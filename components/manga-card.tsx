@@ -9,23 +9,47 @@ interface MangaCardProps {
     title: string;
     image: string;
     rating: number;
-    chapter: number;
+    chapter: number | string;
     type?: string;
+    source?: string;
+    link?: string;
     className?: string;
 }
 
-export function MangaCard({ title, image, rating, chapter, type, className }: MangaCardProps) {
+function slugify(text: string) {
+    return text.toString().toLowerCase()
+        .replace(/\s+/g, '-')           // Replace spaces with -
+        .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+        .replace(/^-+/, '')             // Trim - from start of text
+        .replace(/-+$/, '');            // Trim - from end of text
+}
+
+export function MangaCard({ title, image, rating, chapter, type, source, link, className }: MangaCardProps) {
+    const slug = slugify(title);
+    const mangaType = type ? slugify(type) : 'manhwa';
+    // If source and link are present, link to detail page. Otherwise #
+    // Simplified URL structure as requested
+    const href = `/${mangaType}/${slug}`;
+
     return (
-        <Link href="#" className={cn("group block relative overflow-hidden rounded-xl bg-card", className)}>
+        <Link href={href} className={cn("group block relative overflow-hidden rounded-xl bg-card", className)}>
             {/* Image Container */}
-            <div className="relative aspect-[3/4] overflow-hidden">
-                <Image
-                    src={image}
-                    alt={title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    sizes="(max-width: 768px) 50vw, 33vw"
-                />
+            <div className="relative aspect-[3/4] overflow-hidden bg-gray-800 flex items-center justify-center">
+                {image ? (
+                    <Image
+                        src={image}
+                        alt={title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 768px) 50vw, 33vw"
+                    />
+                ) : (
+                    <div className="flex flex-col items-center justify-center gap-2 text-gray-500">
+                        <span className="text-4xl">📚</span>
+                        <span className="text-xs font-medium">No Image</span>
+                    </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
                 {/* Badges */}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, Menu, X, BookOpen, User, Flame } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,17 @@ const NAV_ITEMS = [
 export function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const router = useRouter();
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            setMobileMenuOpen(false); // Close mobile menu if open
+            router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+        }
+    };
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -61,14 +73,18 @@ export function Navbar() {
 
                     {/* Actions */}
                     <div className="hidden md:flex items-center gap-4">
-                        <div className="relative group">
-                            <Search className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-primary transition-colors" />
+                        <form onSubmit={handleSearch} className="relative group">
+                            <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 z-10 cursor-pointer">
+                                <Search className="w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            </button>
                             <input
                                 type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search manga..."
-                                className="bg-secondary/50 border border-transparent focus:border-primary/50 focus:bg-secondary text-sm rounded-full pl-10 pr-4 py-2 w-64 outline-none transition-all placeholder:text-muted-foreground/50"
+                                className="bg-secondary/50 border border-transparent focus:border-primary/50 focus:bg-secondary text-sm rounded-full pl-10 pr-4 py-2 w-64 outline-none transition-all placeholder:text-muted-foreground/50 text-white"
                             />
-                        </div>
+                        </form>
                         <button className="p-2 hover:bg-secondary rounded-full transition-colors text-muted-foreground hover:text-white">
                             <User className="w-5 h-5" />
                         </button>
@@ -94,14 +110,18 @@ export function Navbar() {
                         className="fixed inset-0 z-40 bg-background pt-24 px-4 md:hidden"
                     >
                         <div className="flex flex-col gap-4">
-                            <div className="relative mb-4">
-                                <Search className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                            <form onSubmit={handleSearch} className="relative mb-4">
+                                <button type="submit" className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
+                                    <Search className="w-5 h-5 text-muted-foreground" />
+                                </button>
                                 <input
                                     type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Search manga..."
-                                    className="w-full bg-secondary border border-border rounded-lg pl-10 pr-4 py-3 outline-none text-white"
+                                    className="w-full bg-secondary border border-border rounded-lg pl-10 pr-4 py-3 outline-none text-white focus:border-primary/50 transition-colors"
                                 />
-                            </div>
+                            </form>
                             {NAV_ITEMS.map((item) => (
                                 <Link
                                     key={item.label}
