@@ -8,6 +8,8 @@ import { Star, User, Book, Clock, ArrowLeft, Layers, Bookmark, Heart } from "luc
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { isBookmarked, removeBookmark, saveBookmark } from "@/lib/bookmarks";
+import { CommentSection } from "@/components/comment-section";
+import { formatDate } from "@/lib/utils";
 
 interface SourceDetail {
     name: string;
@@ -183,8 +185,8 @@ export default function MangaDetailPage() {
                                 <button
                                     onClick={toggleBookmark}
                                     className={`px-6 py-2 rounded-full font-bold flex items-center gap-2 transition-all ${isSaved
-                                            ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                                            : 'bg-white/10 hover:bg-white/20 text-white'
+                                        ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                                        : 'bg-white/10 hover:bg-white/20 text-white'
                                         }`}
                                 >
                                     <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-white' : ''}`} />
@@ -269,13 +271,18 @@ export default function MangaDetailPage() {
                                     <span className="font-medium text-gray-200 group-hover:text-primary transition-colors line-clamp-1">{chapter.title}</span>
                                     <div className="flex items-center gap-2 text-xs text-gray-500 shrink-0">
                                         <Clock className="w-3 h-3" />
-                                        <span>{chapter.released || 'Unknown'}</span>
+                                        <span>{formatDate(chapter.released)}</span>
                                     </div>
                                 </Link>
                             );
                         })}
                     </div>
                 </motion.div>
+
+                {/* Comment Section */}
+                <div className="mt-16 border-t border-white/10 pt-8">
+                    <CommentSection slug={slug as string} />
+                </div>
             </div>
         </main>
     );

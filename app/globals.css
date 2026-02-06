@@ -4,22 +4,28 @@
   /* Dark Theme Default */
   --background: #0f0f11;
   --foreground: #ededed;
-  
-  --primary: #9333ea; /* Purple 600 */
+
+  --primary: #9333ea;
+  /* Purple 600 */
   --primary-foreground: #ffffff;
-  
-  --secondary: #27272a; /* Zinc 800 */
+
+  --secondary: #27272a;
+  /* Zinc 800 */
   --secondary-foreground: #ffffff;
-  
-  --accent: #f59e0b; /* Amber 500 */
+
+  --accent: #f59e0b;
+  /* Amber 500 */
   --accent-foreground: #000000;
-  
-  --muted: #52525b; /* Zinc 600 */
-  --muted-foreground: #a1a1aa; /* Zinc 400 */
-  
-  --card: #18181b; /* Zinc 950 */
+
+  --muted: #52525b;
+  /* Zinc 600 */
+  --muted-foreground: #a1a1aa;
+  /* Zinc 400 */
+
+  --card: #18181b;
+  /* Zinc 950 */
   --card-foreground: #ededed;
-  
+
   --border: #27272a;
 }
 
@@ -37,7 +43,7 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
-  
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -54,14 +60,16 @@ body {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--background);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--secondary);
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted);
 }
-

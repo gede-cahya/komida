@@ -39,7 +39,28 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '09.shinigami.asia',
       },
+      {
+        protocol: 'https',
+        hostname: 'image.softkomik.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image2.softkomik.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cover.softdevices.my.id',
+      },
     ],
+
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*',
+      },
+    ];
   },
 };
 

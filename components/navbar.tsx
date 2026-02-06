@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Search, Menu, X, BookOpen, User, Flame } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { UserMenu } from "./user-menu";
 
 const NAV_ITEMS = [
     { label: "Home", href: "/", icon: BookOpen },
@@ -49,9 +51,14 @@ export function Navbar() {
             >
                 <div className="container mx-auto px-4 flex items-center justify-between">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform">
-                            K
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="relative w-10 h-10 group-hover:scale-110 transition-transform duration-300 rounded-xl overflow-hidden">
+                            <Image
+                                src="/logo.png"
+                                alt="Komida Logo"
+                                fill
+                                className="object-contain"
+                            />
                         </div>
                         <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
                             KOMIDA
@@ -82,12 +89,10 @@ export function Navbar() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search manga..."
-                                className="bg-secondary/50 border border-transparent focus:border-primary/50 focus:bg-secondary text-sm rounded-full pl-10 pr-4 py-2 w-64 outline-none transition-all placeholder:text-muted-foreground/50 text-white"
+                                className="bg-secondary/50 border border-transparent focus:border-primary/50 focus:bg-secondary text-sm rounded-full pl-10 pr-4 py-2 w-64 outline-none transition-all text-white"
                             />
                         </form>
-                        <button className="p-2 hover:bg-secondary rounded-full transition-colors text-muted-foreground hover:text-white">
-                            <User className="w-5 h-5" />
-                        </button>
+                        <UserMenu />
                     </div>
 
                     {/* Mobile Toggle */}

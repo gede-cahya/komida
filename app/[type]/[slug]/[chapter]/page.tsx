@@ -6,6 +6,8 @@ import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, Menu, X, Home } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { CommentSection } from "@/components/comment-section";
+import { formatDate } from "@/lib/utils";
 
 interface ChapterData {
     images: string[];
@@ -132,132 +134,142 @@ export default function ChapterReaderPage() {
         );
     }
 
+    // Toggle controls on tap (middle area preferably, but full screen for simplicity)
+    const toggleControls = () => {
+        setShowControls(prev => !prev);
+    };
+
     return (
-        <main className="min-h-screen bg-black text-white pb-32">
+        <main className="min-h-screen bg-[#111] text-gray-200">
             {/* Top Bar */}
-            <div className={`fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md p-4 flex items-center justify-between z-50 transition-transform duration-300 ${showControls ? 'translate-y-0' : '-translate-y-full'}`}>
-                <div className="flex items-center gap-4">
-                    <Link href={`/${type}/${slug}`} className="hover:text-primary transition-colors">
-                        <ArrowLeft className="w-6 h-6" />
-                    </Link>
-                    <div className="flex flex-col">
-                        <h1 className="text-sm font-bold line-clamp-1">{slug?.replace(/-/g, ' ')}</h1>
-                        {/* If we have an ID, we assume title is not easily available unless fetched or passed. 
-                            Ideally API returns title too, or we just show 'Reading' */}
-                        <span className="text-xs text-gray-400 capitalize">Reading Chapter</span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    {data.prev && (
-                        <button
-                            onClick={() => navigateChapter(data.prev)}
-                            className="p-2 rounded hover:bg-white/10"
-                        >
-                            Prev
-                        </button>
-                    )}
-                    {data.next ? (
-                        <button
-                            onClick={() => navigateChapter(data.next)}
-                            className="p-2 rounded hover:bg-white/10"
-                        >
-                            Next
-                        </button>
-                    ) : (
-                        <Link
-                            href={`/${type}/${slug}`}
-                            className="p-2 rounded hover:bg-white/10"
-                        >
-                            <Home className="w-5 h-5" />
-                        </Link>
+            <div
+                className={`fixed top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/90 to-transparent z-50 flex items-center px-4 transition-transform duration-300 ease-in-out ${showControls ? 'translate-y-0' : '-translate-y-full'}`}
+            >
+                <button onClick={() => router.push(`/${type}/${slug}`)} className="p-2 -ml-2 hover:text-white transition-colors">
+                    <ArrowLeft className="w-6 h-6" />
+                </button>
+                <div className="ml-4 flex-1 min-w-0">
+                    <h1 className="text-sm font-bold text-white truncate max-w-[80%]">
+                        {slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                    </h1>
+                    {data?.source && (
+                        <p className="text-xs text-gray-400 capitalize">{data.source} • {chapter}</p>
                     )}
                 </div>
             </div>
 
-            {/* Reader Content */}
-            <div className="max-w-3xl mx-auto pt-20">
-                <div className="flex flex-col">
+            {/* Main Content (Images) */}
+            <div
+                className="w-full min-h-screen flex flex-col items-center pb-32 pt-0"
+                onClick={toggleControls}
+            >
+                <div className="w-full max-w-4xl mx-auto">
                     {data.images.map((img, idx) => (
                         <div key={idx} className="relative w-full">
-                            {/* We use standard img for best compatibility with external sources and layout */}
-                            <img
-                                src={!img.startsWith('http') && activeSource === 'Kiryuu' ? `https://kiryuu03.com${img}` : img}
+                            <Image
+                                src={`/api/image/proxy?url=${encodeURIComponent(img)}&source=${activeSource}`}
                                 alt={`Page ${idx + 1}`}
-                                className="w-full h-auto block"
-                                loading="lazy"
+                                width={800}
+                                height={1200}
+                                className="w-full h-auto object-cover"
+                                unoptimized
+                                priority={idx < 2}
+                                loading={idx < 2 ? 'eager' : 'lazy'}
                             />
                         </div>
                     ))}
                 </div>
-            </div>
 
-            {/* Bottom Controls */}
-            <div className={`fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur p-4 flex justify-between items-center z-50 transition-transform duration-300 ${showControls ? 'translate-y-0' : 'translate-y-full'}`}>
-                {/* Prev Button - Hide if no prev */}
-                <div className="w-[100px] flex justify-start">
-                    {data.prev ? (
-                        <button
-                            onClick={() => navigateChapter(data.prev)}
-                            className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full hover:bg-white/20 transition-all"
-                        >
-                            <ArrowLeft className="w-4 h-4" /> Prev
-                        </button>
-                    ) : null}
+                {/* End of Chapter Navigation Area */}
+                <div className="w-full max-w-4xl mx-auto p-8 flex flex-col gap-6 items-center justify-center text-center mt-8">
+                    <p className="text-gray-500 text-sm">You've reached the end of the chapter.</p>
+                    <div className="flex gap-4 w-full justify-center">
+                        {data.prev && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); navigateChapter(data.prev); }}
+                                className="px-6 py-3 rounded-full bg-gray-800 hover:bg-gray-700 text-white font-medium transition-colors border border-white/10"
+                            >
+                                Previous
+                            </button>
+                        )}
+                        {data.next && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); navigateChapter(data.next); }}
+                                className="px-8 py-3 rounded-full bg-primary hover:bg-primary/80 text-white font-bold transition-colors shadow-lg shadow-primary/20"
+                            >
+                                Next Chapter
+                            </button>
+                        )}
+                    </div>
                 </div>
 
-                {/* Chapter List Button */}
-                <button
-                    onClick={() => setShowChapterList(true)}
-                    className="flex items-center justify-center p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all text-white"
-                >
-                    <Menu className="w-5 h-5" />
-                </button>
-
-                {/* Next Button or Home */}
-                <div className="w-[100px] flex justify-end">
-                    {data.next ? (
-                        <button
-                            onClick={() => navigateChapter(data.next)}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
-                        >
-                            Next <ArrowRight className="w-4 h-4" />
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => router.push(`/${type}/${slug}`)}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all shadow-lg shadow-green-600/20"
-                        >
-                            <Home className="w-4 h-4" /> Home
-                        </button>
-                    )}
+                {/* Comment Section */}
+                <div className="w-full max-w-4xl mx-auto px-4 pb-20">
+                    <div className="border-t border-white/10 my-8 w-full"></div>
+                    <CommentSection slug={slug as string} chapter={chapter as string} />
                 </div>
             </div>
 
-            {/* Chapter List Modal */}
+            {/* Bottom Bar */}
+            <div className={`fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 p-4 pb-6 z-50 transition-transform duration-300 ease-in-out ${showControls ? 'translate-y-0' : 'translate-y-full'}`}>
+                <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+                    {/* Previous Button */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); if (data.prev) navigateChapter(data.prev); }}
+                        disabled={!data.prev}
+                        className={`flex flex-col items-center gap-1 p-2 min-w-[60px] rounded-lg transition-colors ${!data.prev ? 'text-gray-600' : 'text-gray-300 hover:text-white hover:bg-white/5'}`}
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        <span className="text-[10px]">Prev</span>
+                    </button>
+
+                    {/* Chapter List / Info */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setShowChapterList(true); }}
+                        className="flex-1 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 h-10 rounded-full border border-white/10 transition-all"
+                    >
+                        <span className="text-sm font-medium text-white px-4 truncate">
+                            {chapters.find(c => c.id === chapter)?.title || 'Current Chapter'}
+                        </span>
+                        <div className="w-8 h-1 bg-white/20 rounded-full mt-1"></div>
+                    </button>
+
+                    {/* Next Button */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); if (data.next) navigateChapter(data.next); }}
+                        disabled={!data.next}
+                        className={`flex flex-col items-center gap-1 p-2 min-w-[60px] rounded-lg transition-colors ${!data.next ? 'text-gray-600' : 'text-primary hover:text-primary/80 hover:bg-white/5'}`}
+                    >
+                        <ArrowRight className="w-5 h-5" />
+                        <span className="text-[10px]">Next</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Chapter List Modal/Sheet */}
             {showChapterList && (
-                <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex justify-center items-end md:items-center">
-                    <div className="bg-gray-900 w-full md:max-w-md h-[80vh] md:h-[70vh] rounded-t-2xl md:rounded-2xl flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300">
-                        <div className="flex items-center justify-between p-4 border-b border-white/10">
-                            <h3 className="font-bold text-lg">Chapters</h3>
-                            <button onClick={() => setShowChapterList(false)} className="p-2 rounded-full hover:bg-white/10">
+                <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowChapterList(false)} />
+
+                    <div className="relative w-full max-w-md bg-[#1a1a1a] rounded-t-2xl sm:rounded-2xl max-h-[80vh] flex flex-col shadow-2xl border border-white/10 animate-in slide-in-from-bottom-full duration-300">
+                        <div className="p-4 border-b border-white/10 flex items-center justify-between sticky top-0 bg-[#1a1a1a] z-10 rounded-t-2xl">
+                            <h3 className="font-bold text-white pl-2">Chapters</h3>
+                            <button onClick={() => setShowChapterList(false)} className="p-2 hover:bg-white/10 rounded-full">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                            {chapters.length === 0 ? (
-                                <p className="text-center text-gray-500 py-8">Loading chapters...</p>
-                            ) : (
-                                chapters.map((ch, i) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => navigateToChapter(ch)}
-                                        className="w-full text-left p-3 rounded-lg hover:bg-white/5 transition-colors border border-white/5 flex items-center justify-between group"
-                                    >
-                                        <span className="font-medium text-gray-300 group-hover:text-white transition-colors">{ch.title}</span>
-                                        <span className="text-xs text-gray-500">{ch.released}</span>
-                                    </button>
-                                ))
-                            )}
+
+                        <div className="overflow-y-auto flex-1 p-2 scrollbar-hide">
+                            {chapters.map((c, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => navigateToChapter(c)}
+                                    className={`w-full text-left p-4 rounded-xl mb-1 transition-colors flex items-center justify-between ${c.id === chapter ? 'bg-primary/20 text-primary border border-primary/30' : 'hover:bg-white/5 text-gray-300'}`}
+                                >
+                                    <span className="font-medium truncate">{c.title}</span>
+                                    {c.released && <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">{formatDate(c.released)}</span>}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>

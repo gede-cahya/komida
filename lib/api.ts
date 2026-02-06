@@ -24,6 +24,15 @@ export async function fetchPopular(page = 1) {
         throw new Error('Failed to fetch popular manga');
     }
     return res.json();
+    return res.json();
+}
+
+export async function fetchGenre(genre: string, page = 1) {
+    const res = await fetch(`${API_URL}/genres/${genre}?page=${page}`);
+    if (!res.ok) {
+        throw new Error('Failed to fetch genre manga');
+    }
+    return res.json();
 }
 
 export async function fetchMangaDetail(source: string, link: string) {
