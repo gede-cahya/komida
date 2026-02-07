@@ -29,11 +29,11 @@ export function TrendingSection() {
     return (
         <section>
             <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-2 text-white">
+                <div className="flex items-center gap-2 text-foreground">
                     <Flame className="w-6 h-6 text-orange-500" />
                     <h2 className="text-3xl font-bold tracking-tight">Trending This Week</h2>
                 </div>
-                <button className="text-sm font-medium text-muted-foreground hover:text-white flex items-center gap-1 transition-colors group">
+                <button className="text-sm font-medium text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors group">
                     View All <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>

@@ -2,8 +2,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Footer } from "@/components/footer";
 import { AuthProvider } from "@/lib/auth";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ClientFooter } from "@/components/client-footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,9 +20,10 @@ export const metadata: Metadata = {
   title: "Komida | Read Manga Modernly",
   description: "The smoothest, fastest manga reading experience.",
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon-v3.png',
   },
 };
+
 
 export default function RootLayout({
   children,
@@ -33,10 +35,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
-        <Footer />
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+          <ClientFooter />
+        </ThemeProvider>
       </body>
     </html>
   );

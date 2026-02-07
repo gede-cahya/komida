@@ -13,6 +13,8 @@ interface Manga {
     synopsis: string;
     genres: string[];
     link: string;
+    source?: string;
+    type?: string;
 }
 
 function slugify(text: string) {
@@ -79,11 +81,12 @@ export function Hero() {
                     <div className={`absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent z-10`} />
                     <div className={`absolute inset-0 bg-gradient-to-r ${color} opacity-20 mix-blend-overlay z-10`} />
                     <Image
-                        src={currentManga.image}
+                        src={currentManga.image ? `/api/image/proxy?url=${encodeURIComponent(currentManga.image)}&source=${currentManga.source || 'kiryuu'}` : '/placeholder.png'}
                         alt={currentManga.title}
                         fill
                         className="object-cover"
                         priority
+                        unoptimized
                     />
                 </motion.div>
             </AnimatePresence>
@@ -130,7 +133,7 @@ export function Hero() {
 
                         {/* Buttons */}
                         <div className="flex flex-wrap gap-4">
-                            <Link href={`/manhwa/${slug}`}>
+                            <Link href={`/${currentManga.type || 'manga'}/${slug}`}>
                                 <button className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-8 py-3.5 rounded-full font-bold text-lg transition-transform active:scale-95 shadow-lg shadow-primary/25 cursor-pointer">
                                     <BookOpen className="w-5 h-5" />
                                     Read Now
@@ -139,6 +142,7 @@ export function Hero() {
                         </div>
                     </motion.div>
                 </AnimatePresence>
+
 
                 {/* Carousel Indicators */}
                 <div className="absolute right-4 md:right-10 bottom-1/2 translate-y-1/2 flex flex-col gap-3 z-30">

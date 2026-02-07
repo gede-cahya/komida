@@ -1,18 +1,25 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Github, Twitter, Facebook, Instagram } from "lucide-react";
+
 
 export function Footer() {
     return (
-        <footer className="border-t border-border bg-black/20 backdrop-blur-md mt-20">
+        <footer className="border-t border-border bg-card text-card-foreground mt-20">
             <div className="container mx-auto px-4 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* Brand */}
                     <div className="space-y-4">
-                        <Link href="/" className="flex items-center gap-2 group">
-                            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xl">
-                                K
+                        <Link href="/" className="flex items-center gap-3 group">
+                            <div className="relative w-10 h-10 group-hover:scale-110 transition-transform duration-300 rounded-xl overflow-hidden bg-white/10 p-1">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Komida Logo"
+                                    fill
+                                    className="object-contain"
+                                />
                             </div>
-                            <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                            <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground">
                                 KOMIDA
                             </span>
                         </Link>
@@ -23,7 +30,7 @@ export function Footer() {
 
                     {/* Links */}
                     <div>
-                        <h4 className="font-bold text-white mb-4">Platform</h4>
+                        <h4 className="font-bold text-foreground mb-4">Platform</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li><Link href="#" className="hover:text-primary transition-colors">Trending</Link></li>
                             <li><Link href="#" className="hover:text-primary transition-colors">Latest Updates</Link></li>
@@ -33,7 +40,7 @@ export function Footer() {
                     </div>
 
                     <div>
-                        <h4 className="font-bold text-white mb-4">Support</h4>
+                        <h4 className="font-bold text-foreground mb-4">Support</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li><Link href="#" className="hover:text-primary transition-colors">Help Center</Link></li>
                             <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
@@ -44,7 +51,7 @@ export function Footer() {
 
                     {/* Socials */}
                     <div>
-                        <h4 className="font-bold text-white mb-4">Connect</h4>
+                        <h4 className="font-bold text-foreground mb-4">Connect</h4>
                         <div className="flex gap-4">
                             <Link href="#" className="p-2 bg-secondary rounded-full hover:bg-primary hover:text-white transition-all text-muted-foreground">
                                 <Twitter className="w-4 h-4" />

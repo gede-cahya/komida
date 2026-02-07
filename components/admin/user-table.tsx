@@ -1,0 +1,155 @@
+
+'use client';
+
+import { useState } from 'react';
+import { Edit, Trash2, UserPlus, Search } from 'lucide-react';
+import { UserDialog } from './user-dialog';
+
+interface User {
+    id: number;
+    username: string;
+    role: string;
+    created_at: string;
+}
+
+interface UserTableProps {
+    users: User[];
+    loading: boolean;
+    page: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+    onSearch: (query: string) => void;
+    onRefresh: () => void;
+}
+
+export function UserTable({ users, loading, page, totalPages, onPageChange, onSearch, onRefresh }: UserTableProps) {
+    const [search, setSearch] = useState('');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSearch(search);
+    };
+
+    const handleEdit = (user: User) => {
+        setSelectedUser(user);
+        setIsDialogOpen(true);
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this user?')) return;
+
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/users/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                onRefresh();
+            } else {
+                alert('Failed to delete user');
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="flex justify-between items-center bg-gray-900/50 p-4 rounded-xl border border-white/10">
+                <form onSubmit={handleSearch} className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Search users..."
+                        className="w-full bg-black/50 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary/50 text-white"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </form>
+                <button
+                    onClick={() => { setSelectedUser(null); setIsDialogOpen(true); }}
+                    className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors"
+                >
+                    <UserPlus className="w-4 h-4" />
+                    Add User
+                </button>
+            </div>
+
+            <div className="bg-gray-900/50 rounded-xl border border-white/10 overflow-hidden">
+                <table className="w-full text-left text-sm text-gray-400">
+                    <thead className="bg-white/5 uppercase text-xs font-semibold text-white">
+                        <tr>
+                            <th className="px-6 py-4">ID</th>
+                            <th className="px-6 py-4">Username</th>
+                            <th className="px-6 py-4">Role</th>
+                            <th className="px-6 py-4">Created At</th>
+                            <th className="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                        {loading ? (
+                            <tr><td colSpan={5} className="px-6 py-8 text-center">Loading...</td></tr>
+                        ) : users.length === 0 ? (
+                            <tr><td colSpan={5} className="px-6 py-8 text-center">No users found</td></tr>
+                        ) : (
+                            users.map((user) => (
+                                <tr key={user.id} className="hover:bg-white/5 transition-colors">
+                                    <td className="px-6 py-4">#{user.id}</td>
+                                    <td className="px-6 py-4 text-white font-medium">{user.username}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${user.role === 'admin' ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'
+                                            }`}>
+                                            {user.role}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">{new Date(user.created_at).toLocaleDateString()}</td>
+                                    <td className="px-6 py-4 text-right flex justify-end gap-2">
+                                        <button onClick={() => handleEdit(user)} className="p-2 hover:bg-white/10 rounded-full text-blue-400 transition-colors">
+                                            <Edit className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => handleDelete(user.id)} className="p-2 hover:bg-white/10 rounded-full text-red-400 transition-colors">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex justify-between items-center text-sm text-gray-500">
+                <span>Page {page} of {totalPages}</span>
+                <div className="flex gap-2">
+                    <button
+                        disabled={page === 1}
+                        onClick={() => onPageChange(page - 1)}
+                        className="px-3 py-1 bg-white/5 rounded hover:bg-white/10 disabled:opacity-50"
+                    >
+                        Prev
+                    </button>
+                    <button
+                        disabled={page === totalPages}
+                        onClick={() => onPageChange(page + 1)}
+                        className="px-3 py-1 bg-white/5 rounded hover:bg-white/10 disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+                </div>
+            </div>
+
+            {isDialogOpen && (
+                <UserDialog
+                    isOpen={isDialogOpen}
+                    onClose={() => setIsDialogOpen(false)}
+                    onSuccess={() => { setIsDialogOpen(false); onRefresh(); }}
+                    user={selectedUser}
+                />
+            )}
+        </div>
+    );
+}

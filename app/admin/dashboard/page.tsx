@@ -1,15 +1,40 @@
 
 'use client';
 
-import { useAuth } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useAuth } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
+import { Shield, Users, BookOpen, LogOut, LayoutDashboard, TrendingUp, Eye, BarChart3, List } from "lucide-react";
+import { UserTable } from "@/components/admin/user-table";
+import { MangaTable } from "@/components/admin/manga-table";
+import { StatsCard } from "@/components/admin/stats-card";
+import { VisitorsChart } from "@/components/admin/visitors-chart";
+import { PopularComicsTable } from "@/components/admin/popular-comics-table";
+import { TimePeriod, StatsSummary, PopularManga, VisitStat } from "@/types/analytics";
 import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+
+type Tab = 'dashboard' | 'users' | 'manga';
 
 export default function AdminDashboard() {
-    const { user, token, isLoading, logout } = useAuth();
+    const { user, logout, isLoading } = useAuth();
     const router = useRouter();
-    const [stats, setStats] = useState<any>(null);
+    const [activeTab, setActiveTab] = useState<Tab>('dashboard');
+
+    // Data States
+    const [stats, setStats] = useState<StatsSummary | null>(null);
+    const [visitStats, setVisitStats] = useState<VisitStat[]>([]);
+    const [popularManga, setPopularManga] = useState<PopularManga[]>([]);
+    const [timePeriod, setTimePeriod] = useState<TimePeriod>('day');
+
+    const [users, setUsers] = useState([]);
+    const [manga, setManga] = useState([]);
+    const [loadingData, setLoadingData] = useState(false);
+
+    // Pagination & Search
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         if (!isLoading) {
@@ -18,86 +43,236 @@ export default function AdminDashboard() {
             } else if (user.role !== 'admin') {
                 router.push('/');
             } else {
-                // Fetch stats
-                fetchAdminStats();
+                if (activeTab === 'dashboard') {
+                    fetchSummary();
+                    fetchAnalytics(timePeriod);
+                }
+                else fetchData();
             }
         }
-    }, [user, isLoading, router]);
+    }, [user, isLoading, router, activeTab, page, search]);
 
-    const fetchAdminStats = async () => {
+    // Re-fetch analytics when time period changes
+    useEffect(() => {
+        if (activeTab === 'dashboard') {
+            fetchAnalytics(timePeriod);
+        }
+    }, [timePeriod]);
+
+    const fetchSummary = async () => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const res = await fetch(`${API_URL}/admin/dashboard`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` // use stored token or from context
-                }
+            const res = await fetch(`${API_URL}/admin/stats/summary`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
             if (res.ok) {
                 const data = await res.json();
-                setStats(data.stats);
+                setStats(data);
             }
         } catch (e) {
             console.error(e);
         }
     };
 
+    const fetchAnalytics = async (period: TimePeriod) => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+            const token = localStorage.getItem('token');
+            const headers = { 'Authorization': `Bearer ${token}` };
+
+            const [visitsRes, popularRes] = await Promise.all([
+                fetch(`${API_URL}/admin/stats/visits?period=${period}`, { headers }),
+                fetch(`${API_URL}/admin/stats/popular?period=${period}`, { headers })
+            ]);
+
+            if (visitsRes.ok) setVisitStats(await visitsRes.json());
+            if (popularRes.ok) setPopularManga(await popularRes.json());
+
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+
+    const fetchData = useCallback(async () => {
+        setLoadingData(true);
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+            const endpoint = activeTab === 'users' ? '/admin/users' : '/admin/manga';
+            const query = `?page=${page}&limit=10&search=${encodeURIComponent(search)}`;
+
+            const res = await fetch(`${API_URL}${endpoint}${query}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (activeTab === 'users') {
+                    setUsers(data.users);
+                } else {
+                    setManga(data.manga);
+                }
+                setTotalPages(data.totalPages);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoadingData(false);
+        }
+    }, [activeTab, page, search]);
+
+    const handleTabChange = (tab: Tab) => {
+        setActiveTab(tab);
+        setPage(1);
+        setSearch('');
+    };
+
     if (isLoading || !user || user.role !== 'admin') {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] text-white">
-                Loading...
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] p-8 pb-32">
-            <div className="max-w-6xl mx-auto">
-                <header className="flex items-center justify-between mb-12">
+        <div className="min-h-screen bg-[#0a0a0a] flex">
+            {/* Sidebar */}
+            <aside className="w-64 border-r border-white/10 p-6 flex flex-col">
+                <div className="flex items-center gap-2 mb-10 text-white">
+                    <Shield className="w-8 h-8 text-primary" />
+                    <span className="text-xl font-bold">Admin Panel</span>
+                </div>
+
+                <nav className="flex-1 space-y-2">
+                    <button
+                        onClick={() => handleTabChange('dashboard')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'dashboard' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                    >
+                        <LayoutDashboard className="w-5 h-5" />
+                        Dashboard
+                    </button>
+                    <button
+                        onClick={() => handleTabChange('users')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'users' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                    >
+                        <Users className="w-5 h-5" />
+                        Manage Users
+                    </button>
+                    <button
+                        onClick={() => handleTabChange('manga')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'manga' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                    >
+                        <BookOpen className="w-5 h-5" />
+                        Manage Komik
+                    </button>
+                </nav>
+
+                <div className="pt-6 border-t border-white/10 space-y-2">
+                    <Link href="/" className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl transition-colors">
+                        Go Home
+                    </Link>
+                    <button
+                        onClick={logout}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
+                    >
+                        <LogOut className="w-5 h-5" />
+                        Logout
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 p-8 overflow-y-auto">
+                <header className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-                        <p className="text-gray-400">Welcome back, {user.username}</p>
+                        <h1 className="text-2xl font-bold text-white capitalize">{activeTab === 'manga' ? 'Manage Komik' : activeTab}</h1>
+                        <p className="text-gray-400 text-sm">Overview and management</p>
                     </div>
-                    <div className="flex gap-4">
-                        <Link href="/" className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-white transition-colors">
-                            Go Home
-                        </Link>
-                        <button
-                            onClick={logout}
-                            className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg transition-colors"
-                        >
-                            Logout
-                        </button>
-                    </div>
+                    {activeTab === 'dashboard' && (
+                        <div className="flex bg-[#111] p-1 rounded-lg border border-white/10">
+                            {(['day', 'week', 'month'] as TimePeriod[]).map((period) => (
+                                <button
+                                    key={period}
+                                    onClick={() => setTimePeriod(period)}
+                                    className={`px-4 py-1.5 text-sm rounded-md transition-all capitalize ${timePeriod === period
+                                            ? 'bg-primary text-white font-medium shadow-lg'
+                                            : 'text-gray-400 hover:text-white'
+                                        }`}
+                                >
+                                    {period}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                    <div className="bg-[#111] p-6 rounded-2xl border border-white/10">
-                        <h3 className="text-gray-400 text-sm font-medium mb-2">Total Users</h3>
-                        <p className="text-4xl font-bold text-white">{stats?.users ?? '-'}</p>
-                    </div>
-                    <div className="bg-[#111] p-6 rounded-2xl border border-white/10">
-                        <h3 className="text-gray-400 text-sm font-medium mb-2">Manga Cached</h3>
-                        <p className="text-4xl font-bold text-white">{stats?.manga ?? '-'}</p>
-                    </div>
-                    <div className="bg-[#111] p-6 rounded-2xl border border-white/10">
-                        <h3 className="text-gray-400 text-sm font-medium mb-2">Server Uptime</h3>
-                        <p className="text-4xl font-bold text-white">{stats?.serverUptime ? Math.floor(stats.serverUptime / 60) + 'm' : '-'}</p>
-                    </div>
-                </div>
+                {activeTab === 'dashboard' && (
+                    <div className="space-y-6">
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <StatsCard
+                                title="Total Titles"
+                                value={stats?.totalManga.toLocaleString() ?? '-'}
+                                icon={<BookOpen className="h-4 w-4 text-muted-foreground" />}
+                            />
+                            <StatsCard
+                                title="Total Visits"
+                                value={stats?.totalVisits.toLocaleString() ?? '-'}
+                                icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+                            />
+                            <StatsCard
+                                title="Visits Today"
+                                value={stats?.todayVisits.toLocaleString() ?? '-'}
+                                icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
+                            />
+                            <StatsCard
+                                title="Total Comic Views"
+                                value={stats?.totalViews.toLocaleString() ?? '-'}
+                                icon={<Eye className="h-4 w-4 text-muted-foreground" />}
+                            />
+                        </div>
 
-                <div className="bg-[#111] p-8 rounded-2xl border border-white/10">
-                    <h2 className="text-xl font-bold text-white mb-4">Management Actions</h2>
-                    <p className="text-gray-500 text-sm mb-6">More features coming soon...</p>
-                    <div className="flex gap-4">
-                        <button className="px-6 py-3 bg-primary/20 text-primary border border-primary/30 rounded-xl hover:bg-primary/30 transition-colors">
-                            Manage Users
-                        </button>
-                        <button className="px-6 py-3 bg-primary/20 text-primary border border-primary/30 rounded-xl hover:bg-primary/30 transition-colors">
-                            Manage Manga
-                        </button>
+                        {/* Charts Area */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2">
+                                <VisitorsChart data={visitStats} title={`Site Visits (${timePeriod})`} />
+                            </div>
+                            <div className="lg:col-span-1">
+                                <PopularComicsTable data={popularManga} title={`Top 10 Comics (${timePeriod})`} />
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                )}
+
+                {activeTab === 'users' && (
+                    <UserTable
+                        users={users}
+                        loading={loadingData}
+                        page={page}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                        onSearch={setSearch}
+                        onRefresh={fetchData}
+                    />
+                )}
+
+                {activeTab === 'manga' && (
+                    <MangaTable
+                        manga={manga}
+                        loading={loadingData}
+                        page={page}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
+                        onSearch={setSearch}
+                        onRefresh={fetchData}
+                    />
+                )}
+            </main>
         </div>
     );
 }
+

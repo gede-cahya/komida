@@ -28,11 +28,11 @@ export function RecentUpdates() {
     return (
         <section>
             <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2 text-white">
+                <div className="flex items-center gap-2 text-foreground">
                     <Clock className="w-6 h-6 text-blue-500" />
                     <h2 className="text-2xl font-bold tracking-tight">Recent Updates</h2>
                 </div>
-                <button className="text-sm font-medium text-muted-foreground hover:text-white flex items-center gap-1 transition-colors group">
+                <button className="text-sm font-medium text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors group">
                     View All <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
@@ -45,6 +45,7 @@ export function RecentUpdates() {
                         image={item.image}
                         rating={item.rating}
                         chapter={item.chapter}
+                        source={item.source}
                         className="w-full"
                     />
                 ))}

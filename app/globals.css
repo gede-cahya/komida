@@ -1,56 +1,38 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  /* Dark Theme Default */
-  --background: #0f0f11;
-  --foreground: #ededed;
+@custom-variant dark (&:is(.dark *));
 
-  --primary: #9333ea;
-  /* Purple 600 */
-  --primary-foreground: #ffffff;
-
-  --secondary: #27272a;
-  /* Zinc 800 */
-  --secondary-foreground: #ffffff;
-
-  --accent: #f59e0b;
-  /* Amber 500 */
-  --accent-foreground: #000000;
-
-  --muted: #52525b;
-  /* Zinc 600 */
-  --muted-foreground: #a1a1aa;
-  /* Zinc 400 */
-
-  --card: #18181b;
-  /* Zinc 950 */
-  --card-foreground: #ededed;
-
-  --border: #27272a;
-}
+/* Base Theme variables removed, now defined in @layer base for proper Tailwind overriding */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-border: var(--border);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-border: hsl(var(--border));
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
+
 
 body {
   background-color: var(--background);
-  color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -72,4 +54,214 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted);
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  :root {
+    --radius: 0.625rem;
+
+    /* Default Light Theme Base (Spaces and Percentages for HSL) */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 4%;
+    /* Near black */
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 4%;
+    --primary: 262 83% 58%;
+    /* Default violet */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 40%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 262 83% 58%;
+
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  /* Theme Color Overrides (Light Mode) */
+  :root[data-color="violet"] {
+    --primary: 262 83% 58%;
+    --ring: 262 83% 58%;
+  }
+
+  :root[data-color="zinc"] {
+    --primary: 240 5.9% 10%;
+    --ring: 240 5.9% 10%;
+  }
+
+  :root[data-color="red"] {
+    --primary: 0 72% 51%;
+    --ring: 0 72% 51%;
+  }
+
+  :root[data-color="rose"] {
+    --primary: 346 84% 61%;
+    --ring: 346 84% 61%;
+  }
+
+  :root[data-color="orange"] {
+    --primary: 21 90% 48%;
+    --ring: 21 90% 48%;
+  }
+
+  :root[data-color="green"] {
+    --primary: 142 71% 45%;
+    --ring: 142 71% 45%;
+  }
+
+  :root[data-color="blue"] {
+    --primary: 221 83% 53%;
+    --ring: 221 83% 53%;
+  }
+
+  :root[data-color="yellow"] {
+    --primary: 47 95% 57%;
+    --ring: 47 95% 57%;
+  }
+
+  .dark {
+    /* Explicitly use HSL space separated values */
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 4%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 4%;
+    --popover-foreground: 0 0% 98%;
+
+    --secondary: 240 3.7% 16%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 16%;
+    --muted-foreground: 240 5% 65%;
+
+    --accent: 240 3.7% 16%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 16%;
+    --input: 240 3.7% 16%;
+
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+
+    /* Default primary for dark mode unless overridden */
+    --primary: 263 70% 50%;
+    --primary-foreground: 0 0% 98%;
+    --ring: 263 70% 50%;
+  }
+
+  /* Create overriding rules for .dark combined with data-color */
+  /* Using higher specificity or explicitly combining classes */
+
+  :root[data-color="violet"] .dark,
+  .dark[data-color="violet"] {
+    --primary: 263 70% 50%;
+    --ring: 263 70% 50%;
+  }
+
+  :root[data-color="zinc"] .dark,
+  .dark[data-color="zinc"] {
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --ring: 0 0% 98%;
+  }
+
+  :root[data-color="red"] .dark,
+  .dark[data-color="red"] {
+    --primary: 0 72% 51%;
+    --ring: 0 72% 51%;
+  }
+
+  :root[data-color="rose"] .dark,
+  .dark[data-color="rose"] {
+    --primary: 346 87% 43%;
+    --ring: 346 87% 43%;
+  }
+
+  :root[data-color="orange"] .dark,
+  .dark[data-color="orange"] {
+    --primary: 20 90% 38%;
+    --ring: 20 90% 38%;
+  }
+
+  :root[data-color="green"] .dark,
+  .dark[data-color="green"] {
+    --primary: 142 70% 50%;
+    --ring: 142 70% 50%;
+  }
+
+  :root[data-color="blue"] .dark,
+  .dark[data-color="blue"] {
+    --primary: 217 91% 60%;
+    --ring: 217 91% 60%;
+  }
+
+  :root[data-color="yellow"] .dark,
+  .dark[data-color="yellow"] {
+    --primary: 47 95% 57%;
+    --ring: 47 95% 57%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }

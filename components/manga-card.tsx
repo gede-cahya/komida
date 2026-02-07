@@ -38,11 +38,12 @@ export function MangaCard({ title, image, rating, chapter, type, source, link, c
             <div className="relative aspect-[3/4] overflow-hidden bg-gray-800 flex items-center justify-center">
                 {image ? (
                     <Image
-                        src={image}
+                        src={image ? `/api/image/proxy?url=${encodeURIComponent(image)}&source=${source || 'kiryuu'}` : '/placeholder.png'}
                         alt={title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                         sizes="(max-width: 768px) 50vw, 33vw"
+                        unoptimized
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center gap-2 text-gray-500">

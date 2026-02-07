@@ -1,5 +1,6 @@
 
 import { Manga } from "./api";
+export type { Manga };
 
 const STORAGE_KEY = 'komida_bookmarks';
 

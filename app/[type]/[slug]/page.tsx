@@ -130,16 +130,17 @@ export default function MangaDetailPage() {
                 {/* Blurred Background */}
                 <div className="absolute inset-0 overflow-hidden">
                     <Image
-                        src={detail.image}
+                        src={detail.image || '/placeholder.png'}
                         alt="Background"
                         fill
-                        className="object-cover blur-[50px] opacity-30 scale-110"
+                        className="object-cover blur-[50px] opacity-20 scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-transparent" />
+                    <div className="absolute inset-0 bg-black/40" /> {/* Added overlay for contrast */}
                 </div>
 
                 <div className="container mx-auto px-4 h-full flex flex-col justify-end pb-8 relative z-10">
-                    <Link href="/" className="absolute top-24 left-4 md:left-0 flex items-center gap-2 text-muted-foreground hover:text-white transition-colors">
+                    <Link href="/" className="absolute top-24 left-4 md:left-0 flex items-center gap-2 text-white/80 hover:text-white transition-colors bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full">
                         <ArrowLeft className="w-5 h-5" /> Back
                     </Link>
                 </div>
@@ -155,7 +156,7 @@ export default function MangaDetailPage() {
                         className="w-[200px] md:w-[300px] aspect-[2/3] relative rounded-xl overflow-hidden shadow-2xl mx-auto md:mx-0 shrink-0 ring-1 ring-white/10"
                     >
                         <Image
-                            src={detail.image}
+                            src={detail.image || '/placeholder.png'}
                             alt={detail.title}
                             fill
                             className="object-cover"
@@ -271,7 +272,7 @@ export default function MangaDetailPage() {
                                     <span className="font-medium text-gray-200 group-hover:text-primary transition-colors line-clamp-1">{chapter.title}</span>
                                     <div className="flex items-center gap-2 text-xs text-gray-500 shrink-0">
                                         <Clock className="w-3 h-3" />
-                                        <span>{formatDate(chapter.released)}</span>
+                                        <span>{formatDate(chapter.released || '')}</span>
                                     </div>
                                 </Link>
                             );

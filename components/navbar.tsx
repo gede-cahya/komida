@@ -8,6 +8,7 @@ import { Search, Menu, X, BookOpen, User, Flame } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "./user-menu";
+import { ThemePicker } from "./theme-picker";
 
 const NAV_ITEMS = [
     { label: "Home", href: "/", icon: BookOpen },
@@ -92,6 +93,7 @@ export function Navbar() {
                                 className="bg-secondary/50 border border-transparent focus:border-primary/50 focus:bg-secondary text-sm rounded-full pl-10 pr-4 py-2 w-64 outline-none transition-all text-white"
                             />
                         </form>
+                        <ThemePicker />
                         <UserMenu />
                     </div>
 

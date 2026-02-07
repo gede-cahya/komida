@@ -5,7 +5,7 @@ import { RecentUpdates } from "@/components/recent-updates";
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-background text-foreground">
       <Navbar />
       <Hero />
       <div className="container mx-auto px-4 py-12 space-y-20">
