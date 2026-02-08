@@ -130,10 +130,11 @@ export default function MangaDetailPage() {
                 {/* Blurred Background */}
                 <div className="absolute inset-0 overflow-hidden">
                     <Image
-                        src={detail.image || '/placeholder.png'}
+                        src={detail.image ? `/api/image/proxy?url=${encodeURIComponent(detail.image)}&source=${selectedSource?.name || 'kiryuu'}` : '/placeholder.png'}
                         alt="Background"
                         fill
                         className="object-cover blur-[50px] opacity-20 scale-110"
+                        unoptimized
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-transparent" />
                     <div className="absolute inset-0 bg-black/40" /> {/* Added overlay for contrast */}
@@ -156,10 +157,11 @@ export default function MangaDetailPage() {
                         className="w-[200px] md:w-[300px] aspect-[2/3] relative rounded-xl overflow-hidden shadow-2xl mx-auto md:mx-0 shrink-0 ring-1 ring-white/10"
                     >
                         <Image
-                            src={detail.image || '/placeholder.png'}
+                            src={detail.image ? `/api/image/proxy?url=${encodeURIComponent(detail.image)}&source=${selectedSource?.name || 'kiryuu'}` : '/placeholder.png'}
                             alt={detail.title}
                             fill
                             className="object-cover"
+                            unoptimized
                         />
                     </motion.div>
 

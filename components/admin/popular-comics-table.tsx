@@ -27,11 +27,12 @@ export function PopularComicsTable({ data, title }: ComponentProps) {
                             </div>
                             <div className="relative h-12 w-8 overflow-hidden rounded">
                                 <Image
-                                    src={manga.image || '/placeholder.png'}
+                                    src={manga.image ? `/api/image/proxy?url=${encodeURIComponent(manga.image)}&source=${manga.source || 'kiryuu'}` : '/placeholder.png'}
                                     alt={manga.title}
                                     fill
                                     className="object-cover"
                                     sizes="32px"
+                                    unoptimized
                                 />
                             </div>
                             <div className="flex-1 min-w-0">
