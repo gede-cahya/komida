@@ -55,7 +55,11 @@ const nextConfig: NextConfig = {
 
   },
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:3001';
+    // Get the API URL and ensure it doesn't have trailing slash
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api').replace(/\/$/, '');
+    // Extract base URL without /api suffix
+    const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
+
     return [
       {
         source: '/api/:path*',
