@@ -27,7 +27,8 @@ export default function ChapterReaderPage() {
 
     const type = Array.isArray(params.type) ? params.type[0] : params.type;
     const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
-    const chapter = Array.isArray(params.chapter) ? params.chapter[0] : params.chapter;
+    const chapterParam = Array.isArray(params.chapter) ? params.chapter[0] : params.chapter;
+    const chapter = chapterParam ? decodeURIComponent(chapterParam) : '';
     // Chapter param is now potentially the Encrypted ID.
 
     const [data, setData] = useState<ChapterData | null>(null);
@@ -55,7 +56,6 @@ export default function ChapterReaderPage() {
         fetch(url)
             .then(res => res.json())
             .then(resData => {
-                console.log('Fetched chapter data:', resData);
                 if (resData.images) {
                     setData(resData as ChapterData);
                 } else {
@@ -112,14 +112,8 @@ export default function ChapterReaderPage() {
     }, [lastScrollY]);
 
     const navigateChapter = (targetId: string | undefined) => {
-        console.log('Navigating to chapter ID:', targetId);
-        if (!targetId) {
-            console.error('Target ID is missing');
-            return;
-        }
-        const targetUrl = `/${type}/${slug}/${encodeURIComponent(targetId)}`;
-        console.log('Pushing URL:', targetUrl);
-        router.push(targetUrl);
+        if (!targetId) return;
+        router.push(`/${type}/${slug}/${encodeURIComponent(targetId)}`);
     };
 
     if (loading) {
