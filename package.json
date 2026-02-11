@@ -34,11 +34,9 @@
     "typescript": "^5"
   },
   "ignoreScripts": [
-    "sharp",
-    "unrs-resolver"
+    "sharp"
   ],
   "trustedDependencies": [
-    "sharp",
-    "unrs-resolver"
+    "sharp"
   ]
 }
