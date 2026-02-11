@@ -62,6 +62,10 @@ const nextConfig: NextConfig = {
 
     return [
       {
+        source: '/api/image/:path*',
+        destination: `https://komida-backend-production.up.railway.app/api/image/:path*`,
+      },
+      {
         source: '/api/:path*',
         destination: `${backendUrl}/api/:path*`,
       },
