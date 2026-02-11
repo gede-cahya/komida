@@ -74,8 +74,11 @@ export default function AdminDashboard() {
         }
     };
 
+    const [error, setError] = useState<string | null>(null);
+
     const fetchAnalytics = async (period: TimePeriod) => {
         try {
+            setError(null);
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
             const token = localStorage.getItem('token');
             const headers = { 'Authorization': `Bearer ${token}` };
@@ -85,11 +88,18 @@ export default function AdminDashboard() {
                 fetch(`${API_URL}/admin/stats/popular?period=${period}`, { headers })
             ]);
 
-            if (visitsRes.ok) setVisitStats(await visitsRes.json());
-            if (popularRes.ok) setPopularManga(await popularRes.json());
+            if (visitsRes.ok) {
+                setVisitStats(await visitsRes.json());
+            } else {
+                throw new Error(`Failed to fetch visits: ${visitsRes.statusText}`);
+            }
 
-        } catch (e) {
+            if (popularRes.ok) {
+                setPopularManga(await popularRes.json());
+            }
+        } catch (e: any) {
             console.error(e);
+            setError(e.message || 'Failed to load analytics');
         }
     };
 
@@ -199,8 +209,8 @@ export default function AdminDashboard() {
                                     key={period}
                                     onClick={() => setTimePeriod(period)}
                                     className={`px-4 py-1.5 text-sm rounded-md transition-all capitalize ${timePeriod === period
-                                            ? 'bg-primary text-white font-medium shadow-lg'
-                                            : 'text-gray-400 hover:text-white'
+                                        ? 'bg-primary text-white font-medium shadow-lg'
+                                        : 'text-gray-400 hover:text-white'
                                         }`}
                                 >
                                     {period}
@@ -212,6 +222,11 @@ export default function AdminDashboard() {
 
                 {activeTab === 'dashboard' && (
                     <div className="space-y-6">
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-lg">
+                                {error}
+                            </div>
+                        )}
                         {/* Summary Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <StatsCard
