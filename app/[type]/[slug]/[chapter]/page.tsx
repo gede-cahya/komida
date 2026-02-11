@@ -55,6 +55,7 @@ export default function ChapterReaderPage() {
         fetch(url)
             .then(res => res.json())
             .then(resData => {
+                console.log('Fetched chapter data:', resData);
                 if (resData.images) {
                     setData(resData as ChapterData);
                 } else {
@@ -111,8 +112,14 @@ export default function ChapterReaderPage() {
     }, [lastScrollY]);
 
     const navigateChapter = (targetId: string | undefined) => {
-        if (!targetId) return;
-        router.push(`/${type}/${slug}/${targetId}`);
+        console.log('Navigating to chapter ID:', targetId);
+        if (!targetId) {
+            console.error('Target ID is missing');
+            return;
+        }
+        const targetUrl = `/${type}/${slug}/${encodeURIComponent(targetId)}`;
+        console.log('Pushing URL:', targetUrl);
+        router.push(targetUrl);
     };
 
     if (loading) {
