@@ -61,6 +61,30 @@ export function MangaTable({ manga, loading, page, totalPages, onPageChange, onS
     };
 
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+    const [updating, setUpdating] = useState(false);
+
+    const handleUpdateAll = async () => {
+        if (!confirm('Are you sure you want to update ALL manga? This will happen in the background.')) return;
+
+        setUpdating(true);
+        const token = localStorage.getItem('token');
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/update-all`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                alert('Update started in background!');
+            } else {
+                alert('Failed to start update');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error starting update');
+        } finally {
+            setUpdating(false);
+        }
+    };
 
     return (
         <div className="space-y-4">
@@ -75,13 +99,22 @@ export function MangaTable({ manga, loading, page, totalPages, onPageChange, onS
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </form>
-                <button
-                    onClick={() => setIsAddDialogOpen(true)}
-                    className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium"
-                >
-                    <Plus className="w-4 h-4" />
-                    Add Komik
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleUpdateAll}
+                        disabled={updating}
+                        className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium"
+                    >
+                        {updating ? 'Starting...' : 'Update All'}
+                    </button>
+                    <button
+                        onClick={() => setIsAddDialogOpen(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Add Komik
+                    </button>
+                </div>
             </div>
 
             <div className="bg-gray-900/50 rounded-xl border border-white/10 overflow-hidden">

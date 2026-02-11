@@ -38,7 +38,7 @@ export function TrendingSection() {
                 </button>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-4 h-[600px] md:h-[500px]">
+            <div className="grid grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-4 h-auto md:h-[500px]">
                 {trendingItems.slice(0, 5).map((item, index) => {
                     // Assign span for bento grid if not present
                     const spanClass = item.span || (index === 0 ? "col-span-2 row-span-2" : "col-span-1 row-span-1");
