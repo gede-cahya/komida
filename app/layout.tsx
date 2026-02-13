@@ -86,10 +86,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-          <ClientFooter />
+          <div className="flex flex-col min-h-screen bg-background text-foreground">
+            <AuthProvider>
+              <div className="flex-1 w-full">
+                {children}
+              </div>
+            </AuthProvider>
+            <ClientFooter />
+          </div>
         </ThemeProvider>
       </body>
     </html>
