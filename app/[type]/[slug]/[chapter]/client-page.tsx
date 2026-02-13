@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CommentSection } from "@/components/comment-section";
 import { formatDate } from "@/lib/utils";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 interface ChapterData {
     images: string[];
@@ -182,7 +183,7 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
             >
                 <div className="w-full max-w-4xl mx-auto">
                     {data.images.map((img, idx) => (
-                        <div key={idx} className="relative w-full">
+                        <div key={idx} className="relative w-full min-h-[500px] bg-gray-900/50 mb-1 flex items-center justify-center">
                             <Image
                                 src={`/api/image/proxy?url=${encodeURIComponent(img)}&source=${activeSource}`}
                                 alt={`Page ${idx + 1}`}
@@ -190,8 +191,8 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
                                 height={1200}
                                 className="w-full h-auto object-cover"
                                 unoptimized
-                                priority={idx < 2}
-                                loading={idx < 2 ? 'eager' : 'lazy'}
+                                priority={idx < 4}
+                                loading={idx < 4 ? 'eager' : 'lazy'}
                             />
                         </div>
                     ))}
@@ -291,6 +292,8 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
                     </div>
                 </div>
             )}
+            {/* Scroll To Top Button */}
+            <ScrollToTop />
         </main>
     );
 }
