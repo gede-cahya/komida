@@ -44,6 +44,22 @@ export async function fetchMangaDetail(source: string, link: string) {
     return res.json();
 }
 
+export async function fetchMangaBySlug(slug: string) {
+    const res = await fetch(`${API_URL}/manga/slug/${slug}`);
+    if (!res.ok) {
+        throw new Error('Failed to fetch manga by slug');
+    }
+    return res.json();
+}
+
+export async function fetchChapter(id: string) {
+    const res = await fetch(`${API_URL}/manga/chapter?id=${encodeURIComponent(id)}`);
+    if (!res.ok) {
+        throw new Error('Failed to fetch chapter');
+    }
+    return res.json();
+}
+
 export interface Manga {
     id: number;
     title: string;
