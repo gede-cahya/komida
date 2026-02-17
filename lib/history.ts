@@ -2,6 +2,7 @@
 export interface ReadHistoryItem {
     mangaTitle: string;
     chapterId: string;
+    chapterTitle?: string;
     timestamp: number;
 }
 
@@ -18,32 +19,37 @@ export function getReadHistory(): ReadHistoryItem[] {
     }
 }
 
-export function saveReadHistory(mangaTitle: string, chapterId: string) {
+export function saveReadHistory(mangaTitle: string, chapterId: string, chapterTitle?: string) {
     if (typeof window === 'undefined') return;
 
     try {
         const history = getReadHistory();
-        // Check if already exists to avoid duplicates/unnecessary writes, 
-        // using a composite key check or just simple existence.
-        // We want to update timestamp if it exists.
-
         const normalizedTitle = mangaTitle.toLowerCase();
-        const existingIndex = history.findIndex(h => h.mangaTitle === normalizedTitle && h.chapterId === String(chapterId));
+
+        // Find by ID match preferably
+        const existingIndex = history.findIndex(h =>
+            h.mangaTitle === normalizedTitle &&
+            (h.chapterId === String(chapterId) || (chapterTitle && h.chapterTitle === chapterTitle))
+        );
 
         if (existingIndex >= 0) {
             history[existingIndex].timestamp = Date.now();
+            // Update title if missing
+            if (chapterTitle && !history[existingIndex].chapterTitle) {
+                history[existingIndex].chapterTitle = chapterTitle;
+            }
         } else {
             history.push({
                 mangaTitle: normalizedTitle,
                 chapterId: String(chapterId),
+                chapterTitle: chapterTitle,
                 timestamp: Date.now()
             });
         }
 
-        // Optional: Limit history size if needed, e.g. last 1000 chapters
         if (history.length > 1000) {
-            history.sort((a, b) => a.timestamp - b.timestamp); // Oldest first
-            history.splice(0, history.length - 1000); // Remove oldest
+            history.sort((a, b) => a.timestamp - b.timestamp);
+            history.splice(0, history.length - 1000);
         }
 
         localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
@@ -53,19 +59,32 @@ export function saveReadHistory(mangaTitle: string, chapterId: string) {
     }
 }
 
-export function isChapterRead(mangaTitle: string, chapterId: string): boolean {
-    const history = getReadHistory();
-    return history.some(h => h.mangaTitle === mangaTitle && h.chapterId === chapterId);
+export interface ReadStatus {
+    ids: Set<string>;
+    titles: Set<string>;
+    has: (id?: string, title?: string) => boolean;
 }
 
-export function getReadChaptersForManga(mangaTitle: string): Set<string> {
+export function getReadStatusForManga(mangaTitle: string): ReadStatus {
     const history = getReadHistory();
-    const readChapters = new Set<string>();
+    const ids = new Set<string>();
+    const titles = new Set<string>();
     const normalizedTitle = mangaTitle.toLowerCase();
+
     history.forEach(h => {
         if (h.mangaTitle === normalizedTitle) {
-            readChapters.add(h.chapterId);
+            ids.add(h.chapterId);
+            if (h.chapterTitle) titles.add(h.chapterTitle);
         }
     });
-    return readChapters;
+
+    return {
+        ids,
+        titles,
+        has: (id?: string, title?: string) => {
+            if (id && ids.has(String(id))) return true;
+            if (title && titles.has(title)) return true;
+            return false;
+        }
+    };
 }

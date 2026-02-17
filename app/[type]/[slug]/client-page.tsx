@@ -11,7 +11,7 @@ import { isBookmarked, removeBookmark, saveBookmark } from "@/lib/bookmarks";
 import { CommentSection } from "@/components/comment-section";
 import { formatDate } from "@/lib/utils";
 import { MangaDetailSkeleton } from "@/components/skeletons";
-import { getReadChaptersForManga } from "@/lib/history";
+import { getReadStatusForManga } from "@/lib/history";
 
 interface SourceDetail {
     name: string;
@@ -58,7 +58,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
     const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState('');
     const [isSaved, setIsSaved] = useState(false);
-    const [readChapters, setReadChapters] = useState<Set<string>>(new Set());
+    // const [readChapters, setReadChapters] = useState<Set<string>>(new Set()); // Deprecated
 
     useEffect(() => {
         if (!slug) return;
@@ -88,19 +88,19 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
             });
     }, [slug]);
 
+    const [readStatus, setReadStatus] = useState<any>(null); // Use any to avoid complex type import for now or import it
+
     useEffect(() => {
         if (detail && slug) {
             const updateStatus = () => {
                 const saved = isBookmarked(detail.title);
                 setIsSaved(saved);
-                const chapters = getReadChaptersForManga(slug as string);
-                setReadChapters(chapters);
-                console.log(`[ReadStatus] Slug: ${slug}, Count: ${chapters.size}`, Array.from(chapters));
+                const status = getReadStatusForManga(slug as string);
+                setReadStatus(status);
             };
 
             updateStatus();
             window.addEventListener('history-updated', updateStatus);
-            // Also update on visibility change to catch updates from other tabs
             window.addEventListener('focus', updateStatus);
 
             return () => {
@@ -160,11 +160,14 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
                     <strong>Slug:</strong> {slug}
                 </div>
                 <div className="mb-2">
-                    <strong>Read Count:</strong> {readChapters.size}
+                    <strong>Read ID Count:</strong> {readStatus?.ids.size ?? 0}
+                </div>
+                <div className="mb-2">
+                    <strong>Read Title Count:</strong> {readStatus?.titles.size ?? 0}
                 </div>
                 <div className="mb-2">
                     <strong>First 5 Read IDs:</strong><br />
-                    {Array.from(readChapters).slice(0, 5).join(', ')}
+                    {readStatus ? Array.from(readStatus.ids).slice(0, 5).join(', ') : 'loading'}
                 </div>
                 <div className="mb-2">
                     <strong>First 5 Chapter IDs:</strong><br />
@@ -173,7 +176,8 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
                 <div>
                     <strong>Match Check (First Ch):</strong><br />
                     ID: {selectedSource.chapters[0]?.id}<br />
-                    Has: {readChapters.has(String(selectedSource.chapters[0]?.id || '')) ? 'YES' : 'NO'}
+                    Title: {selectedSource.chapters[0]?.title}<br />
+                    Has: {readStatus?.has(selectedSource.chapters[0]?.id, selectedSource.chapters[0]?.title) ? 'YES' : 'NO'}
                 </div>
             </div>
 
@@ -325,7 +329,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
                                     href={chapterUrl}
                                     className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/60 transition-colors group"
                                 >
-                                    <span className={`font-medium transition-colors line-clamp-1 ${readChapters.has(String(chapter.id || '')) ? 'text-orange-500 font-bold' : 'text-gray-200 group-hover:text-primary'
+                                    <span className={`font-medium transition-colors line-clamp-1 ${readStatus?.has(chapter.id, chapter.title) ? 'text-orange-500 font-bold' : 'text-gray-200 group-hover:text-primary'
                                         }`}>{chapter.title}</span>
                                     <div className="flex items-center gap-2 text-xs text-gray-500 shrink-0">
                                         <Clock className="w-3 h-3" />

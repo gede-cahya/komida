@@ -79,7 +79,9 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
                     setData(resData as ChapterData);
                     // Save to history
                     if (chapter) {
-                        saveReadHistory(slug as string, chapter);
+                        const matchedChapter = chapters.find(c => c.id === chapter);
+                        // Save ID and Title (if found)
+                        saveReadHistory(slug as string, chapter, matchedChapter?.title);
                     }
                 } else {
                     setError('Failed to load chapter data');
