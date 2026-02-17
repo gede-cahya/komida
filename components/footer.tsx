@@ -24,7 +24,7 @@ export function Footer() {
                             </span>
                         </Link>
                         <p className="text-muted-foreground text-sm">
-                            The smoothest, fastest manga reading experience on the web.
+                            Baca Manga, Manhwa, dan Manhua online gratis dengan update harian dan koleksi lengkap di Komida.
                         </p>
                     </div>
 
