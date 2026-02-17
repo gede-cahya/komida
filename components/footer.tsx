@@ -32,10 +32,9 @@ export function Footer() {
                     <div>
                         <h4 className="font-bold text-foreground mb-4">Platform</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="#" className="hover:text-primary transition-colors">Trending</Link></li>
-                            <li><Link href="#" className="hover:text-primary transition-colors">Latest Updates</Link></li>
-                            <li><Link href="#" className="hover:text-primary transition-colors">Genres</Link></li>
-                            <li><Link href="#" className="hover:text-primary transition-colors">Request Manga</Link></li>
+                            <li><Link href="/popular" className="hover:text-primary transition-colors">Popular</Link></li>
+                            <li><Link href="/" className="hover:text-primary transition-colors">Latest Updates</Link></li>
+                            <li><Link href="/genres" className="hover:text-primary transition-colors">Genres</Link></li>
                         </ul>
                     </div>
 

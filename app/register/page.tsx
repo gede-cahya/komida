@@ -8,7 +8,6 @@ import Link from 'next/link';
 export default function RegisterPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('user'); // Default to user
     const [error, setError] = useState('');
     const { login } = useAuth();
 
@@ -22,7 +21,7 @@ export default function RegisterPage() {
             const res = await fetch(`${API_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, role })
+                body: JSON.stringify({ username, password })
             });
 
             const data = await res.json();
@@ -73,19 +72,8 @@ export default function RegisterPage() {
                         />
                     </div>
 
-                    {/* Role Selection for Demo */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-400 mb-1">Role (Demo Only)</label>
-                        <select
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg p-3 text-white focus:outline-none focus:border-primary transition-colors"
-                        >
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                        <p className="text-xs text-gray-500 mt-1">Select 'Admin' to access dashboard.</p>
-                    </div>
+
+
 
                     <button
                         type="submit"
