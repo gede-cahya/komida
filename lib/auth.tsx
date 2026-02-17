@@ -8,6 +8,9 @@ interface User {
     id: number;
     username: string;
     role: string;
+    email?: string;
+    display_name?: string;
+    avatar_url?: string;
 }
 
 interface AuthContextType {
@@ -15,6 +18,7 @@ interface AuthContextType {
     token: string | null;
     login: (token: string, user: User) => void;
     logout: () => void;
+    updateUser: (user: User) => void;
     isLoading: boolean;
 }
 
@@ -60,8 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push('/login');
     };
 
+    const updateUser = (updatedUser: User) => {
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+        <AuthContext.Provider value={{ user, token, login, logout, updateUser, isLoading }}>
             {children}
         </AuthContext.Provider>
     );

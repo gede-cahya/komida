@@ -53,9 +53,17 @@ export function UserMenu() {
         <div className="relative" ref={menuRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold text-white shadow-lg border border-white/20 transition-transform active:scale-95 ${getRandomColor(user.username)}`}
+                className={`relatve flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold text-white shadow-lg border border-white/20 transition-transform active:scale-95 overflow-hidden ${!user.avatar_url ? getRandomColor(user.username) : ''}`}
             >
-                {getInitials(user.username)}
+                {user.avatar_url ? (
+                    <img
+                        src={user.avatar_url}
+                        alt={user.username}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    getInitials(user.username)
+                )}
             </button>
 
             <AnimatePresence>
@@ -68,8 +76,9 @@ export function UserMenu() {
                         className="absolute right-0 mt-2 w-56 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl py-2 z-50 overflow-hidden"
                     >
                         <div className="px-4 py-3 border-b border-white/5">
-                            <p className="text-sm font-medium text-white truncate">{user.username}</p>
+                            <p className="text-sm font-medium text-white truncate">{user.display_name || user.username}</p>
                             <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                            {user.email && <p className="text-xs text-gray-500 truncate">{user.email}</p>}
                         </div>
 
                         <div className="py-1">
@@ -83,10 +92,14 @@ export function UserMenu() {
                                     Dashboard
                                 </Link>
                             )}
-                            <button className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                            <Link
+                                href="/settings"
+                                className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                                onClick={() => setIsOpen(false)}
+                            >
                                 <Settings className="w-4 h-4" />
                                 Settings
-                            </button>
+                            </Link>
                         </div>
 
                         <div className="border-t border-white/5 py-1">
