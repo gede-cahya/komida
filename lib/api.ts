@@ -3,7 +3,9 @@ const API_URL = '/api';
 export async function fetchTrending() {
     const res = await fetch(`${API_URL}/trending`);
     if (!res.ok) {
-        throw new Error('Failed to fetch trending manga');
+        const text = await res.text();
+        console.error('Fetch Trending Error:', res.status, text);
+        throw new Error(`Failed to fetch trending manga: ${res.status} ${text.substring(0, 50)}`);
     }
     return res.json();
 }
@@ -11,7 +13,9 @@ export async function fetchTrending() {
 export async function fetchRecentUpdates() {
     const res = await fetch(`${API_URL}/recent`);
     if (!res.ok) {
-        throw new Error('Failed to fetch recent updates');
+        const text = await res.text();
+        console.error('Fetch Recent Error:', res.status, text);
+        throw new Error(`Failed to fetch recent updates: ${res.status} ${text.substring(0, 50)}`);
     }
     return res.json();
 }
