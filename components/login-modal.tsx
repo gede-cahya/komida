@@ -57,7 +57,29 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || 'Authentication failed');
+                let errorMessage = data.error || 'Authentication failed';
+                if (typeof errorMessage !== 'string') {
+                    // Handle Zod/Object errors
+                    if (errorMessage.issues && Array.isArray(errorMessage.issues)) {
+                        errorMessage = errorMessage.issues.map((i: any) => i.message).join(', ');
+                    } else if (errorMessage.name === 'ZodError' && typeof errorMessage.message === 'string') {
+                        try {
+                            const parsed = JSON.parse(errorMessage.message);
+                            if (Array.isArray(parsed)) {
+                                errorMessage = parsed.map((i: any) => i.message).join(', ');
+                            } else {
+                                errorMessage = errorMessage.message;
+                            }
+                        } catch {
+                            errorMessage = errorMessage.message;
+                        }
+                    } else if (errorMessage.message) {
+                        errorMessage = errorMessage.message;
+                    } else {
+                        errorMessage = JSON.stringify(errorMessage);
+                    }
+                }
+                throw new Error(errorMessage);
             }
 
             // Success
