@@ -152,7 +152,31 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
     }
 
     return (
-        <main className="min-h-screen bg-background text-foreground pb-24">
+        <main className="min-h-screen bg-background text-foreground pb-24 relative">
+            {/* DEBUG PANEL - TEMPORARY */}
+            <div className="fixed top-20 right-4 z-[100] bg-black/80 text-white p-4 rounded text-xs font-mono max-w-xs overflow-auto border border-red-500 max-h-[80vh]">
+                <h3 className="text-red-400 font-bold mb-2">DEBUG MODE</h3>
+                <div className="mb-2">
+                    <strong>Slug:</strong> {slug}
+                </div>
+                <div className="mb-2">
+                    <strong>Read Count:</strong> {readChapters.size}
+                </div>
+                <div className="mb-2">
+                    <strong>First 5 Read IDs:</strong><br />
+                    {Array.from(readChapters).slice(0, 5).join(', ')}
+                </div>
+                <div className="mb-2">
+                    <strong>First 5 Chapter IDs:</strong><br />
+                    {selectedSource.chapters.slice(0, 5).map(c => c.id || 'null').join(', ')}
+                </div>
+                <div>
+                    <strong>Match Check (First Ch):</strong><br />
+                    ID: {selectedSource.chapters[0]?.id}<br />
+                    Has: {readChapters.has(String(selectedSource.chapters[0]?.id || '')) ? 'YES' : 'NO'}
+                </div>
+            </div>
+
             <Navbar />
 
             {/* Header / Hero */}
