@@ -298,7 +298,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
                                     href={chapterUrl}
                                     className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/60 transition-colors group"
                                 >
-                                    <span className={`font-medium transition-colors line-clamp-1 ${readChapters.has(String(chapter.id || '')) ? 'text-purple-400 font-bold' : 'text-gray-200 group-hover:text-primary'
+                                    <span className={`font-medium transition-colors line-clamp-1 ${readChapters.has(String(chapter.id || '')) ? 'text-primary font-bold' : 'text-gray-200 group-hover:text-primary'
                                         }`}>{chapter.title}</span>
                                     <div className="flex items-center gap-2 text-xs text-gray-500 shrink-0">
                                         <Clock className="w-3 h-3" />
