@@ -41,11 +41,9 @@ export function UserTable({ users, loading, page, totalPages, onPageChange, onSe
     const handleDelete = async (id: number) => {
         if (!confirm('Are you sure you want to delete this user?')) return;
 
-        const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/users/${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
                 onRefresh();

@@ -30,10 +30,13 @@ export default function LoginPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || 'Login failed');
+                const errorMsg = data.error
+                    ? (typeof data.error === 'object' ? JSON.stringify(data.error) : data.error)
+                    : (data.message && typeof data.message === 'string' ? data.message : JSON.stringify(data));
+                throw new Error(errorMsg);
             }
 
-            login(data.token, data.user);
+            login(data.user);
         } catch (err: any) {
             setError(err.message);
         }

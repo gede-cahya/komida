@@ -66,11 +66,9 @@ export default function AdminDashboard() {
     const fetchSummary = async () => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const headers = { 'Authorization': `Bearer ${localStorage.getItem('token')}` };
-
             const [summaryRes, healthRes] = await Promise.all([
-                fetch(`${API_URL}/admin/stats/summary`, { headers }),
-                fetch(`${API_URL}/admin/system/health`, { headers })
+                fetch(`${API_URL}/admin/stats/summary`),
+                fetch(`${API_URL}/admin/system/health`)
             ]);
 
             if (summaryRes.ok) {
@@ -92,12 +90,9 @@ export default function AdminDashboard() {
         try {
             setError(null);
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const token = localStorage.getItem('token');
-            const headers = { 'Authorization': `Bearer ${token}` };
-
             const [visitsRes, popularRes] = await Promise.all([
-                fetch(`${API_URL}/admin/stats/visits?period=${period}`, { headers }),
-                fetch(`${API_URL}/admin/stats/popular?period=${period}`, { headers })
+                fetch(`${API_URL}/admin/stats/visits?period=${period}`),
+                fetch(`${API_URL}/admin/stats/popular?period=${period}`)
             ]);
 
             if (visitsRes.ok) {
@@ -123,9 +118,7 @@ export default function AdminDashboard() {
             const endpoint = activeTab === 'users' ? '/admin/users' : activeTab === 'manga' ? '/admin/manga' : '/admin/comments';
             const query = `?page=${page}&limit=10&search=${encodeURIComponent(search)}`;
 
-            const res = await fetch(`${API_URL}${endpoint}${query}`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
+            const res = await fetch(`${API_URL}${endpoint}${query}`);
 
             if (res.ok) {
                 const data = await res.json();

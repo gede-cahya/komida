@@ -62,7 +62,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             }
 
             // Success
-            login(data.token, data.user);
+            login(data.user);
             onClose();
             resetForm();
             setEmailMode(false); // Reset to main view

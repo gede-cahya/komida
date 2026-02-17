@@ -27,11 +27,14 @@ export default function RegisterPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || 'Registration failed');
+                const errorMsg = data.error
+                    ? (typeof data.error === 'object' ? JSON.stringify(data.error) : data.error)
+                    : (data.message && typeof data.message === 'string' ? data.message : JSON.stringify(data));
+                throw new Error(errorMsg);
             }
 
             // Automatically login after register
-            login(data.token, data.user);
+            login(data.user);
         } catch (err: any) {
             setError(err.message);
         }

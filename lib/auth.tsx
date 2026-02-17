@@ -1,8 +1,7 @@
-
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface User {
     id: number;
@@ -15,62 +14,76 @@ interface User {
 
 interface AuthContextType {
     user: User | null;
-    token: string | null;
-    login: (token: string, user: User) => void;
+    login: (user: User) => void;
     logout: () => void;
     updateUser: (user: User) => void;
     isLoading: boolean;
+    checkAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+    const pathname = usePathname();
 
-    useEffect(() => {
-        // Load from localStorage on mount
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-
-        if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
-        }
-        setIsLoading(false);
-    }, []);
-
-    const login = (newToken: string, newUser: User) => {
-        setToken(newToken);
-        setUser(newUser);
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('user', JSON.stringify(newUser));
-
-        // Redirect logic can be handled here or in the component calling login
-        if (newUser.role === 'admin') {
-            router.push('/admin/dashboard');
-        } else {
-            router.push('/');
+    const checkAuth = async () => {
+        try {
+            const res = await fetch('/api/user/profile', {
+                credentials: 'include'
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUser(data.user);
+            } else {
+                setUser(null);
+            }
+        } catch (error) {
+            setUser(null);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const logout = () => {
-        setToken(null);
+    useEffect(() => {
+        checkAuth();
+    }, []);
+
+    const login = (newUser: User) => {
+        setUser(newUser);
+
+        // Redirect logic
+        if (newUser.role === 'admin') {
+            router.push('/admin/dashboard');
+        } else {
+            // If already on login page, go home, otherwise stay (modal)
+            if (pathname === '/login' || pathname === '/register') {
+                router.push('/');
+            }
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+        } catch (e) {
+            console.error('Logout failed', e);
+        }
         setUser(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
         router.push('/login');
     };
 
     const updateUser = (updatedUser: User) => {
         setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, updateUser, isLoading }}>
+        <AuthContext.Provider value={{ user, login, logout, updateUser, isLoading, checkAuth }}>
             {children}
         </AuthContext.Provider>
     );

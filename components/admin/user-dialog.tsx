@@ -41,7 +41,6 @@ export function UserDialog({ isOpen, onClose, onSuccess, user }: UserDialogProps
         setError('');
         setLoading(true);
 
-        const token = localStorage.getItem('token');
         const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/users${user ? `/${user.id}` : ''}`;
         const method = user ? 'PUT' : 'POST';
 
@@ -54,7 +53,6 @@ export function UserDialog({ isOpen, onClose, onSuccess, user }: UserDialogProps
                 method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(payload)
             });

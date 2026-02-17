@@ -24,7 +24,6 @@ interface SearchResult {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export default function MangaAddDialog({ isOpen, onClose, onSuccess }: MangaAddDialogProps) {
-    const { token } = useAuth();
     const [query, setQuery] = useState('');
     const [source, setSource] = useState(''); // Empty = All, or specific
     const [loading, setLoading] = useState(false);
@@ -47,7 +46,6 @@ export default function MangaAddDialog({ isOpen, onClose, onSuccess }: MangaAddD
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ query, source: source || undefined })
             });
@@ -75,7 +73,6 @@ export default function MangaAddDialog({ isOpen, onClose, onSuccess }: MangaAddD
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ source: manga.source, link: manga.link })
             });
