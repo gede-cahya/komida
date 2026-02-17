@@ -9,7 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function SettingsPage() {
-    const { user, token, updateUser, isLoading: authLoading } = useAuth();
+    const { user, updateUser, isLoading: authLoading } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -62,9 +62,9 @@ export default function SettingsPage() {
             const res = await fetch(`${API_URL}/user/profile`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     display_name: displayName,
                     email,
@@ -100,9 +100,9 @@ export default function SettingsPage() {
             const res = await fetch(`${API_URL}/user/password`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     oldPassword,
                     newPassword

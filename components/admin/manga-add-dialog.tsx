@@ -47,6 +47,7 @@ export default function MangaAddDialog({ isOpen, onClose, onSuccess }: MangaAddD
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ query, source: source || undefined })
             });
 
@@ -74,6 +75,7 @@ export default function MangaAddDialog({ isOpen, onClose, onSuccess }: MangaAddD
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({ source: manga.source, link: manga.link })
             });
 

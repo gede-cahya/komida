@@ -50,7 +50,9 @@ export default function MangaEditor({ params }: { params: Promise<{ id: string }
 
     const fetchManga = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/${id}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/${id}`, {
+                credentials: 'include'
+            });
             if (res.ok) {
                 const data = await res.json();
                 setManga(data);
@@ -89,6 +91,7 @@ export default function MangaEditor({ params }: { params: Promise<{ id: string }
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify(formData)
             });
 
@@ -112,6 +115,7 @@ export default function MangaEditor({ params }: { params: Promise<{ id: string }
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/${id}/chapter/${encodeURIComponent(slug)}`, {
                 method: 'DELETE',
+                credentials: 'include'
             });
 
             if (res.ok) {

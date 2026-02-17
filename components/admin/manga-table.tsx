@@ -36,11 +36,10 @@ export function MangaTable({ manga, loading, page, totalPages, onPageChange, onS
     const handleDelete = async (id: number) => {
         if (!confirm('Are you sure you want to delete this manga? This cannot be undone.')) return;
 
-        const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/${id}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
             if (res.ok) {
                 onRefresh();
@@ -67,11 +66,10 @@ export function MangaTable({ manga, loading, page, totalPages, onPageChange, onS
         if (!confirm('Are you sure you want to update ALL manga? This will happen in the background.')) return;
 
         setUpdating(true);
-        const token = localStorage.getItem('token');
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/update-all`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
             if (res.ok) {
                 alert('Update started in background!');

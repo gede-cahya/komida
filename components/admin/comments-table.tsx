@@ -32,6 +32,7 @@ export function CommentsTable({ comments, loading, page, totalPages, onPageChang
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/comments/${id}`, {
                 method: 'DELETE',
+                credentials: 'include'
             });
             if (res.ok) {
                 onRefresh();

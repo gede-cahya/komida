@@ -24,7 +24,7 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ slug, chapter }: CommentSectionProps) {
-    const { user, token } = useAuth();
+    const { user } = useAuth();
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [loading, setLoading] = useState(true);
@@ -70,8 +70,8 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     slug,
                     chapter,
