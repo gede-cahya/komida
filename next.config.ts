@@ -56,8 +56,11 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     // Get the API URL and ensure it doesn't have trailing slash
-    // Get the API URL and ensure it doesn't have trailing slash
-    let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    let defaultUrl = process.env.NODE_ENV === 'production'
+      ? 'https://komida-backend-production.up.railway.app/api'
+      : 'http://localhost:3001/api';
+
+    let apiUrl = process.env.NEXT_PUBLIC_API_URL || defaultUrl;
 
     // Remove trailing slash if present
     if (apiUrl.endsWith('/')) {
