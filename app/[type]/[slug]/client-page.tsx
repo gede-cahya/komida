@@ -89,10 +89,10 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
     }, [slug]);
 
     useEffect(() => {
-        if (detail) {
+        if (detail && slug) {
             const updateStatus = () => {
                 setIsSaved(isBookmarked(detail.title));
-                setReadChapters(getReadChaptersForManga(detail.title));
+                setReadChapters(getReadChaptersForManga(slug));
             };
 
             updateStatus();
@@ -105,7 +105,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
                 window.removeEventListener('focus', updateStatus);
             };
         }
-    }, [detail]);
+    }, [detail, slug]);
 
     const toggleBookmark = () => {
         if (!detail || !selectedSource) return;
