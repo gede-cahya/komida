@@ -56,11 +56,13 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     // Get the API URL and ensure it doesn't have trailing slash
-    let defaultUrl = process.env.NODE_ENV === 'production'
-      ? 'https://komida-backend-production.up.railway.app/api'
-      : 'http://localhost:3001/api';
-
-    let apiUrl = process.env.NEXT_PUBLIC_API_URL || defaultUrl;
+    let apiUrl;
+    if (process.env.NODE_ENV === 'production') {
+      // Force production URL to avoid Vercel env var misconfiguration
+      apiUrl = 'https://komida-backend-production.up.railway.app/api';
+    } else {
+      apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    }
 
     // Remove trailing slash if present
     if (apiUrl.endsWith('/')) {

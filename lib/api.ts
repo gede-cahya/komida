@@ -1,10 +1,14 @@
 const isServer = typeof window === 'undefined';
 // Ensure no trailing slash
 const cleanUrl = (url: string) => url.endsWith('/') ? url.slice(0, -1) : url;
-const defaultServerUrl = process.env.NODE_ENV === 'production'
-    ? 'https://komida-backend-production.up.railway.app/api'
-    : 'http://localhost:3001/api';
-const SERVER_API_URL = cleanUrl(process.env.NEXT_PUBLIC_API_URL || defaultServerUrl);
+
+let SERVER_API_URL;
+if (process.env.NODE_ENV === 'production') {
+    SERVER_API_URL = 'https://komida-backend-production.up.railway.app/api';
+} else {
+    SERVER_API_URL = cleanUrl(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api');
+}
+
 const API_URL = isServer ? SERVER_API_URL : '/api';
 
 export async function fetchTrending() {
