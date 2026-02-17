@@ -168,7 +168,7 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
                         {slug?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                     </h1>
                     {data?.source && (
-                        <p className="text-xs text-gray-400 capitalize">{data.source} • {chapter}</p>
+                        <p className="text-xs text-gray-400 capitalize">{data.source} • {chapters.find(c => c.id === chapter)?.title || 'Chapter'}</p>
                     )}
                 </div>
             </div>
@@ -180,7 +180,7 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
             >
                 <div className="w-full max-w-4xl mx-auto">
                     {data.images.map((img, idx) => (
-                        <div key={idx} className="relative w-full min-h-[500px] bg-gray-900/50 mb-1 flex items-center justify-center">
+                        <div key={idx} className="relative w-full bg-gray-900/50 flex items-center justify-center">
                             <Image
                                 src={`/api/image/proxy?url=${encodeURIComponent(img)}&source=${activeSource}`}
                                 alt={`Page ${idx + 1}`}
