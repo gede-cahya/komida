@@ -9,6 +9,7 @@ interface User {
     id: number;
     username: string;
     role: string;
+    is_banned: boolean;
     created_at: string;
 }
 
@@ -100,10 +101,17 @@ export function UserTable({ users, loading, page, totalPages, onPageChange, onSe
                                     <td className="px-6 py-4">#{user.id}</td>
                                     <td className="px-6 py-4 text-white font-medium">{user.username}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${user.role === 'admin' ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'
-                                            }`}>
-                                            {user.role}
-                                        </span>
+                                        <div className="flex gap-2">
+                                            <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${user.role === 'admin' ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'
+                                                }`}>
+                                                {user.role}
+                                            </span>
+                                            {user.is_banned && (
+                                                <span className="px-2 py-1 rounded text-xs font-bold uppercase bg-red-900/50 text-red-200 border border-red-500/50">
+                                                    BANNED
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">{new Date(user.created_at).toLocaleDateString()}</td>
                                     <td className="px-6 py-4 text-right flex justify-end gap-2">

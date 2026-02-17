@@ -4,17 +4,19 @@
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
-import { Shield, Users, BookOpen, LogOut, LayoutDashboard, TrendingUp, Eye, BarChart3, List } from "lucide-react";
+import { Shield, Users, BookOpen, LogOut, LayoutDashboard, TrendingUp, Eye, BarChart3, List, MessageSquare } from "lucide-react";
 import { UserTable } from "@/components/admin/user-table";
 import { MangaTable } from "@/components/admin/manga-table";
 import { StatsCard } from "@/components/admin/stats-card";
 import { VisitorsChart } from "@/components/admin/visitors-chart";
 import { PopularComicsTable } from "@/components/admin/popular-comics-table";
-import { TimePeriod, StatsSummary, PopularManga, VisitStat } from "@/types/analytics";
+import { TimePeriod, StatsSummary, PopularManga, VisitStat, SystemHealth } from "@/types/analytics";
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
+import { SystemHealthWidget } from "@/components/admin/system-health";
+import { CommentsTable } from "@/components/admin/comments-table";
 
-type Tab = 'dashboard' | 'users' | 'manga';
+type Tab = 'dashboard' | 'users' | 'manga' | 'comments';
 
 export default function AdminDashboard() {
     const { user, logout, isLoading } = useAuth();
@@ -25,10 +27,12 @@ export default function AdminDashboard() {
     const [stats, setStats] = useState<StatsSummary | null>(null);
     const [visitStats, setVisitStats] = useState<VisitStat[]>([]);
     const [popularManga, setPopularManga] = useState<PopularManga[]>([]);
+    const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
     const [timePeriod, setTimePeriod] = useState<TimePeriod>('day');
 
     const [users, setUsers] = useState([]);
     const [manga, setManga] = useState([]);
+    const [comments, setComments] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
 
     // Pagination & Search
@@ -62,12 +66,20 @@ export default function AdminDashboard() {
     const fetchSummary = async () => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const res = await fetch(`${API_URL}/admin/stats/summary`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
+            const headers = { 'Authorization': `Bearer ${localStorage.getItem('token')}` };
+
+            const [summaryRes, healthRes] = await Promise.all([
+                fetch(`${API_URL}/admin/stats/summary`, { headers }),
+                fetch(`${API_URL}/admin/system/health`, { headers })
+            ]);
+
+            if (summaryRes.ok) {
+                const data = await summaryRes.json();
                 setStats(data);
+            }
+            if (healthRes.ok) {
+                const health = await healthRes.json();
+                setSystemHealth(health);
             }
         } catch (e) {
             console.error(e);
@@ -108,7 +120,7 @@ export default function AdminDashboard() {
         setLoadingData(true);
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const endpoint = activeTab === 'users' ? '/admin/users' : '/admin/manga';
+            const endpoint = activeTab === 'users' ? '/admin/users' : activeTab === 'manga' ? '/admin/manga' : '/admin/comments';
             const query = `?page=${page}&limit=10&search=${encodeURIComponent(search)}`;
 
             const res = await fetch(`${API_URL}${endpoint}${query}`, {
@@ -119,8 +131,10 @@ export default function AdminDashboard() {
                 const data = await res.json();
                 if (activeTab === 'users') {
                     setUsers(data.users);
-                } else {
+                } else if (activeTab === 'manga') {
                     setManga(data.manga);
+                } else if (activeTab === 'comments') {
+                    setComments(data.comments);
                 }
                 setTotalPages(data.totalPages);
             }
@@ -179,6 +193,14 @@ export default function AdminDashboard() {
                         <BookOpen className="w-5 h-5" />
                         Manage Komik
                     </button>
+                    <button
+                        onClick={() => handleTabChange('comments')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'comments' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                    >
+                        <MessageSquare className="w-5 h-5" />
+                        Comments
+                    </button>
                 </nav>
 
                 <div className="pt-6 border-t border-white/10 space-y-2">
@@ -227,28 +249,33 @@ export default function AdminDashboard() {
                                 {error}
                             </div>
                         )}
-                        {/* Summary Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <StatsCard
-                                title="Total Titles"
-                                value={stats?.totalManga.toLocaleString() ?? '-'}
-                                icon={<BookOpen className="h-4 w-4 text-muted-foreground" />}
-                            />
-                            <StatsCard
-                                title="Total Visits"
-                                value={stats?.totalVisits.toLocaleString() ?? '-'}
-                                icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
-                            />
-                            <StatsCard
-                                title="Visits Today"
-                                value={stats?.todayVisits.toLocaleString() ?? '-'}
-                                icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
-                            />
-                            <StatsCard
-                                title="Total Comic Views"
-                                value={stats?.totalViews.toLocaleString() ?? '-'}
-                                icon={<Eye className="h-4 w-4 text-muted-foreground" />}
-                            />
+                        {/* System Health & Summary */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <StatsCard
+                                    title="Total Titles"
+                                    value={stats?.totalManga.toLocaleString() ?? '-'}
+                                    icon={<BookOpen className="h-4 w-4 text-muted-foreground" />}
+                                />
+                                <StatsCard
+                                    title="Total Visits"
+                                    value={stats?.totalVisits.toLocaleString() ?? '-'}
+                                    icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+                                />
+                                <StatsCard
+                                    title="Visits Today"
+                                    value={stats?.todayVisits.toLocaleString() ?? '-'}
+                                    icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
+                                />
+                                <StatsCard
+                                    title="Total Comic Views"
+                                    value={stats?.totalViews.toLocaleString() ?? '-'}
+                                    icon={<Eye className="h-4 w-4 text-muted-foreground" />}
+                                />
+                            </div>
+                            <div className="lg:col-span-1">
+                                <SystemHealthWidget health={systemHealth} loading={!systemHealth} />
+                            </div>
                         </div>
 
                         {/* Charts Area */}
@@ -283,6 +310,17 @@ export default function AdminDashboard() {
                         totalPages={totalPages}
                         onPageChange={setPage}
                         onSearch={setSearch}
+                        onRefresh={fetchData}
+                    />
+                )}
+
+                {activeTab === 'comments' && (
+                    <CommentsTable
+                        comments={comments}
+                        loading={loadingData}
+                        page={page}
+                        totalPages={totalPages}
+                        onPageChange={setPage}
                         onRefresh={fetchData}
                     />
                 )}

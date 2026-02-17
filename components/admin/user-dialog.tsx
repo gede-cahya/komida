@@ -8,6 +8,7 @@ interface User {
     id: number;
     username: string;
     role: string;
+    is_banned: boolean;
 }
 
 interface UserDialogProps {
@@ -21,16 +22,17 @@ export function UserDialog({ isOpen, onClose, onSuccess, user }: UserDialogProps
     const [formData, setFormData] = useState({
         username: '',
         password: '',
-        role: 'user'
+        role: 'user',
+        is_banned: false
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     useEffect(() => {
         if (user) {
-            setFormData({ username: user.username, password: '', role: user.role });
+            setFormData({ username: user.username, password: '', role: user.role, is_banned: user.is_banned });
         } else {
-            setFormData({ username: '', password: '', role: 'user' });
+            setFormData({ username: '', password: '', role: 'user', is_banned: false });
         }
     }, [user]);
 
@@ -114,6 +116,19 @@ export function UserDialog({ isOpen, onClose, onSuccess, user }: UserDialogProps
                             <option value="user">User</option>
                             <option value="admin">Admin</option>
                         </select>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2">
+                        <input
+                            type="checkbox"
+                            id="is_banned"
+                            checked={formData.is_banned}
+                            onChange={e => setFormData({ ...formData, is_banned: e.target.checked })}
+                            className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-primary focus:ring-primary"
+                        />
+                        <label htmlFor="is_banned" className="text-sm font-medium text-gray-400">
+                            Banned / Suspended
+                        </label>
                     </div>
 
                     <div className="pt-4 flex justify-end gap-3">
