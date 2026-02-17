@@ -14,6 +14,8 @@ interface Comment {
     role: string;
     content: string;
     created_at: string;
+    display_name?: string;
+    avatar_url?: string;
 }
 
 interface CommentSectionProps {
@@ -112,8 +114,12 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
             <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5 mb-8">
                 {user ? (
                     <form onSubmit={handleSubmit} className="flex gap-4">
-                        <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${getRandomColor(user.username)}`}>
-                            {getInitials(user.username)}
+                        <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${!user.avatar_url ? getRandomColor(user.username) : ''} overflow-hidden`}>
+                            {user.avatar_url ? (
+                                <img src={user.avatar_url} alt={user.username} className="w-full h-full object-cover" />
+                            ) : (
+                                getInitials(user.display_name || user.username)
+                            )}
                         </div>
                         <div className="flex-1">
                             <textarea
@@ -153,12 +159,16 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                 ) : comments.length > 0 ? (
                     comments.map((comment) => (
                         <div key={comment.id} className="flex gap-4 group">
-                            <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${getRandomColor(comment.username)}`}>
-                                {getInitials(comment.username)}
+                            <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${!comment.avatar_url ? getRandomColor(comment.username) : ''} overflow-hidden`}>
+                                {comment.avatar_url ? (
+                                    <img src={comment.avatar_url} alt={comment.username} className="w-full h-full object-cover" />
+                                ) : (
+                                    getInitials(comment.display_name || comment.username)
+                                )}
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-semibold text-white">{comment.username}</span>
+                                    <span className="font-semibold text-white">{comment.display_name || comment.username}</span>
                                     {comment.role === 'admin' && (
                                         <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-bold rounded uppercase tracking-wider">
                                             Admin
