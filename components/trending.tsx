@@ -5,6 +5,7 @@ import { MangaCard } from "@/components/manga-card";
 import { ArrowRight, Flame } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fetchTrending, type TrendingManga } from "@/lib/api";
+import { TrendingSkeleton } from "@/components/skeletons";
 
 export function TrendingSection() {
     const [trendingItems, setTrendingItems] = useState<TrendingManga[]>([]);
@@ -23,7 +24,7 @@ export function TrendingSection() {
     }, []);
 
     if (loading) {
-        return <div className="text-white">Loading trending...</div>;
+        return <TrendingSkeleton />;
     }
 
     return (

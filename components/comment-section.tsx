@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { MessageSquare, Send } from 'lucide-react';
 import { LoginModal } from './login-modal';
 import { formatDate } from '@/lib/utils';
+import { CommentsSkeleton } from '@/components/skeletons';
 
 interface Comment {
     id: number;
@@ -148,7 +149,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
             {/* Comments List */}
             <div className="space-y-6">
                 {loading ? (
-                    <p className="text-center text-gray-500">Loading comments...</p>
+                    <CommentsSkeleton />
                 ) : comments.length > 0 ? (
                     comments.map((comment) => (
                         <div key={comment.id} className="flex gap-4 group">

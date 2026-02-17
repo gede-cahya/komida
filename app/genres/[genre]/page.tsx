@@ -8,6 +8,7 @@ import { Tag, Loader2, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { PopularPageSkeleton } from "@/components/skeletons";
 
 export default function GenreDetailPage() {
     const params = useParams();
@@ -76,11 +77,7 @@ export default function GenreDetailPage() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                        {[...Array(10)].map((_, i) => (
-                            <div key={i} className="aspect-[2/3] bg-secondary/50 rounded-xl animate-pulse" />
-                        ))}
-                    </div>
+                    <PopularPageSkeleton />
                 ) : (
                     <>
                         {mangaList.length === 0 ? (

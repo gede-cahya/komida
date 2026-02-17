@@ -4,6 +4,7 @@ import { MangaCard } from "@/components/manga-card";
 import { ArrowRight, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fetchRecentUpdates, type Manga } from "@/lib/api";
+import { RecentUpdatesSkeleton } from "@/components/skeletons";
 
 export function RecentUpdates() {
     const [recentUpdates, setRecentUpdates] = useState<Manga[]>([]);
@@ -22,7 +23,7 @@ export function RecentUpdates() {
     }, []);
 
     if (loading) {
-        return <div className="text-white">Loading recent updates...</div>;
+        return <RecentUpdatesSkeleton />;
     }
 
     return (

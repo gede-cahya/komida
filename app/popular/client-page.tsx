@@ -6,6 +6,7 @@ import { fetchPopular, type Manga } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { Flame, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { PopularPageSkeleton } from "@/components/skeletons";
 
 export default function PopularPage() {
     const [popularManga, setPopularManga] = useState<Manga[]>([]);
@@ -63,11 +64,7 @@ export default function PopularPage() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                        {[...Array(10)].map((_, i) => (
-                            <div key={i} className="aspect-[2/3] bg-secondary/50 rounded-xl animate-pulse" />
-                        ))}
-                    </div>
+                    <PopularPageSkeleton />
                 ) : (
                     <>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">

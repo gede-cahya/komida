@@ -9,6 +9,7 @@ import Image from "next/image";
 import { CommentSection } from "@/components/comment-section";
 import { formatDate } from "@/lib/utils";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { ChapterReaderSkeleton } from "@/components/skeletons";
 
 interface ChapterData {
     images: string[];
@@ -134,11 +135,7 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
     };
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-black flex items-center justify-center text-white">
-                <div className="animate-pulse">Loading Chapter...</div>
-            </div>
-        );
+        return <ChapterReaderSkeleton />;
     }
 
     if (error || !data) {

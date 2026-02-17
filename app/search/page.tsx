@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar";
 import { MangaCard } from "@/components/manga-card";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { SearchResultsSkeleton } from "@/components/skeletons";
 
 interface Manga {
     title: string;
@@ -50,11 +51,7 @@ function SearchContent() {
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {[1, 2, 3, 4, 5].map(i => (
-                        <div key={i} className="aspect-[3/4] bg-secondary/30 rounded-lg animate-pulse" />
-                    ))}
-                </div>
+                <SearchResultsSkeleton />
             ) : results.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {results.map((manga, i) => (

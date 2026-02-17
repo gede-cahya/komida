@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Star, PlayCircle, BookOpen } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { HeroSkeleton } from "@/components/skeletons";
 
 interface Manga {
     title: string;
@@ -58,7 +59,7 @@ export function Hero() {
     }, [featuredManga]);
 
     if (loading || featuredManga.length === 0) {
-        return <div className="w-full h-[90vh] bg-black animate-pulse" />;
+        return <HeroSkeleton />;
     }
 
     const currentManga = featuredManga[currentIndex];

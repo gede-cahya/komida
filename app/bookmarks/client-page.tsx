@@ -7,6 +7,7 @@ import { Bookmark, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getBookmarks, removeBookmark, type Manga } from "@/lib/bookmarks";
 import Link from "next/link";
+import { BookmarksSkeleton } from "@/components/skeletons";
 // We need Manga type from api or compatible
 // lib/bookmarks imports Manga from lib/api, so strict type.
 
@@ -41,7 +42,7 @@ export default function BookmarksPage() {
                 </div>
 
                 {loading ? (
-                    <div className="text-white animate-pulse">Loading...</div>
+                    <BookmarksSkeleton />
                 ) : bookmarks.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-4">
                         <Bookmark className="w-16 h-16 opacity-20" />

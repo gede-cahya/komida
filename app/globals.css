@@ -2,6 +2,12 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* Base Theme variables removed, now defined in @layer base for proper Tailwind overriding */

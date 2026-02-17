@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { isBookmarked, removeBookmark, saveBookmark } from "@/lib/bookmarks";
 import { CommentSection } from "@/components/comment-section";
 import { formatDate } from "@/lib/utils";
+import { MangaDetailSkeleton } from "@/components/skeletons";
 
 interface SourceDetail {
     name: string;
@@ -115,9 +116,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
         return (
             <main className="min-h-screen bg-background">
                 <Navbar />
-                <div className="container mx-auto px-4 py-24 flex justify-center">
-                    <div className="text-white animate-pulse">Loading manga details...</div>
-                </div>
+                <MangaDetailSkeleton />
             </main>
         );
     }
