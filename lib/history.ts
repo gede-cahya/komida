@@ -27,14 +27,15 @@ export function saveReadHistory(mangaTitle: string, chapterId: string) {
         // using a composite key check or just simple existence.
         // We want to update timestamp if it exists.
 
-        const existingIndex = history.findIndex(h => h.mangaTitle === mangaTitle && h.chapterId === chapterId);
+        const normalizedTitle = mangaTitle.toLowerCase();
+        const existingIndex = history.findIndex(h => h.mangaTitle === normalizedTitle && h.chapterId === String(chapterId));
 
         if (existingIndex >= 0) {
             history[existingIndex].timestamp = Date.now();
         } else {
             history.push({
-                mangaTitle,
-                chapterId,
+                mangaTitle: normalizedTitle,
+                chapterId: String(chapterId),
                 timestamp: Date.now()
             });
         }
@@ -60,8 +61,9 @@ export function isChapterRead(mangaTitle: string, chapterId: string): boolean {
 export function getReadChaptersForManga(mangaTitle: string): Set<string> {
     const history = getReadHistory();
     const readChapters = new Set<string>();
+    const normalizedTitle = mangaTitle.toLowerCase();
     history.forEach(h => {
-        if (h.mangaTitle === mangaTitle) {
+        if (h.mangaTitle === normalizedTitle) {
             readChapters.add(h.chapterId);
         }
     });
