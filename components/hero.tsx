@@ -35,7 +35,7 @@ export function Hero() {
     useEffect(() => {
         const fetchTrending = async () => {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/popular`);
+                const res = await fetch('/api/popular', { credentials: 'include' });
                 const data = await res.json();
                 // Take top 5 items that have images
                 const valid = data.filter((m: any) => m.image).slice(0, 5);

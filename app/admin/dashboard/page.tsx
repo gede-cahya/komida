@@ -65,10 +65,9 @@ export default function AdminDashboard() {
 
     const fetchSummary = async () => {
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
             const [summaryRes, healthRes] = await Promise.all([
-                fetch(`${API_URL}/admin/stats/summary`, { credentials: 'include' }),
-                fetch(`${API_URL}/admin/system/health`, { credentials: 'include' })
+                fetch('/api/admin/stats/summary', { credentials: 'include' }),
+                fetch('/api/admin/system/health', { credentials: 'include' })
             ]);
 
             if (summaryRes.ok) {
@@ -89,10 +88,9 @@ export default function AdminDashboard() {
     const fetchAnalytics = async (period: TimePeriod) => {
         try {
             setError(null);
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
             const [visitsRes, popularRes] = await Promise.all([
-                fetch(`${API_URL}/admin/stats/visits?period=${period}`, { credentials: 'include' }),
-                fetch(`${API_URL}/admin/stats/popular?period=${period}`, { credentials: 'include' })
+                fetch(`/api/admin/stats/visits?period=${period}`, { credentials: 'include' }),
+                fetch(`/api/admin/stats/popular?period=${period}`, { credentials: 'include' })
             ]);
 
             if (visitsRes.ok) {
@@ -114,11 +112,10 @@ export default function AdminDashboard() {
     const fetchData = useCallback(async () => {
         setLoadingData(true);
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const endpoint = activeTab === 'users' ? '/admin/users' : activeTab === 'manga' ? '/admin/manga' : '/admin/comments';
+            const endpoint = activeTab === 'users' ? '/api/admin/users' : activeTab === 'manga' ? '/api/admin/manga' : '/api/admin/comments';
             const query = `?page=${page}&limit=10&search=${encodeURIComponent(search)}`;
 
-            const res = await fetch(`${API_URL}${endpoint}${query}`, {
+            const res = await fetch(`${endpoint}${query}`, {
                 credentials: 'include'
             });
 

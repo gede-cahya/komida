@@ -41,7 +41,7 @@ export function UserDialog({ isOpen, onClose, onSuccess, user }: UserDialogProps
         setError('');
         setLoading(true);
 
-        const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/users${user ? `/${user.id}` : ''}`;
+        const url = `/api/admin/users${user ? `/${user.id}` : ''}`;
         const method = user ? 'PUT' : 'POST';
 
         // Filter out empty password for update

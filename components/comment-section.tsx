@@ -37,12 +37,11 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
 
     const fetchComments = async () => {
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            let url = `${API_URL}/comments?slug=${slug}`;
+            let url = `/api/comments?slug=${slug}`;
             if (chapter) {
                 url += `&chapter=${chapter}`;
             }
-            const res = await fetch(url);
+            const res = await fetch(url, { credentials: 'include' });
             const data = await res.json();
             if (res.ok) {
                 setComments(data.comments || []);
@@ -65,8 +64,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
 
         setPosting(true);
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const res = await fetch(`${API_URL}/comments`, {
+            const res = await fetch('/api/comments', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

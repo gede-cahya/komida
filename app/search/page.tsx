@@ -15,7 +15,7 @@ interface Manga {
     source: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = '/api';
 
 function SearchContent() {
     const searchParams = useSearchParams();
@@ -26,7 +26,7 @@ function SearchContent() {
     useEffect(() => {
         if (query) {
             setLoading(true);
-            fetch(`${API_URL}/manga/search?q=${encodeURIComponent(query)}`)
+            fetch(`/api/manga/search?q=${encodeURIComponent(query)}`, { credentials: 'include' })
                 .then(res => res.json())
                 .then(data => {
                     setResults(data.results || []);

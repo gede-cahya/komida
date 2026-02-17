@@ -12,7 +12,7 @@ interface Genre {
     slug: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = '/api';
 
 const gradients = [
     'from-rose-500 to-orange-500',
@@ -28,7 +28,7 @@ export default function GenresPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${API_URL}/genres`)
+        fetch('/api/genres', { credentials: 'include' })
             .then(res => res.json())
             .then(data => {
                 setGenres(data);

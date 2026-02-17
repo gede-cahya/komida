@@ -42,17 +42,16 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         setLoading(true);
 
         try {
-            // Adjust API URL logic similar to pages
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
+            const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
 
             const body: any = { username, password };
             if (mode === 'register') body.role = role;
 
-            const res = await fetch(`${API_URL}${endpoint}`, {
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body: JSON.stringify(body),
+                credentials: 'include'
             });
 
             const data = await res.json();

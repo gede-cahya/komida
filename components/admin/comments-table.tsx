@@ -30,7 +30,7 @@ export function CommentsTable({ comments, loading, page, totalPages, onPageChang
         if (!confirm('Are you sure you want to delete this comment?')) return;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/comments/${id}`, {
+            const res = await fetch(`/api/admin/comments/${id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });

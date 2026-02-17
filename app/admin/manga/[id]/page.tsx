@@ -50,7 +50,7 @@ export default function MangaEditor({ params }: { params: Promise<{ id: string }
 
     const fetchManga = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/${id}`, {
+            const res = await fetch(`/api/admin/manga/${id}`, {
                 credentials: 'include'
             });
             if (res.ok) {
@@ -86,7 +86,7 @@ export default function MangaEditor({ params }: { params: Promise<{ id: string }
     const handleSave = async () => {
         setSaving(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/${id}`, {
+            const res = await fetch(`/api/admin/manga/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ export default function MangaEditor({ params }: { params: Promise<{ id: string }
         if (!confirm('Are you sure you want to delete this chapter?')) return;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/${id}/chapter/${encodeURIComponent(slug)}`, {
+            const res = await fetch(`/api/admin/manga/${id}/chapter/${encodeURIComponent(slug)}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });

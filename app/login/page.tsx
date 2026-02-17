@@ -16,15 +16,11 @@ export default function LoginPage() {
         setError('');
 
         try {
-            // Assume NEXT_PUBLIC_API_URL includes /api suffix if set (e.g. http://localhost:3001/api)
-            // If not set, use default with /api
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-
-            // Just append /auth/login
-            const res = await fetch(`${API_URL}/auth/login`, {
+            const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
+                credentials: 'include'
             });
 
             const data = await res.json();

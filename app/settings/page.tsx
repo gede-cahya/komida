@@ -58,8 +58,7 @@ export default function SettingsPage() {
         setMessage(null);
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const res = await fetch(`${API_URL}/user/profile`, {
+            const res = await fetch('/api/user/profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -96,8 +95,7 @@ export default function SettingsPage() {
         setMessage(null);
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-            const res = await fetch(`${API_URL}/user/password`, {
+            const res = await fetch('/api/user/password', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

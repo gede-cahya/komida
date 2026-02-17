@@ -42,7 +42,7 @@ export function UserTable({ users, loading, page, totalPages, onPageChange, onSe
         if (!confirm('Are you sure you want to delete this user?')) return;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/users/${id}`, {
+            const res = await fetch(`/api/admin/users/${id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });

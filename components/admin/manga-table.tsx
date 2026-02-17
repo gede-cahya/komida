@@ -37,7 +37,7 @@ export function MangaTable({ manga, loading, page, totalPages, onPageChange, onS
         if (!confirm('Are you sure you want to delete this manga? This cannot be undone.')) return;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/${id}`, {
+            const res = await fetch(`/api/admin/manga/${id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -67,7 +67,7 @@ export function MangaTable({ manga, loading, page, totalPages, onPageChange, onS
 
         setUpdating(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/admin/manga/update-all`, {
+            const res = await fetch('/api/admin/manga/update-all', {
                 method: 'POST',
                 credentials: 'include'
             });

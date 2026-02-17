@@ -19,7 +19,7 @@ interface ChapterData {
     source?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = '/api';
 
 interface ChapterReaderPageProps {
     initialData?: ChapterData | null;
@@ -72,7 +72,7 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
             return;
         }
 
-        fetch(url)
+        fetch(url, { credentials: 'include' })
             .then(res => res.json())
             .then(resData => {
                 if (resData.images) {
@@ -101,7 +101,7 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
     // Fetch chapter list for the menu
     useEffect(() => {
         if (!slug || !activeSource) return;
-        fetch(`${API_URL}/manga/slug/${slug}`)
+        fetch(`/api/manga/slug/${slug}`, { credentials: 'include' })
             .then(res => res.json())
             .then(data => {
                 if (data.sources) {

@@ -31,7 +31,7 @@ interface AggregatedMangaDetail {
     sources: SourceDetail[];
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = '/api';
 
 // ... imports ...
 
@@ -65,7 +65,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
 
         setLoading(true);
         // Using the new slug-based API
-        fetch(`${API_URL}/manga/slug/${slug}`)
+        fetch(`/api/manga/slug/${slug}`, { credentials: 'include' })
             .then(res => {
                 if (!res.ok) throw new Error('Manga not found');
                 return res.json();
