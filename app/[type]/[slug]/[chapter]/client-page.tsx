@@ -10,6 +10,7 @@ import { CommentSection } from "@/components/comment-section";
 import { formatDate } from "@/lib/utils";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { ChapterReaderSkeleton } from "@/components/skeletons";
+import { saveReadHistory } from "@/lib/history";
 
 interface ChapterData {
     images: string[];
@@ -76,6 +77,10 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
             .then(resData => {
                 if (resData.images) {
                     setData(resData as ChapterData);
+                    // Save to history
+                    if (chapter) {
+                        saveReadHistory(slug as string, chapter);
+                    }
                 } else {
                     setError('Failed to load chapter data');
                 }

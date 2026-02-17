@@ -11,6 +11,7 @@ import { isBookmarked, removeBookmark, saveBookmark } from "@/lib/bookmarks";
 import { CommentSection } from "@/components/comment-section";
 import { formatDate } from "@/lib/utils";
 import { MangaDetailSkeleton } from "@/components/skeletons";
+import { getReadChaptersForManga } from "@/lib/history";
 
 interface SourceDetail {
     name: string;
@@ -57,6 +58,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
     const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState('');
     const [isSaved, setIsSaved] = useState(false);
+    const [readChapters, setReadChapters] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         if (!slug) return;
@@ -88,7 +90,20 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
 
     useEffect(() => {
         if (detail) {
-            setIsSaved(isBookmarked(detail.title));
+            const updateStatus = () => {
+                setIsSaved(isBookmarked(detail.title));
+                setReadChapters(getReadChaptersForManga(detail.title));
+            };
+
+            updateStatus();
+            window.addEventListener('history-updated', updateStatus);
+            // Also update on visibility change to catch updates from other tabs
+            window.addEventListener('focus', updateStatus);
+
+            return () => {
+                window.removeEventListener('history-updated', updateStatus);
+                window.removeEventListener('focus', updateStatus);
+            };
         }
     }, [detail]);
 
@@ -283,7 +298,8 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
                                     href={chapterUrl}
                                     className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/60 transition-colors group"
                                 >
-                                    <span className="font-medium text-gray-200 group-hover:text-primary transition-colors line-clamp-1">{chapter.title}</span>
+                                    <span className={`font-medium transition-colors line-clamp-1 ${readChapters.has(chapter.id || '') ? 'text-purple-400' : 'text-gray-200 group-hover:text-primary'
+                                        }`}>{chapter.title}</span>
                                     <div className="flex items-center gap-2 text-xs text-gray-500 shrink-0">
                                         <Clock className="w-3 h-3" />
                                         <span>{formatDate(chapter.released || '')}</span>

@@ -140,6 +140,16 @@ export function Navbar() {
                                     {item.label}
                                 </Link>
                             ))}
+
+                            <div className="border-t border-border pt-4 mt-2 flex items-center justify-between">
+                                <span className="text-muted-foreground font-medium">Appearance</span>
+                                <ThemePicker />
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <span className="text-muted-foreground font-medium">Account</span>
+                                <UserMenu />
+                            </div>
                         </div>
                     </motion.div>
                 )}
