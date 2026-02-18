@@ -51,6 +51,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cover.softdevices.my.id',
       },
+      {
+        protocol: 'https',
+        hostname: 'media.tenor.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'c.tenor.com',
+      },
     ],
 
   },
@@ -61,7 +69,7 @@ const nextConfig: NextConfig = {
       // Force production URL to avoid Vercel env var misconfiguration
       apiUrl = 'https://komida-backend-production.up.railway.app/api';
     } else {
-      apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
     }
 
     // Remove trailing slash if present
@@ -80,6 +88,10 @@ const nextConfig: NextConfig = {
       {
         source: '/api/:path*',
         destination: `${backendUrl}/api/:path*`,
+      },
+      {
+        source: '/uploads/:path*',
+        destination: `${backendUrl}/uploads/:path*`,
       },
     ];
   },

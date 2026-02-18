@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
-import { MessageSquare, Send, Image as ImageIcon, Smile, Eye, EyeOff, Trash2, X, AlertTriangle } from 'lucide-react';
+import { MessageSquare, Send, Image as ImageIcon, Smile, Eye, EyeOff, Trash2, X, AlertTriangle, FileVideo } from 'lucide-react';
 import { LoginModal } from './login-modal';
 import { formatDate } from '@/lib/utils';
 import { EmojiClickData, Theme } from 'emoji-picker-react';
 import { CommentsSkeleton } from '@/components/skeletons';
+import { GifPicker } from './gif-picker';
 import dynamic from 'next/dynamic';
 
 // Dynamically import EmojiPicker to avoid SSR issues
@@ -36,10 +37,13 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
     const [newComment, setNewComment] = useState('');
     const [loading, setLoading] = useState(true);
     const [posting, setPosting] = useState(false);
+    const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+
     const [showLoginModal, setShowLoginModal] = useState(false);
 
     // Enhanced Features State
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showGifPicker, setShowGifPicker] = useState(false);
     const [isSpoiler, setIsSpoiler] = useState(false);
     const [mediaUrl, setMediaUrl] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -107,6 +111,23 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
         }
     };
 
+    const handleEditClick = (comment: Comment) => {
+        setEditingCommentId(comment.id);
+        setNewComment(comment.content);
+        setMediaUrl(comment.media_url || null);
+        setIsSpoiler(comment.is_spoiler || false);
+        setPreviewMode(false);
+        // Scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingCommentId(null);
+        setNewComment('');
+        setMediaUrl(null);
+        setIsSpoiler(false);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newComment.trim() && !mediaUrl) return;
@@ -118,31 +139,51 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
 
         setPosting(true);
         try {
-            const res = await fetch('/api/comments', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    slug,
-                    chapter,
-                    content: newComment,
-                    is_spoiler: isSpoiler,
-                    media_url: mediaUrl
-                })
-            });
+            if (editingCommentId) {
+                // UPDATE Mode
+                const res = await fetch(`/api/comments/${editingCommentId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        content: newComment,
+                        is_spoiler: isSpoiler,
+                        media_url: mediaUrl
+                    })
+                });
 
-            if (res.ok) {
-                const data = await res.json();
-                setComments([data.comment, ...comments]);
-                // Reset State
-                setNewComment('');
-                setMediaUrl(null);
-                setIsSpoiler(false);
-                setPreviewMode(false);
+                if (res.ok) {
+                    const data = await res.json();
+                    setComments(comments.map(c => c.id === editingCommentId ? { ...c, ...data.comment } : c));
+                    handleCancelEdit(); // Reset form
+                } else {
+                    alert('Failed to update comment');
+                }
             } else {
-                alert('Failed to post comment');
+                // CREATE Mode
+                const res = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        slug,
+                        chapter,
+                        content: newComment,
+                        is_spoiler: isSpoiler,
+                        media_url: mediaUrl
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setComments([data.comment, ...comments]);
+                    setNewComment('');
+                    setMediaUrl(null);
+                    setIsSpoiler(false);
+                    setPreviewMode(false);
+                } else {
+                    alert('Failed to post comment');
+                }
             }
         } catch (e) {
             console.error(e);
@@ -155,21 +196,10 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
         if (!confirm('Are you sure you want to delete this comment?')) return;
 
         try {
-            const res = await fetch(`/api/admin/comments/${commentId}`, { // Assuming admin endpoint works for now, or need user specific endpoint
-                // Wait, task says allow users to delete their own. Admin endpoint might check role.
-                // Current implementation plan mentioned "Create DELETE /api/comments/:id".
-                // I missed implementing that specific endpoint in backend.
-                // I will stick to existing admin endpoint for now or use it if user is admin.
-                // Actually, let's just try calling the delete endpoint.
-                // If I need to implement user delete, I will do it in next step.
+            const res = await fetch(`/api/comments/${commentId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
-
-            // NOTE: Using admin endpoint for now. If it fails for normal users, I'll need to update backend.
-            // For now, let's assume it works or just hide it for non-admin until I verify.
-            // But wait, the task required "Add Delete/Review actions".
-            // I'll leave the button there.
 
             if (res.ok) {
                 setComments(comments.filter(c => c.id !== commentId));
@@ -199,6 +229,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
 
     return (
         <section className="w-full max-w-4xl mx-auto px-4 py-12">
+            {/* ... header ... */}
             <div className="flex items-center gap-3 mb-8">
                 <MessageSquare className="w-6 h-6 text-primary" />
                 <h3 className="text-xl font-bold text-white">
@@ -206,10 +237,11 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                 </h3>
             </div>
 
-            {/* Post Comment Form */}
+            {/* Post/Edit Comment Form */}
             <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5 mb-8">
                 {user ? (
                     <div className="flex gap-4">
+                        {/* ... user avatar ... */}
                         <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${!user.avatar_url ? getRandomColor(user.username) : ''} overflow-hidden`}>
                             {user.avatar_url ? (
                                 <img src={user.avatar_url} alt={user.username} className="w-full h-full object-cover" />
@@ -219,19 +251,29 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                         </div>
                         <div className="flex-1 space-y-3">
                             {/* Tabs */}
-                            <div className="flex gap-4 text-sm font-medium border-b border-white/10">
-                                <button
-                                    onClick={() => setPreviewMode(false)}
-                                    className={`pb-2 px-1 ${!previewMode ? 'text-primary border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                                >
-                                    Write
-                                </button>
-                                <button
-                                    onClick={() => setPreviewMode(true)}
-                                    className={`pb-2 px-1 ${previewMode ? 'text-primary border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
-                                >
-                                    Preview
-                                </button>
+                            <div className="flex gap-4 text-sm font-medium border-b border-white/10 justify-between">
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={() => setPreviewMode(false)}
+                                        className={`pb-2 px-1 ${!previewMode ? 'text-primary border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                                    >
+                                        {editingCommentId ? 'Edit Comment' : 'Write'}
+                                    </button>
+                                    <button
+                                        onClick={() => setPreviewMode(true)}
+                                        className={`pb-2 px-1 ${previewMode ? 'text-primary border-b-2 border-primary' : 'text-gray-400 hover:text-white'}`}
+                                    >
+                                        Preview
+                                    </button>
+                                </div>
+                                {editingCommentId && (
+                                    <button
+                                        onClick={handleCancelEdit}
+                                        className="text-xs text-red-400 hover:text-red-300 pb-2"
+                                    >
+                                        Cancel Edit
+                                    </button>
+                                )}
                             </div>
 
                             {!previewMode ? (
@@ -239,11 +281,11 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                     <textarea
                                         value={newComment}
                                         onChange={(e) => setNewComment(e.target.value)}
-                                        placeholder="Join the discussion..."
+                                        placeholder={editingCommentId ? "Update your comment..." : "Join the discussion..."}
                                         className="w-full bg-[#111] border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors resize-none h-24 min-h-[100px]"
                                     />
 
-                                    {/* Media Preview */}
+                                    {/* ... existing media preview ... */}
                                     {mediaUrl && (
                                         <div className="relative inline-block mt-2">
                                             <img src={mediaUrl} alt="Upload preview" className="h-20 w-auto rounded-lg border border-white/10" />
@@ -259,6 +301,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                     {/* Toolbar */}
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
+                                            {/* ... existing emoji/upload/spoiler buttons ... */}
                                             <div className="relative">
                                                 <button
                                                     type="button"
@@ -300,6 +343,32 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                                 onChange={handleFileUpload}
                                             />
 
+                                            <div className="relative">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowGifPicker(!showGifPicker)}
+                                                    className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors flex items-center gap-1"
+                                                    title="Add GIF"
+                                                >
+                                                    <FileVideo className="w-5 h-5" />
+                                                    <span className="text-xs font-bold">GIF</span>
+                                                </button>
+                                                {showGifPicker && (
+                                                    <div className="absolute bottom-12 left-0 z-50 w-80">
+                                                        <div className="fixed inset-0" onClick={() => setShowGifPicker(false)} />
+                                                        <div className="relative">
+                                                            <GifPicker
+                                                                onGifSelect={(url) => {
+                                                                    setMediaUrl(url);
+                                                                    setShowGifPicker(false);
+                                                                }}
+                                                                onClose={() => setShowGifPicker(false)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
                                             <button
                                                 type="button"
                                                 onClick={() => setIsSpoiler(!isSpoiler)}
@@ -314,9 +383,9 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                         <button
                                             onClick={handleSubmit}
                                             disabled={posting || (!newComment.trim() && !mediaUrl)}
-                                            className="px-6 py-2 bg-primary hover:bg-primary/80 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            className={`px-6 py-2 ${editingCommentId ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/80'} text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
                                         >
-                                            {posting ? 'Posting...' : <>{isUploading ? 'Uploading...' : 'Post'} <Send className="w-4 h-4" /></>}
+                                            {posting ? (editingCommentId ? 'Updating...' : 'Posting...') : <>{isUploading ? 'Uploading...' : (editingCommentId ? 'Update' : 'Post')} <Send className="w-4 h-4" /></>}
                                         </button>
                                     </div>
                                 </div>
@@ -324,6 +393,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                 // Preview Content
                                 <div className="bg-[#111] border border-white/10 rounded-xl p-4 min-h-[100px]">
                                     <div className="flex gap-4">
+                                        {/* ... user avatar in preview ... */}
                                         <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${!user.avatar_url ? getRandomColor(user.username) : ''} overflow-hidden`}>
                                             {user.avatar_url ? (
                                                 <img src={user.avatar_url} alt={user.username} className="w-full h-full object-cover" />
@@ -364,6 +434,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                         </div>
                     </div>
                 ) : (
+                    // ... existing login prompt ...
                     <div className="text-center py-6">
                         <p className="text-gray-400 mb-4">Log in to join the discussion for {chapter ? 'this chapter' : 'this manga'}.</p>
                         <button
@@ -383,12 +454,16 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                 ) : comments.length > 0 ? (
                     comments.map((comment) => {
                         const isRevealed = revealedSpoilers.has(comment.id);
-                        const isOwner = user?.id === comment.user_id || user?.role === 'admin'; // Assuming we have user_id on comment or can derive from username match if simple. 
-                        // Actually comment schema returns user_id? Checked service/commentService.ts: it returns user_id. 
-                        // But interface checks: comment.user_id. 
+
+                        // Strict check: Only display Delete/Edit if user is owner. Admin can delete.
+                        const isOwner = user?.username === comment.username; // Safer than user_id if not unified
+                        const isAdmin = user?.role === 'admin';
+                        const canDelete = isOwner || isAdmin;
+                        const canEdit = isOwner;
 
                         return (
-                            <div key={comment.id} className="flex gap-4 group">
+                            <div key={comment.id} className={`flex gap-4 group ${editingCommentId === comment.id ? 'opacity-50 pointer-events-none' : ''}`}>
+                                {/* ... existing comment render ... */}
                                 <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${!comment.avatar_url ? getRandomColor(comment.username) : ''} overflow-hidden`}>
                                     {comment.avatar_url ? (
                                         <img src={comment.avatar_url} alt={comment.username} className="w-full h-full object-cover" />
@@ -406,20 +481,32 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                                 </span>
                                             )}
                                             <span className="text-xs text-gray-500">• {formatDate(comment.created_at)}</span>
+                                            {/* Edited indicator could go here if we tracked updated_at */}
                                         </div>
+
                                         {/* Actions */}
-                                        {(user?.username === comment.username || user?.role === 'admin') && (
-                                            <button
-                                                onClick={() => handleDelete(comment.id)}
-                                                className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all rounded"
-                                                title="Delete Comment"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        )}
+                                        <div className="flex gap-2">
+                                            {canEdit && (
+                                                <button
+                                                    onClick={() => handleEditClick(comment)}
+                                                    className="opacity-0 group-hover:opacity-100 text-xs text-gray-500 hover:text-primary transition-all"
+                                                >
+                                                    Edit
+                                                </button>
+                                            )}
+                                            {canDelete && (
+                                                <button
+                                                    onClick={() => handleDelete(comment.id)}
+                                                    className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all rounded"
+                                                    title="Delete Comment"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    {/* Content Render */}
+                                    {/* ... existing content render ... */}
                                     {comment.is_spoiler && !isRevealed ? (
                                         <div className="bg-[#1a1a1a] border border-red-500/20 rounded-lg p-4">
                                             <div className="flex items-center justify-between">

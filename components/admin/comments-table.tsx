@@ -14,6 +14,8 @@ interface Comment {
     chapter_slug: string | null;
     content: string;
     created_at: string;
+    is_spoiler?: boolean;
+    media_url?: string;
 }
 
 interface CommentsTableProps {
@@ -140,7 +142,18 @@ export function CommentsTable({ comments, loading, page, totalPages, onPageChang
                                         </td>
                                         <td className="px-6 py-5 align-top">
                                             <div className="text-gray-300 text-[15px] leading-relaxed break-words pr-8 whitespace-normal">
-                                                "{comment.content}"
+                                                {comment.content}
+                                                {comment.media_url && (
+                                                    <div className="mt-2">
+                                                        <a href={comment.media_url} target="_blank" rel="noopener noreferrer">
+                                                            <img
+                                                                src={comment.media_url}
+                                                                alt="Attachment"
+                                                                className="h-16 w-auto rounded border border-white/10 hover:opacity-80 transition-opacity"
+                                                            />
+                                                        </a>
+                                                    </div>
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-5 align-top">
