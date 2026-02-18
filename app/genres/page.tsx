@@ -1,6 +1,5 @@
 'use client';
 
-import { Navbar } from "@/components/navbar";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -42,7 +41,6 @@ export default function GenresPage() {
 
     return (
         <main className="min-h-screen bg-background text-foreground">
-            <Navbar />
             <div className="container mx-auto px-4 py-24">
                 <div className="flex items-center gap-2 mb-8">
                     <Tag className="w-8 h-8 text-primary" />

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { Search, Menu, X, BookOpen, User, Flame } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,6 +32,8 @@ export function Navbar() {
     };
 
 
+    const pathname = usePathname();
+
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
@@ -39,6 +41,15 @@ export function Navbar() {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    // Hide Navbar on specific routes
+    if (pathname.startsWith('/admin')) return null;
+
+    // Check for Reader Page: /type/slug/chapter (3 segments)
+    const segments = pathname.split('/').filter(Boolean);
+    if (segments.length >= 3 && ['manga', 'manhwa', 'manhua'].includes(segments[0])) {
+        return null;
+    }
 
     return (
         <>

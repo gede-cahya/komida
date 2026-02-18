@@ -12,7 +12,7 @@ if (process.env.NODE_ENV === 'production') {
 const API_URL = isServer ? SERVER_API_URL : '/api';
 
 export async function fetchTrending() {
-    const res = await fetch(`${API_URL}/trending`);
+    const res = await fetch(`${API_URL}/trending`, { next: { revalidate: 60 } });
     if (!res.ok) {
         const text = await res.text();
         console.error('Fetch Trending Error:', res.status, text);
@@ -22,7 +22,7 @@ export async function fetchTrending() {
 }
 
 export async function fetchRecentUpdates() {
-    const res = await fetch(`${API_URL}/recent`);
+    const res = await fetch(`${API_URL}/recent`, { next: { revalidate: 60 } });
     if (!res.ok) {
         const text = await res.text();
         console.error('Fetch Recent Error:', res.status, text);
@@ -32,13 +32,12 @@ export async function fetchRecentUpdates() {
 }
 
 export async function fetchPopular(page = 1) {
-    const res = await fetch(`${API_URL}/popular?page=${page}`);
+    const res = await fetch(`${API_URL}/popular?page=${page}`, { next: { revalidate: 60 } });
     if (!res.ok) {
         // Fallback for demo if backend isn't ready
         console.warn("Retrying with fallback or returning error");
         throw new Error('Failed to fetch popular manga');
     }
-    return res.json();
     return res.json();
 }
 

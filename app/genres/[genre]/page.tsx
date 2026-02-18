@@ -1,6 +1,5 @@
 'use client';
 
-import { Navbar } from "@/components/navbar";
 import { MangaCard } from "@/components/manga-card";
 import { fetchGenre, type Manga } from "@/lib/api";
 import { useEffect, useState } from "react";
@@ -64,7 +63,6 @@ export default function GenreDetailPage() {
 
     return (
         <main className="min-h-screen bg-background text-foreground">
-            <Navbar />
             <div className="container mx-auto px-4 py-24">
                 <div className="flex flex-col gap-4 mb-8">
                     <Link href="/genres" className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors w-fit">

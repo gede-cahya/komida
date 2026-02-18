@@ -42,8 +42,7 @@ export function MangaCard({ title, image, rating, chapter, type, source, link, c
                         alt={title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        sizes="(max-width: 768px) 50vw, 33vw"
-                        unoptimized
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                     />
                 ) : (
                     <div className="flex flex-col items-center justify-center gap-2 text-gray-500">

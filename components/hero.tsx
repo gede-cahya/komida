@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Star, PlayCircle, BookOpen } from "lucide-react";
+import { ArrowRight, Star, BookOpen } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { HeroSkeleton } from "@/components/skeletons";
+// Removed Skeleton import as parent handles loading state or we show nothing
 
 interface Manga {
     title: string;
@@ -18,6 +18,10 @@ interface Manga {
     type?: string;
 }
 
+interface HeroProps {
+    items: Manga[];
+}
+
 function slugify(text: string) {
     return text.toString().toLowerCase()
         .replace(/\s+/g, '-')
@@ -27,28 +31,8 @@ function slugify(text: string) {
         .replace(/-+$/, '');
 }
 
-export function Hero() {
-    const [featuredManga, setFeaturedManga] = useState<Manga[]>([]);
+export function Hero({ items: featuredManga = [] }: HeroProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchTrending = async () => {
-            try {
-                const res = await fetch('/api/popular', { credentials: 'include' });
-                const data = await res.json();
-                // Take top 5 items that have images
-                const valid = data.filter((m: any) => m.image).slice(0, 5);
-                setFeaturedManga(valid);
-            } catch (error) {
-                console.error("Failed to fetch trending:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTrending();
-    }, []);
 
     useEffect(() => {
         if (featuredManga.length === 0) return;
@@ -58,8 +42,8 @@ export function Hero() {
         return () => clearInterval(timer);
     }, [featuredManga]);
 
-    if (loading || featuredManga.length === 0) {
-        return <HeroSkeleton />;
+    if (featuredManga.length === 0) {
+        return null; // or return a fallback hero
     }
 
     const currentManga = featuredManga[currentIndex];
@@ -88,6 +72,7 @@ export function Hero() {
                         className="object-cover"
                         priority
                         unoptimized
+                        sizes="100vw"
                     />
                 </motion.div>
             </AnimatePresence>
@@ -103,12 +88,7 @@ export function Hero() {
                         transition={{ duration: 0.5 }}
                         className="max-w-3xl"
                     >
-                        {/* Genres (Scraped data might not have genres in popular list, check logic) */}
-                        {/* If genres missing, hide or show placeholder */}
                         <div className="flex gap-2 mb-4">
-                            {/* <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white">
-                                Manga
-                            </span> */}
                         </div>
 
                         {/* Title */}
@@ -124,13 +104,6 @@ export function Hero() {
                             </div>
                             <span className="text-sm">Ongoing</span>
                         </div>
-
-                        {/* Description */}
-                        {/* Popular list might not have full synopsis if not scraped detailedly. 
-                            MangaService.getPopularManga returns DB rows. 
-                            DB 'synopsis' column might be empty if scrapePopular didn't get it.
-                            Most popular scrapers only get title/image/chapter. 
-                            So description might be empty. */}
 
                         {/* Buttons */}
                         <div className="flex flex-wrap gap-4">

@@ -1,6 +1,6 @@
 'use client';
 
-import { Navbar } from "@/components/navbar";
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
@@ -133,7 +133,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
     if (loading) {
         return (
             <main className="min-h-screen bg-background">
-                <Navbar />
+
                 <MangaDetailSkeleton />
             </main>
         );
@@ -142,7 +142,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
     if (error || !detail || !selectedSource) {
         return (
             <main className="min-h-screen bg-background">
-                <Navbar />
+
                 <div className="container mx-auto px-4 py-24 flex flex-col items-center gap-4">
                     <div className="text-red-500">{error || 'Manga not found'}</div>
                     <Link href="/" className="text-blue-400 hover:underline">Back to Home</Link>
@@ -153,7 +153,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
 
     return (
         <main className="min-h-screen bg-background text-foreground pb-24 relative">
-            <Navbar />
+
 
             {/* Header / Hero */}
             <div className="relative w-full h-[300px] md:h-[400px]">

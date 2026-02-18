@@ -1,29 +1,21 @@
-'use client';
-
 import { MangaCard } from "@/components/manga-card";
 import { ArrowRight, Clock } from "lucide-react";
-import { useEffect, useState } from "react";
 import { fetchRecentUpdates, type Manga } from "@/lib/api";
-import { RecentUpdatesSkeleton } from "@/components/skeletons";
 
-export function RecentUpdates() {
-    const [recentUpdates, setRecentUpdates] = useState<Manga[]>([]);
-    const [loading, setLoading] = useState(true);
+export async function RecentUpdates() {
+    let recentUpdates: Manga[] = [];
 
-    useEffect(() => {
-        fetchRecentUpdates()
-            .then(data => {
-                setRecentUpdates(data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error("Failed to fetch recent updates:", error);
-                setLoading(false);
-            });
-    }, []);
+    try {
+        recentUpdates = await fetchRecentUpdates();
+    } catch (error) {
+        console.error("Failed to fetch recent updates:", error);
+        // We could initiate a retry or return empty to show nothing
+    }
 
-    if (loading) {
-        return <RecentUpdatesSkeleton />;
+    // If no updates, maybe return null or show empty state? 
+    // For now we render standard section, it will just be empty grid if failed.
+    if (!recentUpdates || recentUpdates.length === 0) {
+        return null;
     }
 
     return (

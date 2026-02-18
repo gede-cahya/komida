@@ -75,6 +75,10 @@ export const metadata: Metadata = {
 };
 
 
+import { Navbar } from "@/components/navbar";
+
+// ... (imports remain)
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -88,6 +92,7 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="flex flex-col min-h-screen bg-background text-foreground">
             <AuthProvider>
+              <Navbar />
               <div className="flex-1 w-full">
                 {children}
               </div>

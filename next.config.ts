@@ -12,32 +12,16 @@ const nextConfig: NextConfig = {
         hostname: 'images.envira-cdn.com',
       },
       {
-        protocol: 'https',
+        protocol: 'http',
         hostname: 'kacu.gmbr.pro',
       },
       {
         protocol: 'https',
-        hostname: 'cdnxyz.xyz',
+        hostname: 'kacu.gmbr.pro',
       },
       {
-        protocol: 'https',
-        hostname: 'assets.shngm.id',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.wp.com', // Covers i0.wp.com, i1.wp.com, etc.
-      },
-      {
-        protocol: 'https',
-        hostname: 'kiryuu03.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.manhwaindo.my',
-      },
-      {
-        protocol: 'https',
-        hostname: '09.shinigami.asia',
+        protocol: 'http',
+        hostname: 'image.softkomik.com',
       },
       {
         protocol: 'https',
@@ -58,6 +42,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'c.tenor.com',
+      },
+    ],
+    localPatterns: [
+      {
+        pathname: '/**',
       },
     ],
 
@@ -83,7 +72,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/image/:path*',
-        destination: `https://komida-backend-production.up.railway.app/api/image/:path*`,
+        destination: `${backendUrl}/api/image/:path*`,
       },
       {
         source: '/api/:path*',
@@ -100,10 +89,6 @@ const nextConfig: NextConfig = {
       {
         source: '/:path*',
         headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=0, must-revalidate, no-transform',
-          },
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on'

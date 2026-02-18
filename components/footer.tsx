@@ -44,7 +44,7 @@ export function Footer() {
                             <li><Link href="#" className="hover:text-primary transition-colors">Help Center</Link></li>
                             <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
                             <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="#" className="hover:text-primary transition-colors">DMCA</Link></li>
+                            <li><Link href="/dmca" className="hover:text-primary transition-colors">DMCA</Link></li>
                         </ul>
                     </div>
 

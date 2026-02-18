@@ -1,6 +1,5 @@
 "use client";
 
-import { Navbar } from "@/components/navbar";
 import { MangaCard } from "@/components/manga-card";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -70,7 +69,6 @@ function SearchContent() {
 export default function SearchPage() {
     return (
         <main className="min-h-screen bg-black text-white font-sans selection:bg-primary/30">
-            <Navbar />
             <Suspense fallback={<div className="container mx-auto px-4 py-8 mt-16 text-center">Loading search...</div>}>
                 <SearchContent />
             </Suspense>
