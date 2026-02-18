@@ -40,3 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+*.txt
+backend_trending_v2.txt
+backend_trending.txt
+compressed_response.txt
+trending_response.txt
