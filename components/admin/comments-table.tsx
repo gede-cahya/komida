@@ -4,6 +4,17 @@ import { useState } from 'react';
 import { Trash2, Search, ExternalLink, MessageSquare, User, Calendar, MapPin, AlertCircle, CornerDownRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Comment {
     id: number;
@@ -31,21 +42,21 @@ export function CommentsTable({ comments, loading, page, totalPages, onPageChang
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Are you sure you want to delete this comment?')) return;
-
         setDeletingId(id);
         try {
             const res = await fetch(`/api/admin/comments/${id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
+
             if (res.ok) {
                 onRefresh();
             } else {
-                alert('Failed to delete comment');
+                const errorData = await res.json();
+                alert('Failed to delete comment: ' + (errorData.error || 'Unknown error'));
             }
         } catch (error) {
-            console.error(error);
+            console.error('Admin delete exception:', error);
         } finally {
             setDeletingId(null);
         }
@@ -190,20 +201,40 @@ export function CommentsTable({ comments, loading, page, totalPages, onPageChang
                                             </span>
                                         </td>
                                         <td className="px-6 py-5 text-right align-top">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => handleDelete(comment.id)}
-                                                disabled={deletingId === comment.id}
-                                                className="h-8 w-8 text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                                                title="Delete Comment"
-                                            >
-                                                {deletingId === comment.id ? (
-                                                    <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
-                                                ) : (
-                                                    <Trash2 className="w-4 h-4" />
-                                                )}
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        disabled={deletingId === comment.id}
+                                                        className="h-8 w-8 text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                                        title="Delete Comment"
+                                                    >
+                                                        {deletingId === comment.id ? (
+                                                            <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="w-4 h-4" />
+                                                        )}
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent className="bg-[#1a1a1a] border-white/10 text-white">
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete Comment?</AlertDialogTitle>
+                                                        <AlertDialogDescription className="text-gray-400">
+                                                            Are you sure you want to delete this comment? This action cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel className="bg-transparent border-white/10 text-white hover:bg-white/10 hover:text-white">Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() => handleDelete(comment.id)}
+                                                            className="bg-red-600 hover:bg-red-700 text-white border-0"
+                                                        >
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </td>
                                     </tr>
                                 ))
@@ -243,14 +274,34 @@ export function CommentsTable({ comments, loading, page, totalPages, onPageChang
                                         <div className="text-xs text-gray-500">{formatDate(comment.created_at)}</div>
                                     </div>
                                 </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDelete(comment.id)}
-                                    className="text-gray-500 hover:text-red-400 -mr-2 h-8 w-8"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-gray-500 hover:text-red-400 -mr-2 h-8 w-8"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="bg-[#1a1a1a] border-white/10 text-white">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Delete Comment?</AlertDialogTitle>
+                                            <AlertDialogDescription className="text-gray-400">
+                                                Are you sure you want to delete this comment? This action cannot be undone.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className="bg-transparent border-white/10 text-white hover:bg-white/10 hover:text-white">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={() => handleDelete(comment.id)}
+                                                className="bg-red-600 hover:bg-red-700 text-white border-0"
+                                            >
+                                                Delete
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
 
                             <div className="text-sm text-gray-300 leading-relaxed border-l-2 border-white/10 pl-3">

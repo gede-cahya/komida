@@ -15,8 +15,10 @@ import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { SystemHealthWidget } from "@/components/admin/system-health";
 import { CommentsTable } from "@/components/admin/comments-table";
+import { AnnouncementsManager } from "@/components/admin/announcements-manager";
+import { Megaphone } from "lucide-react";
 
-type Tab = 'dashboard' | 'users' | 'manga' | 'comments';
+type Tab = 'dashboard' | 'users' | 'manga' | 'comments' | 'announcements';
 
 export default function AdminDashboard() {
     const { user, logout, isLoading } = useAuth();
@@ -33,6 +35,7 @@ export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
     const [manga, setManga] = useState([]);
     const [comments, setComments] = useState([]);
+    const [announcements, setAnnouncements] = useState([]);
     const [loadingData, setLoadingData] = useState(false);
 
     // Pagination & Search
@@ -112,7 +115,10 @@ export default function AdminDashboard() {
     const fetchData = useCallback(async () => {
         setLoadingData(true);
         try {
-            const endpoint = activeTab === 'users' ? '/api/admin/users' : activeTab === 'manga' ? '/api/admin/manga' : '/api/admin/comments';
+            const endpoint = activeTab === 'users' ? '/api/admin/users'
+                : activeTab === 'manga' ? '/api/admin/manga'
+                    : activeTab === 'comments' ? '/api/admin/comments'
+                        : '/api/admin/announcements';
             const query = `?page=${page}&limit=10&search=${encodeURIComponent(search)}`;
 
             const res = await fetch(`${endpoint}${query}`, {
@@ -127,6 +133,8 @@ export default function AdminDashboard() {
                     setManga(data.manga);
                 } else if (activeTab === 'comments') {
                     setComments(data.comments);
+                } else if (activeTab === 'announcements') {
+                    setAnnouncements(data.announcements);
                 }
                 setTotalPages(data.totalPages);
             }
@@ -192,6 +200,14 @@ export default function AdminDashboard() {
                     >
                         <MessageSquare className="w-5 h-5" />
                         Comments
+                    </button>
+                    <button
+                        onClick={() => handleTabChange('announcements')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'announcements' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                    >
+                        <Megaphone className="w-5 h-5" />
+                        Announcements
                     </button>
                 </nav>
 
@@ -313,6 +329,14 @@ export default function AdminDashboard() {
                         page={page}
                         totalPages={totalPages}
                         onPageChange={setPage}
+                        onRefresh={fetchData}
+                    />
+                )}
+
+                {activeTab === 'announcements' && (
+                    <AnnouncementsManager
+                        announcements={announcements}
+                        loading={loadingData}
                         onRefresh={fetchData}
                     />
                 )}

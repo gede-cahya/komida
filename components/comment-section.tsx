@@ -9,6 +9,17 @@ import { EmojiClickData, Theme } from 'emoji-picker-react';
 import { CommentsSkeleton } from '@/components/skeletons';
 import { GifPicker } from './gif-picker';
 import dynamic from 'next/dynamic';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Dynamically import EmojiPicker to avoid SSR issues
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
@@ -193,8 +204,6 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
     };
 
     const handleDelete = async (commentId: number) => {
-        if (!confirm('Are you sure you want to delete this comment?')) return;
-
         try {
             const res = await fetch(`/api/comments/${commentId}`, {
                 method: 'DELETE',
@@ -204,10 +213,11 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
             if (res.ok) {
                 setComments(comments.filter(c => c.id !== commentId));
             } else {
-                alert('Failed to delete comment');
+                const errorData = await res.json();
+                alert('Failed to delete comment: ' + (errorData.error || 'Unknown error'));
             }
         } catch (e) {
-            console.error(e);
+            console.error('Delete exception:', e);
         }
     };
 
@@ -495,13 +505,33 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                                 </button>
                                             )}
                                             {canDelete && (
-                                                <button
-                                                    onClick={() => handleDelete(comment.id)}
-                                                    className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all rounded"
-                                                    title="Delete Comment"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <button
+                                                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all rounded"
+                                                            title="Delete Comment"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent className="bg-[#1a1a1a] border-white/10 text-white">
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Delete Comment?</AlertDialogTitle>
+                                                            <AlertDialogDescription className="text-gray-400">
+                                                                Are you sure you want to delete this comment? This action cannot be undone.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel className="bg-transparent border-white/10 text-white hover:bg-white/10 hover:text-white">Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                onClick={() => handleDelete(comment.id)}
+                                                                className="bg-red-600 hover:bg-red-700 text-white border-0"
+                                                            >
+                                                                Delete
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             )}
                                         </div>
                                     </div>
