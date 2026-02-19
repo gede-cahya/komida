@@ -238,7 +238,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
             </div>
 
             {/* Post/Edit Comment Form */}
-            <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5 mb-8">
+            <div className="bg-[#1a1a1a] rounded-2xl p-4 md:p-6 border border-white/5 mb-8">
                 {user ? (
                     <div className="flex gap-4">
                         {/* ... user avatar ... */}
@@ -249,7 +249,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                 getInitials(user.display_name || user.username)
                             )}
                         </div>
-                        <div className="flex-1 space-y-3">
+                        <div className="flex-1 space-y-3 min-w-0">
                             {/* Tabs */}
                             <div className="flex gap-4 text-sm font-medium border-b border-white/10 justify-between">
                                 <div className="flex gap-4">
@@ -299,8 +299,8 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                     )}
 
                                     {/* Toolbar */}
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div className="flex items-center gap-2 flex-wrap">
                                             {/* ... existing emoji/upload/spoiler buttons ... */}
                                             <div className="relative">
                                                 <button
@@ -312,13 +312,13 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                                     <Smile className="w-5 h-5" />
                                                 </button>
                                                 {showEmojiPicker && (
-                                                    <div className="absolute top-10 left-0 z-50">
-                                                        <div className="fixed inset-0" onClick={() => setShowEmojiPicker(false)} />
-                                                        <div className="relative">
+                                                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] sm:absolute sm:top-10 sm:left-0 sm:translate-x-0 sm:translate-y-0 sm:w-auto sm:max-w-none">
+                                                        <div className="fixed inset-0 bg-black/50 sm:bg-transparent" onClick={() => setShowEmojiPicker(false)} />
+                                                        <div className="relative shadow-xl rounded-xl overflow-hidden border border-white/10">
                                                             <EmojiPicker
                                                                 theme={Theme.DARK}
                                                                 onEmojiClick={handleEmojiClick}
-                                                                width={300}
+                                                                width="100%"
                                                                 height={400}
                                                             />
                                                         </div>
@@ -354,8 +354,8 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                                     <span className="text-xs font-bold">GIF</span>
                                                 </button>
                                                 {showGifPicker && (
-                                                    <div className="absolute bottom-12 left-0 z-50 w-80">
-                                                        <div className="fixed inset-0" onClick={() => setShowGifPicker(false)} />
+                                                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90vw] sm:absolute sm:bottom-12 sm:left-0 sm:translate-x-0 sm:translate-y-0 sm:w-80 sm:max-w-none">
+                                                        <div className="fixed inset-0 bg-black/50 sm:bg-transparent" onClick={() => setShowGifPicker(false)} />
                                                         <div className="relative">
                                                             <GifPicker
                                                                 onGifSelect={(url) => {
@@ -383,7 +383,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                         <button
                                             onClick={handleSubmit}
                                             disabled={posting || (!newComment.trim() && !mediaUrl)}
-                                            className={`px-6 py-2 ${editingCommentId ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/80'} text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
+                                            className={`px-6 py-2 w-full sm:w-auto ${editingCommentId ? 'bg-green-600 hover:bg-green-700' : 'bg-primary hover:bg-primary/80'} text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
                                         >
                                             {posting ? (editingCommentId ? 'Updating...' : 'Posting...') : <>{isUploading ? 'Uploading...' : (editingCommentId ? 'Update' : 'Post')} <Send className="w-4 h-4" /></>}
                                         </button>
@@ -401,7 +401,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                                 getInitials(user.display_name || user.username)
                                             )}
                                         </div>
-                                        <div className="flex-1">
+                                        <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="font-semibold text-white">{user.display_name || user.username}</span>
                                                 <span className="text-xs text-gray-500">• Preview</span>
@@ -413,7 +413,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                                         <AlertTriangle className="w-4 h-4" />
                                                         <span className="text-xs font-bold uppercase tracking-wider">Spoiler Warning</span>
                                                     </div>
-                                                    <div className="blur-sm select-none text-gray-400">
+                                                    <div className="blur-sm select-none text-gray-400 break-words">
                                                         {newComment || 'No content'}
                                                         <br />
                                                         {mediaUrl && '[Image Hidden]'}
@@ -421,7 +421,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{newComment}</p>
+                                                    <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">{newComment}</p>
                                                     {mediaUrl && (
                                                         <img src={mediaUrl} alt="Comment attachment" className="mt-3 max-h-60 rounded-lg" />
                                                     )}
@@ -471,21 +471,21 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                         getInitials(comment.display_name || comment.username)
                                     )}
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-semibold text-white">{comment.display_name || comment.username}</span>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="font-semibold text-white break-words">{comment.display_name || comment.username}</span>
                                             {comment.role === 'admin' && (
                                                 <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-bold rounded uppercase tracking-wider">
                                                     Admin
                                                 </span>
                                             )}
-                                            <span className="text-xs text-gray-500">• {formatDate(comment.created_at)}</span>
+                                            <span className="text-xs text-gray-500 whitespace-nowrap">• {formatDate(comment.created_at)}</span>
                                             {/* Edited indicator could go here if we tracked updated_at */}
                                         </div>
 
                                         {/* Actions */}
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 shrink-0">
                                             {canEdit && (
                                                 <button
                                                     onClick={() => handleEditClick(comment)}
@@ -535,12 +535,12 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                                     </button>
                                                 </div>
                                             )}
-                                            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+                                            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap break-words">{comment.content}</p>
                                             {comment.media_url && (
                                                 <img
                                                     src={comment.media_url}
                                                     alt="Attachment"
-                                                    className="mt-3 max-h-80 rounded-lg border border-white/5 cursor-pointer hover:opacity-90 transition-opacity"
+                                                    className="mt-3 max-h-80 rounded-lg border border-white/5 cursor-pointer hover:opacity-90 transition-opacity max-w-full"
                                                     onClick={() => window.open(comment.media_url, '_blank')}
                                                 />
                                             )}

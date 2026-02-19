@@ -162,7 +162,7 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
     };
 
     return (
-        <main className="min-h-screen bg-[#111] text-gray-200">
+        <main className="min-h-screen bg-[#111] text-gray-200 overflow-x-hidden">
             {/* Top Bar */}
             <div
                 className={`fixed top-0 left-0 right-0 h-16 bg-gradient-to-b from-black/90 to-transparent z-50 flex items-center px-4 transition-transform duration-300 ease-in-out ${showControls ? 'translate-y-0' : '-translate-y-full'}`}

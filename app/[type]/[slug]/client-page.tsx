@@ -152,7 +152,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
     }
 
     return (
-        <main className="min-h-screen bg-background text-foreground pb-24 relative">
+        <main className="min-h-screen bg-background text-foreground pb-24 relative overflow-x-hidden">
 
 
             {/* Header / Hero */}
@@ -203,7 +203,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
                         className="flex-1 space-y-6 pt-4"
                     >
                         <div>
-                            <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 leading-tight">{detail.title}</h1>
+                            <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 leading-tight break-words">{detail.title}</h1>
                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
                                 <span className="flex items-center gap-1"><Book className="w-4 h-4 text-primary" /> {selectedSource.name}</span>
                                 <span className="flex items-center gap-1"><User className="w-4 h-4 text-blue-400" /> {detail.author}</span>
@@ -301,7 +301,7 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
                                     href={chapterUrl}
                                     className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 hover:bg-secondary/60 transition-colors group"
                                 >
-                                    <span className={`font-medium transition-colors line-clamp-1 ${readStatus?.has(chapter.id, chapter.title) ? 'text-orange-500 font-bold' : 'text-gray-200 group-hover:text-primary'
+                                    <span className={`font-medium transition-colors line-clamp-1 flex-1 min-w-0 pr-2 ${readStatus?.has(chapter.id, chapter.title) ? 'text-orange-500 font-bold' : 'text-gray-200 group-hover:text-primary'
                                         }`}>{chapter.title}</span>
                                     <div className="flex items-center gap-2 text-xs text-gray-500 shrink-0">
                                         <Clock className="w-3 h-3" />
