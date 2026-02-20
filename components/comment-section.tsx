@@ -8,6 +8,7 @@ import { formatDate } from '@/lib/utils';
 import { EmojiClickData, Theme } from 'emoji-picker-react';
 import { CommentsSkeleton } from '@/components/skeletons';
 import { GifPicker } from './gif-picker';
+import { AvatarWithDecoration } from './avatar-with-decoration';
 import dynamic from 'next/dynamic';
 import {
     AlertDialog,
@@ -32,6 +33,8 @@ interface Comment {
     created_at: string;
     display_name?: string;
     avatar_url?: string;
+    decoration_url?: string | null;
+    badges?: Array<{ name: string; icon_url: string }>;
     is_spoiler?: boolean;
     media_url?: string;
     user_id?: number; // Needed for delete permission check
@@ -252,13 +255,13 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                 {user ? (
                     <div className="flex gap-4">
                         {/* ... user avatar ... */}
-                        <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${!user.avatar_url ? getRandomColor(user.username) : ''} overflow-hidden`}>
-                            {user.avatar_url ? (
-                                <img src={user.avatar_url} alt={user.username} className="w-full h-full object-cover" />
-                            ) : (
-                                getInitials(user.display_name || user.username)
-                            )}
-                        </div>
+                        <AvatarWithDecoration
+                            src={user.avatar_url}
+                            fallback={getInitials(user.display_name || user.username)}
+                            decorationUrl={(user as any).decoration_url}
+                            badges={(user as any).badges}
+                            size="md"
+                        />
                         <div className="flex-1 space-y-3 min-w-0">
                             {/* Tabs */}
                             <div className="flex gap-4 text-sm font-medium border-b border-white/10 justify-between">
@@ -404,13 +407,13 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                 <div className="bg-[#111] border border-white/10 rounded-xl p-4 min-h-[100px]">
                                     <div className="flex gap-4">
                                         {/* ... user avatar in preview ... */}
-                                        <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${!user.avatar_url ? getRandomColor(user.username) : ''} overflow-hidden`}>
-                                            {user.avatar_url ? (
-                                                <img src={user.avatar_url} alt={user.username} className="w-full h-full object-cover" />
-                                            ) : (
-                                                getInitials(user.display_name || user.username)
-                                            )}
-                                        </div>
+                                        <AvatarWithDecoration
+                                            src={user.avatar_url}
+                                            fallback={getInitials(user.display_name || user.username)}
+                                            decorationUrl={(user as any).decoration_url}
+                                            badges={(user as any).badges}
+                                            size="md"
+                                        />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="font-semibold text-white">{user.display_name || user.username}</span>
@@ -474,13 +477,13 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                         return (
                             <div key={comment.id} className={`flex gap-4 group ${editingCommentId === comment.id ? 'opacity-50 pointer-events-none' : ''}`}>
                                 {/* ... existing comment render ... */}
-                                <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white ${!comment.avatar_url ? getRandomColor(comment.username) : ''} overflow-hidden`}>
-                                    {comment.avatar_url ? (
-                                        <img src={comment.avatar_url} alt={comment.username} className="w-full h-full object-cover" />
-                                    ) : (
-                                        getInitials(comment.display_name || comment.username)
-                                    )}
-                                </div>
+                                <AvatarWithDecoration
+                                    src={comment.avatar_url}
+                                    fallback={getInitials(comment.display_name || comment.username)}
+                                    decorationUrl={comment.decoration_url}
+                                    badges={comment.badges}
+                                    size="md"
+                                />
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between mb-1">
                                         <div className="flex items-center gap-2 flex-wrap">

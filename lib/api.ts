@@ -24,7 +24,8 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
 
     // If running on the client, allow relative URLs pointing to the Next.js API proxy
     if (!isServer && isClientTarget) {
-        return fetch(endpoint, options);
+        const fullUrl = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
+        return fetch(fullUrl, options);
     }
 
     // In Server Components (isServer = true), relative endpoints MUST be appended to an absolute URL

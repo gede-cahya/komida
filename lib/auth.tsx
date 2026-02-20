@@ -10,6 +10,9 @@ interface User {
     email?: string;
     display_name?: string;
     avatar_url?: string;
+    decoration_url?: string | null;
+    badges?: Array<{ name: string; icon_url: string }>;
+    wallet_address?: string | null;
 }
 
 interface AuthContextType {

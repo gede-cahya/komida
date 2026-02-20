@@ -4,12 +4,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, Camera, Save, Loader2, ArrowLeft } from 'lucide-react';
+import { User, Mail, Lock, Camera, Save, Loader2, ArrowLeft, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 export default function SettingsPage() {
-    const { user, updateUser, isLoading: authLoading } = useAuth();
+    const { user, updateUser, checkAuth, isLoading: authLoading } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -255,6 +256,91 @@ export default function SettingsPage() {
                                 </div>
                             </form>
                         </motion.div>
+                        {/* Inventory & Web3 */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-[#1a1a1a] rounded-2xl p-6 border border-white/5 shadow-xl"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-semibold flex items-center gap-2">
+                                    <Save className="w-5 h-5 text-blue-400 rotate-90" />
+                                    Inventory
+                                </h2>
+                                <button
+                                    onClick={async () => {
+                                        setLoading(true);
+                                        try {
+                                            const res1 = await fetch('/api/user/decorations/sync', { method: 'POST', credentials: 'include' });
+                                            const res2 = await fetch('/api/user/badges/sync', { method: 'POST', credentials: 'include' });
+                                            if (res1.ok && res2.ok) {
+                                                const d1 = await res1.json();
+                                                const d2 = await res2.json();
+                                                const totalNew = (d1.newlyAcquired?.length || 0) + (d2.newlyAcquired?.length || 0);
+                                                setMessage({ type: 'success', text: `Sync complete! Found ${totalNew} new items.` });
+                                                await checkAuth(); // Refresh profile
+                                            }
+                                        } catch (e) {
+                                            setMessage({ type: 'error', text: 'Sync failed' });
+                                        } finally {
+                                            setLoading(false);
+                                        }
+                                    }}
+                                    disabled={loading}
+                                    className="text-xs px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-full transition-all flex items-center gap-2"
+                                >
+                                    <Loader2 className={cn("w-3 h-3", loading && "animate-spin")} />
+                                    Sync NFTs
+                                </button>
+                            </div>
+
+                            <div className="space-y-8">
+                                {/* Decorations */}
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-400 mb-4">Avatar Decorations</h3>
+                                    <DecorationList
+                                        currentDecoration={user.decoration_url}
+                                        onEquip={async (id) => {
+                                            const res = await fetch('/api/user/decorations/equip', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                credentials: 'include',
+                                                body: JSON.stringify({ decorationId: id })
+                                            });
+                                            if (res.ok) {
+                                                await checkAuth();
+                                                setMessage({ type: 'success', text: 'Decoration updated!' });
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Badges */}
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-400 mb-4">My Badges</h3>
+                                    <div className="flex flex-wrap gap-3">
+                                        {user.badges && user.badges.length > 0 ? (
+                                            user.badges.map((badge, idx) => (
+                                                <div key={idx} className="flex flex-col items-center gap-1 group relative">
+                                                    <div className="w-12 h-12 rounded-xl bg-[#2a2a2a] border border-white/5 p-2 flex items-center justify-center transition-transform group-hover:scale-110">
+                                                        <img src={badge.icon_url} alt={badge.name} className="w-full h-full object-contain" />
+                                                    </div>
+                                                    <span className="text-[10px] text-gray-500 max-w-[60px] text-center truncate">{badge.name}</span>
+
+                                                    {/* Tooltip */}
+                                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black/90 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+                                                        {badge.name}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-xs text-gray-500 italic">No badges earned yet.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
 
                     {/* Right Column: Security */}
@@ -321,6 +407,57 @@ export default function SettingsPage() {
                     </div>
                 </div>
             </div>
+        </div>
+    );
+}
+
+function DecorationList({ currentDecoration, onEquip }: { currentDecoration?: string | null, onEquip: (id: number | null) => void }) {
+    const [decorations, setDecorations] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/api/user/decorations', { credentials: 'include' })
+            .then(res => res.json())
+            .then(data => {
+                setDecorations(data.decorations || []);
+                setLoading(false);
+            })
+            .catch(() => setLoading(false));
+    }, []);
+
+    if (loading) return <div className="text-xs text-gray-500 animate-pulse">Loading decorations...</div>;
+
+    return (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {/* Unequip option */}
+            <div
+                onClick={() => onEquip(null)}
+                className={cn(
+                    "relative aspect-square rounded-xl bg-[#2a2a2a] border-2 cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group",
+                    !currentDecoration ? "border-purple-500 bg-purple-500/5" : "border-white/5 hover:border-white/10"
+                )}
+            >
+                <div className="w-10 h-10 rounded-full border border-dashed border-gray-600 flex items-center justify-center text-gray-500">
+                    <X className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-medium text-gray-400 group-hover:text-white">None</span>
+            </div>
+
+            {decorations.map((dec) => (
+                <div
+                    key={dec.id}
+                    onClick={() => onEquip(dec.id)}
+                    className={cn(
+                        "relative aspect-square rounded-xl bg-[#2a2a2a] border-2 cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group p-2",
+                        currentDecoration === dec.image_url ? "border-purple-500 bg-purple-500/5" : "border-white/5 hover:border-white/10"
+                    )}
+                >
+                    <div className="w-12 h-12 relative">
+                        <img src={dec.image_url} alt={dec.name} className="w-full h-full object-contain" />
+                    </div>
+                    <span className="text-[10px] font-medium text-gray-400 group-hover:text-white text-center truncate w-full">{dec.name}</span>
+                </div>
+            ))}
         </div>
     );
 }
