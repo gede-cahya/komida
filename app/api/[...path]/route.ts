@@ -57,16 +57,21 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
 
     const attemptFetch = async (baseUrl: string): Promise<Response> => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout for proxy
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout for proxy
 
         try {
-            const res = await fetch(`${baseUrl}${endpoint}${queryString}`, {
+            const url = `${baseUrl}${endpoint}${queryString}`;
+            console.log(`[PROXY] Fetching: ${url}`);
+
+            const res = await fetch(url, {
                 method: request.method,
                 headers: safeHeaders,
                 body,
                 signal: controller.signal,
                 cache: 'no-store'
             });
+
+            console.log(`[PROXY] Status from ${baseUrl}: ${res.status}`);
 
             // Trigger failover if Railway returns 404 App Not Found or 5xx
             if (baseUrl === PRIMARY_API_URL && !res.ok) {
@@ -100,19 +105,21 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
 }
 
 async function convertFetchToNextResponse(res: Response) {
-    const data = await res.blob();
-    const nextResponse = new NextResponse(data, {
-        status: res.status,
-        statusText: res.statusText,
-        headers: res.headers,
-    });
+    const data = await res.arrayBuffer();
 
-    // Copy headers carefully
+    // Filter headers to avoid conflicts
+    const responseHeaders = new Headers();
     res.headers.forEach((value, key) => {
-        if (key.toLowerCase() !== 'content-encoding') {
-            nextResponse.headers.set(key, value);
+        const lowerKey = key.toLowerCase();
+        // Skip headers that Next.js will handle or that might cause issues when proxied
+        if (!['content-encoding', 'transfer-encoding', 'content-length', 'connection'].includes(lowerKey)) {
+            responseHeaders.set(key, value);
         }
     });
 
-    return nextResponse;
+    return new NextResponse(data, {
+        status: res.status,
+        statusText: res.statusText,
+        headers: responseHeaders,
+    });
 }
