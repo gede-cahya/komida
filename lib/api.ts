@@ -8,7 +8,7 @@ const SECONDARY_API_URL = 'https://api.komida.site/api';
 
 // Initial default
 let SERVER_API_URL = isServer
-    ? (process.env.NODE_ENV === 'production' ? PRIMARY_API_URL : cleanUrl(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'))
+    ? (process.env.NODE_ENV === 'production' ? PRIMARY_API_URL : cleanUrl(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'))
     : '/api';
 
 // For client side, we use internal Next.js routes (/api/...) that act as proxy.
@@ -37,7 +37,7 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
 
     try {
         // Use Node 18+ native AbortSignal.timeout which correctly severs the underlying socket
-        const signal = AbortSignal.timeout(3500); // 3.5s timeout
+        const signal = AbortSignal.timeout(5000); // 5s timeout
 
         const res = await fetch(`${activeServerUrl}${targetEndpoint}`, {
             ...options,
@@ -45,13 +45,15 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
         });
 
         if (!res.ok && res.status >= 500 && activeServerUrl === PRIMARY_API_URL) {
-            throw new Error(`Primary API Error 5xx`);
+            throw new Error(`Primary API Error ${res.status}`);
         }
         return res;
 
     } catch (err: any) {
+        const errorMsg = err.name === 'TimeoutError' || err.name === 'AbortError' ? 'TIMEOUT (5s)' : (err.message || 'Unknown Error');
+
         if (activeServerUrl === PRIMARY_API_URL && !isFallbackActive) {
-            console.warn(`[KOMIDA PINGER] Primary API (${PRIMARY_API_URL}) failed (${err.name || err.message}). Switching to Backup Tunnel (${SECONDARY_API_URL}) for ${targetEndpoint}`);
+            console.warn(`[KOMIDA PINGER] Primary API (${PRIMARY_API_URL}) failed (${errorMsg}). Switching to Backup Tunnel (${SECONDARY_API_URL}) for ${targetEndpoint}`);
             activeServerUrl = SECONDARY_API_URL;
             isFallbackActive = true;
 
@@ -59,12 +61,13 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
             try {
                 return await fetch(`${activeServerUrl}${targetEndpoint}`, options);
             } catch (secondErr: any) {
-                console.error(`[KOMIDA PINGER] Secondary API also failed. Returning empty mock to prevent build crash.`, secondErr.message);
+                const secondMsg = secondErr.message || secondErr.name || 'Unknown';
+                console.error(`[KOMIDA PINGER] Secondary API (${activeServerUrl}) also failed (${secondMsg}). Returning empty mock to prevent build crash.`);
                 return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
             }
         }
 
-        console.error(`[KOMIDA PINGER] API completely unreachable. Returning empty mock to prevent build crash.`);
+        console.error(`[KOMIDA PINGER] API completely unreachable (Target: ${activeServerUrl}${targetEndpoint}, Error: ${errorMsg}). Returning empty mock.`);
         return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 }
