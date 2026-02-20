@@ -44,8 +44,12 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
             signal
         });
 
-        if (!res.ok && res.status >= 500 && activeServerUrl === PRIMARY_API_URL) {
-            throw new Error(`Primary API Error ${res.status}`);
+        if (!res.ok && activeServerUrl === PRIMARY_API_URL) {
+            // Railway returns 404 "Application not found" when the project is suspended or deleted
+            // We should also failover for any 5xx errors.
+            if (res.status >= 500 || res.status === 404) {
+                throw new Error(`Primary API Failure (Status ${res.status})`);
+            }
         }
         return res;
 
