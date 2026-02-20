@@ -57,7 +57,7 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
 
     const attemptFetch = async (baseUrl: string): Promise<Response> => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout for proxy
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         try {
             const url = `${baseUrl}${endpoint}${queryString}`;
@@ -85,22 +85,33 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
         }
     };
 
+    let firstError: any = null;
     try {
-        let response = await attemptFetch(targetBase);
+        const response = await attemptFetch(targetBase);
         return await convertFetchToNextResponse(response);
-    } catch (err) {
-        if (!isFallbackActive && targetBase === PRIMARY_API_URL) {
-            console.warn(`[PROXY FAILOVER] Primary API failed. Switching to Secondary for ${endpoint}`);
-            isFallbackActive = true;
-            try {
-                const response = await attemptFetch(SECONDARY_API_URL);
-                return await convertFetchToNextResponse(response);
-            } catch (secondErr) {
-                console.error(`[PROXY FAILOVER] Both APIs failed for ${endpoint}`);
-                return NextResponse.json({ error: 'All backends are unreachable' }, { status: 503 });
-            }
+    } catch (err: any) {
+        firstError = err;
+        const otherBase = (targetBase === PRIMARY_API_URL) ? SECONDARY_API_URL : PRIMARY_API_URL;
+
+        console.warn(`[PROXY] First attempt to ${targetBase} failed: ${err.message}. Trying ${otherBase}...`);
+
+        try {
+            const response = await attemptFetch(otherBase);
+            // If fallback worked, update global state
+            if (otherBase === SECONDARY_API_URL) isFallbackActive = true;
+            else isFallbackActive = false;
+
+            return await convertFetchToNextResponse(response);
+        } catch (secondErr: any) {
+            console.error(`[PROXY FATAL] Both backends unreachable. Error 1: ${firstError.message}, Error 2: ${secondErr.message}`);
+            return NextResponse.json({
+                error: 'Backend unreachable',
+                details: {
+                    primary_error: firstError.message,
+                    secondary_error: secondErr.message
+                }
+            }, { status: 503 });
         }
-        return NextResponse.json({ error: 'Backend unreachable' }, { status: 503 });
     }
 }
 
