@@ -37,7 +37,8 @@ export function UserMenu() {
 
     if (!user) {
         return (
-            <>
+            <div className="flex items-center gap-2">
+                {/* Traditional login toggle button */}
                 <button
                     onClick={() => setShowLoginModal(true)}
                     className="p-2 rounded-full hover:bg-white/10 transition-colors text-white"
@@ -45,7 +46,7 @@ export function UserMenu() {
                     <User className="w-5 h-5" />
                 </button>
                 <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
-            </>
+            </div>
         );
     }
 

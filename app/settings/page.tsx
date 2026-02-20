@@ -134,9 +134,9 @@ export default function SettingsPage() {
         <div className="min-h-screen bg-[#0a0a0a] text-white py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto space-y-8">
                 {/* Header */}
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="p-2 rounded-full hover:bg-white/5 transition-colors">
-                        <ArrowLeft className="w-6 h-6" />
+                <div className="flex items-center gap-4 relative">
+                    <Link href="/" className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-white/10 transition-colors z-10 cursor-pointer">
+                        <ArrowLeft className="w-5 h-5 text-gray-300" />
                     </Link>
                     <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
                         Settings
