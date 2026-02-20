@@ -51,39 +51,9 @@ const nextConfig: NextConfig = {
     ],
 
   },
-  async rewrites() {
-    // Get the API URL and ensure it doesn't have trailing slash
-    let apiUrl;
-    if (process.env.NODE_ENV === 'production') {
-      // Force production URL to avoid Vercel env var misconfiguration
-      apiUrl = 'https://komida-backend-production.up.railway.app/api';
-    } else {
-      apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api';
-    }
+  // Rewrites removed in favor of dynamic API route proxy in app/api/[...path]/route.ts
+  // This allows for intelligent failover between Railway and Cloudflare Tunnel
 
-    // Remove trailing slash if present
-    if (apiUrl.endsWith('/')) {
-      apiUrl = apiUrl.slice(0, -1);
-    }
-
-    // Extract base URL without /api suffix if present
-    const backendUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
-
-    return [
-      {
-        source: '/api/image/:path*',
-        destination: `${backendUrl}/api/image/:path*`,
-      },
-      {
-        source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
-      },
-      {
-        source: '/uploads/:path*',
-        destination: `${backendUrl}/uploads/:path*`,
-      },
-    ];
-  },
   async headers() {
     return [
       {
