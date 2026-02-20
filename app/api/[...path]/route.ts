@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Constants to match lib/api.ts
 const PRIMARY_API_URL = 'https://komida-backend-production.up.railway.app/api';
 const SECONDARY_API_URL = 'https://api.komida.site/api';
+const LOCAL_API_URL = 'http://localhost:3002/api';
 
 // We use a simple global flag for failover in the current instance
 // This is non-persistent across different serverless instances but helps during a single build or session
@@ -29,8 +30,9 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
     const searchParams = request.nextUrl.searchParams.toString();
     const queryString = searchParams ? `?${searchParams}` : '';
 
-    // Determine target base URL
-    let targetBase = isFallbackActive ? SECONDARY_API_URL : PRIMARY_API_URL;
+    // Determine initial target base URL
+    const isDev = process.env.NODE_ENV === 'development';
+    let targetBase = isDev ? LOCAL_API_URL : (isFallbackActive ? SECONDARY_API_URL : PRIMARY_API_URL);
 
     // Handle body for non-GET requests
     let body: any = null;
@@ -91,24 +93,37 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
         return await convertFetchToNextResponse(response);
     } catch (err: any) {
         firstError = err;
-        const otherBase = (targetBase === PRIMARY_API_URL) ? SECONDARY_API_URL : PRIMARY_API_URL;
 
-        console.warn(`[PROXY] First attempt to ${targetBase} failed: ${err.message}. Trying ${otherBase}...`);
+        // Determine the next target based on what just failed
+        let nextTarget = '';
+        if (targetBase === LOCAL_API_URL) {
+            nextTarget = PRIMARY_API_URL;
+        } else if (targetBase === PRIMARY_API_URL) {
+            nextTarget = SECONDARY_API_URL;
+        } else {
+            nextTarget = PRIMARY_API_URL; // Attempt recovery to primary if secondary fails
+        }
+
+        console.warn(`[PROXY] First attempt to ${targetBase} failed: ${err.message}. Trying ${nextTarget}...`);
 
         try {
-            const response = await attemptFetch(otherBase);
-            // If fallback worked, update global state
-            if (otherBase === SECONDARY_API_URL) isFallbackActive = true;
-            else isFallbackActive = false;
+            const response = await attemptFetch(nextTarget);
+
+            // Only toggle production failover if we are NOT in dev mode using Local
+            if (!isDev) {
+                if (nextTarget === SECONDARY_API_URL) isFallbackActive = true;
+                else if (nextTarget === PRIMARY_API_URL) isFallbackActive = false;
+            }
 
             return await convertFetchToNextResponse(response);
         } catch (secondErr: any) {
-            console.error(`[PROXY FATAL] Both backends unreachable. Error 1: ${firstError.message}, Error 2: ${secondErr.message}`);
+            console.error(`[PROXY FATAL] Multiple backends unreachable. Error 1: ${firstError.message}, Error 2: ${secondErr.message}`);
             return NextResponse.json({
                 error: 'Backend unreachable',
                 details: {
-                    primary_error: firstError.message,
-                    secondary_error: secondErr.message
+                    attempt_1: { target: targetBase, error: firstError.message },
+                    attempt_2: { target: nextTarget, error: secondErr.message },
+                    is_dev: isDev
                 }
             }, { status: 503 });
         }
