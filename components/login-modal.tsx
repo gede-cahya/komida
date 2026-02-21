@@ -173,7 +173,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="fixed z-[101] w-full max-w-md bg-[#111] border border-white/10 rounded-2xl shadow-2xl overflow-hidden top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                        className="fixed z-[101] w-[calc(100%-2rem)] max-w-md bg-[#111] border border-white/10 rounded-2xl shadow-2xl overflow-hidden top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-h-[90vh] overflow-y-auto"
                     >
                         {/* Header */}
                         <div className="flex justify-between items-center p-6 border-b border-white/5">
