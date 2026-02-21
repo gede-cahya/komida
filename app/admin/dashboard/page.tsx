@@ -49,6 +49,44 @@ type Tab =
   | "quests"
   | "inventory";
 
+interface User {
+  id: number;
+  username: string;
+  role: string;
+  is_banned: boolean;
+  created_at: string;
+}
+
+interface Manga {
+  id: number;
+  title: string;
+  image: string;
+  source: string;
+  chapter: string;
+  last_updated: string;
+}
+
+interface Comment {
+  id: number;
+  user_id: number;
+  username: string;
+  avatar_url: string;
+  slug: string;
+  chapter_slug: string | null;
+  content: string;
+  created_at: string;
+  is_spoiler?: boolean;
+  media_url?: string;
+}
+
+interface Announcement {
+  id: number;
+  content: string;
+  type: "info" | "warning" | "success" | "destructive";
+  is_active: boolean;
+  created_at: string;
+}
+
 export default function AdminDashboard() {
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
@@ -62,12 +100,10 @@ export default function AdminDashboard() {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>("day");
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
 
-  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
-  const [manga, setManga] = useState<Record<string, unknown>[]>([]);
-  const [comments, setComments] = useState<Record<string, unknown>[]>([]);
-  const [announcements, setAnnouncements] = useState<Record<string, unknown>[]>(
-    [],
-  );
+  const [users, setUsers] = useState<User[]>([]);
+  const [manga, setManga] = useState<Manga[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loadingData, setLoadingData] = useState(false);
 
   // Pagination & Search
@@ -154,9 +190,9 @@ export default function AdminDashboard() {
       if (popularRes.ok) {
         setPopularManga(await popularRes.json());
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setError(e.message || "Failed to load analytics");
+      setError(e instanceof Error ? e.message : "Failed to load analytics");
     }
   };
 
