@@ -5,9 +5,37 @@ const PRIMARY_API_URL = 'https://komida-backend-production.up.railway.app/api';
 const SECONDARY_API_URL = 'https://api.komida.site/api';
 const LOCAL_API_URL = 'http://localhost:3002/api';
 
-// We use a simple global flag for failover in the current instance
-// This is non-persistent across different serverless instances but helps during a single build or session
+// Failover state
 let isFallbackActive = false;
+let lastHealthCheck = 0;
+const HEALTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+// Statuses that should trigger failover (origin dead)
+const FAILOVER_STATUSES = new Set([404, 500, 502, 503, 504, 530]);
+
+/**
+ * Periodically check if the primary API has recovered.
+ * If it has, switch back from the secondary.
+ */
+async function maybeResetToPrimary() {
+    if (!isFallbackActive) return;
+    const now = Date.now();
+    if (now - lastHealthCheck < HEALTH_CHECK_INTERVAL) return;
+    lastHealthCheck = now;
+
+    try {
+        const res = await fetch(`${PRIMARY_API_URL}/popular`, {
+            signal: AbortSignal.timeout(4000),
+            cache: 'no-store',
+        });
+        if (res.ok) {
+            console.log('[PROXY HEALTH] Primary API recovered! Switching back.');
+            isFallbackActive = false;
+        }
+    } catch {
+        // Primary still down, stay on secondary
+    }
+}
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
     return handleProxy(request, await params);
@@ -30,8 +58,12 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
     const searchParams = request.nextUrl.searchParams.toString();
     const queryString = searchParams ? `?${searchParams}` : '';
 
-    // Determine initial target base URL
     const isDev = process.env.NODE_ENV === 'development';
+
+    // In production, periodically check if primary has recovered
+    if (!isDev) await maybeResetToPrimary();
+
+    // Determine initial target base URL
     let targetBase = isDev ? LOCAL_API_URL : (isFallbackActive ? SECONDARY_API_URL : PRIMARY_API_URL);
 
     // Handle body for non-GET requests
@@ -75,11 +107,9 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
 
             console.log(`[PROXY] Status from ${baseUrl}: ${res.status}`);
 
-            // Trigger failover if Railway returns 404 App Not Found or 5xx
-            if (baseUrl === PRIMARY_API_URL && !res.ok) {
-                if (res.status === 404 || res.status >= 500) {
-                    throw new Error(`Upstream Error ${res.status}`);
-                }
+            // Trigger failover for known-bad statuses (404 suspended, 5xx, 530 tunnel dead)
+            if (!res.ok && FAILOVER_STATUSES.has(res.status)) {
+                throw new Error(`Upstream Error ${res.status}`);
             }
             return res;
         } finally {
@@ -94,39 +124,55 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
     } catch (err: any) {
         firstError = err;
 
-        // Determine the next target based on what just failed
-        let nextTarget = '';
-        if (targetBase === LOCAL_API_URL) {
-            nextTarget = PRIMARY_API_URL;
-        } else if (targetBase === PRIMARY_API_URL) {
-            nextTarget = SECONDARY_API_URL;
-        } else {
-            nextTarget = PRIMARY_API_URL; // Attempt recovery to primary if secondary fails
-        }
-
-        console.warn(`[PROXY] First attempt to ${targetBase} failed: ${err.message}. Trying ${nextTarget}...`);
-
-        try {
-            const response = await attemptFetch(nextTarget);
-
-            // Only toggle production failover if we are NOT in dev mode using Local
-            if (!isDev) {
-                if (nextTarget === SECONDARY_API_URL) isFallbackActive = true;
-                else if (nextTarget === PRIMARY_API_URL) isFallbackActive = false;
+        // Build ordered fallback chain depending on what just failed
+        const fallbackChain: string[] = [];
+        if (isDev) {
+            // Dev: Local → Railway → Cloudflare
+            if (targetBase === LOCAL_API_URL) {
+                fallbackChain.push(PRIMARY_API_URL, SECONDARY_API_URL);
+            } else if (targetBase === PRIMARY_API_URL) {
+                fallbackChain.push(SECONDARY_API_URL);
+            } else {
+                fallbackChain.push(PRIMARY_API_URL);
             }
-
-            return await convertFetchToNextResponse(response);
-        } catch (secondErr: any) {
-            console.error(`[PROXY FATAL] Multiple backends unreachable. Error 1: ${firstError.message}, Error 2: ${secondErr.message}`);
-            return NextResponse.json({
-                error: 'Backend unreachable',
-                details: {
-                    attempt_1: { target: targetBase, error: firstError.message },
-                    attempt_2: { target: nextTarget, error: secondErr.message },
-                    is_dev: isDev
-                }
-            }, { status: 503 });
+        } else {
+            // Prod: Railway → Cloudflare (or vice versa)
+            if (targetBase === PRIMARY_API_URL) {
+                fallbackChain.push(SECONDARY_API_URL);
+            } else {
+                fallbackChain.push(PRIMARY_API_URL);
+            }
         }
+
+        for (const nextTarget of fallbackChain) {
+            console.warn(`[PROXY] Attempt to ${targetBase} failed: ${err.message}. Trying ${nextTarget}...`);
+            try {
+                const response = await attemptFetch(nextTarget);
+
+                // Update failover state for production
+                if (!isDev) {
+                    isFallbackActive = nextTarget === SECONDARY_API_URL;
+                    lastHealthCheck = Date.now(); // Reset timer after a switch
+                    console.log(`[PROXY] Failover state updated: active=${isFallbackActive ? 'SECONDARY' : 'PRIMARY'}`);
+                }
+
+                return await convertFetchToNextResponse(response);
+            } catch (nextErr: any) {
+                err = nextErr; // Track latest error for final message
+            }
+        }
+
+        // All backends failed
+        console.error(`[PROXY FATAL] All backends unreachable for ${endpoint}. First: ${firstError.message}, Last: ${err.message}`);
+        return NextResponse.json({
+            error: 'Backend unreachable',
+            details: {
+                primary: PRIMARY_API_URL,
+                secondary: SECONDARY_API_URL,
+                failover_active: isFallbackActive,
+                endpoint,
+            }
+        }, { status: 503 });
     }
 }
 

@@ -15,6 +15,35 @@ let SERVER_API_URL = isServer
 // But for server components, we fetch directly to Backend. We need to handle fallback.
 let activeServerUrl = SERVER_API_URL;
 let isFallbackActive = false;
+let lastHealthCheck = 0;
+const HEALTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+// Statuses that should trigger failover
+const FAILOVER_STATUSES = new Set([404, 500, 502, 503, 504, 530]);
+
+/**
+ * Periodically check if the primary API has recovered (server-side only).
+ */
+async function maybeResetToPrimary() {
+    if (!isFallbackActive || !isServer) return;
+    const now = Date.now();
+    if (now - lastHealthCheck < HEALTH_CHECK_INTERVAL) return;
+    lastHealthCheck = now;
+
+    try {
+        const res = await fetch(`${PRIMARY_API_URL}/popular`, {
+            signal: AbortSignal.timeout(4000),
+            cache: 'no-store',
+        });
+        if (res.ok) {
+            console.log('[SSR HEALTH] Primary API recovered! Switching back.');
+            activeServerUrl = PRIMARY_API_URL;
+            isFallbackActive = false;
+        }
+    } catch {
+        // Primary still down
+    }
+}
 
 /**
  * Intelligent fetch wrapper that routes to the secondary API if the primary one is down.
@@ -29,8 +58,10 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
     }
 
     // In Server Components (isServer = true), relative endpoints MUST be appended to an absolute URL
-    // since Node.js fetch does not understand relative URIs like `/popular?page=1`
     const targetEndpoint = isClientTarget ? endpoint : `/${endpoint}`;
+
+    // Periodically check if primary has recovered
+    await maybeResetToPrimary();
 
     if (isFallbackActive) {
         return fetch(`${SECONDARY_API_URL}${targetEndpoint}`, options);
@@ -46,9 +77,8 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
         });
 
         if (!res.ok && activeServerUrl === PRIMARY_API_URL) {
-            // Railway returns 404 "Application not found" when the project is suspended or deleted
-            // We should also failover for any 5xx errors.
-            if (res.status >= 500 || res.status === 404) {
+            // Failover for known-bad status codes (suspended app, server errors, dead tunnel)
+            if (FAILOVER_STATUSES.has(res.status)) {
                 throw new Error(`Primary API Failure (Status ${res.status})`);
             }
         }
@@ -58,21 +88,22 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
         const errorMsg = err.name === 'TimeoutError' || err.name === 'AbortError' ? 'TIMEOUT (5s)' : (err.message || 'Unknown Error');
 
         if (activeServerUrl === PRIMARY_API_URL && !isFallbackActive) {
-            console.warn(`[KOMIDA PINGER] Primary API (${PRIMARY_API_URL}) failed (${errorMsg}). Switching to Backup Tunnel (${SECONDARY_API_URL}) for ${targetEndpoint}`);
+            console.warn(`[SSR PINGER] Primary API (${PRIMARY_API_URL}) failed (${errorMsg}). Switching to Backup Tunnel (${SECONDARY_API_URL}) for ${targetEndpoint}`);
             activeServerUrl = SECONDARY_API_URL;
             isFallbackActive = true;
+            lastHealthCheck = Date.now();
 
             // Retry directly to secondary without timeout strictness for the first load
             try {
                 return await fetch(`${activeServerUrl}${targetEndpoint}`, options);
             } catch (secondErr: any) {
                 const secondMsg = secondErr.message || secondErr.name || 'Unknown';
-                console.error(`[KOMIDA PINGER] Secondary API (${activeServerUrl}) also failed (${secondMsg}). Returning empty mock to prevent build crash.`);
+                console.error(`[SSR PINGER] Secondary API (${activeServerUrl}) also failed (${secondMsg}). Returning empty mock to prevent build crash.`);
                 return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
             }
         }
 
-        console.error(`[KOMIDA PINGER] API completely unreachable (Target: ${activeServerUrl}${targetEndpoint}, Error: ${errorMsg}). Returning empty mock.`);
+        console.error(`[SSR PINGER] API completely unreachable (Target: ${activeServerUrl}${targetEndpoint}, Error: ${errorMsg}). Returning empty mock.`);
         return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 }
