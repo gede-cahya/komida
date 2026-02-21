@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit2, Trash2, Trophy, X, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Trophy, X, CheckCircle, XCircle, Sparkles } from 'lucide-react';
+import { AvatarWithDecoration } from '@/components/avatar-with-decoration';
 
 interface Quest {
     id: number;
@@ -19,6 +20,8 @@ interface Quest {
     created_at: string;
     badge_name: string | null;
     badge_icon_url: string | null;
+    decoration_name: string | null;
+    decoration_image_url: string | null;
 }
 
 interface Badge {
@@ -504,7 +507,26 @@ export function QuestsManager({ onRefresh }: QuestsManagerProps) {
                                                     <img src={resolveUrl(quest.badge_icon_url)} alt="" className="w-full h-full object-contain" />
                                                 </div>
                                             )}
-                                            <span className="text-gray-300 text-xs">{quest.badge_name || quest.reward_type}</span>
+                                            {quest.decoration_image_url && (
+                                                <div className="w-6 h-6 flex-shrink-0">
+                                                    <AvatarWithDecoration
+                                                        fallback="✨"
+                                                        decorationUrl={quest.decoration_image_url}
+                                                        size="sm"
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="flex flex-col">
+                                                {quest.badge_name && (
+                                                    <span className="text-gray-300 text-xs">🏆 {quest.badge_name}</span>
+                                                )}
+                                                {quest.decoration_name && (
+                                                    <span className="text-purple-300 text-xs">✨ {quest.decoration_name}</span>
+                                                )}
+                                                {!quest.badge_name && !quest.decoration_name && (
+                                                    <span className="text-gray-500 text-xs">{quest.reward_type}</span>
+                                                )}
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 text-center">

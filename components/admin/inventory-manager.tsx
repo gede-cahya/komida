@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Upload, Trash2, Edit, Plus, Image as ImageIcon, Award, Sparkles, X } from 'lucide-react';
+import { AvatarWithDecoration } from '@/components/avatar-with-decoration';
 
 interface Badge {
     id: number;
@@ -277,15 +278,18 @@ function DecorationsPanel() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {decorations.map(deco => (
                     <div key={deco.id} className="bg-[#1e1e1e] rounded-xl border border-white/5 p-3 flex flex-col items-center gap-2 group relative hover:border-purple-500/30 transition-colors">
-                        <div className="w-16 h-16 rounded-full p-1 flex items-center justify-center">
-                            {deco.image_url.startsWith('css:') ? (
-                                <span className="text-xs text-purple-400 font-mono">{deco.image_url}</span>
-                            ) : (
-                                <img src={resolveUploadUrl(deco.image_url)} alt={deco.name} className="w-full h-full object-contain" />
-                            )}
+                        <div className="w-16 h-16 flex items-center justify-center">
+                            <AvatarWithDecoration
+                                fallback="✨"
+                                decorationUrl={deco.image_url.startsWith('css:') ? deco.image_url : resolveUploadUrl(deco.image_url)}
+                                size="lg"
+                            />
                         </div>
                         <span className="text-xs font-medium text-white text-center truncate w-full">{deco.name}</span>
                         <span className="text-[10px] text-gray-500 capitalize">{deco.type}</span>
+                        {deco.image_url.startsWith('css:') && (
+                            <span className="text-[9px] text-purple-400/60 font-mono">{deco.image_url}</span>
+                        )}
                         {/* Actions */}
                         <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button

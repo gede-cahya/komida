@@ -25,6 +25,9 @@ interface Quest {
     // Joined from badges table
     badge_name?: string;
     badge_icon_url?: string;
+    // Joined from decorations table
+    decoration_name?: string;
+    decoration_image_url?: string;
 }
 
 export default function QuestsPage() {
@@ -260,13 +263,13 @@ export default function QuestsPage() {
                                                                 {quest.badge_name}
                                                             </span>
                                                         )}
-                                                        {(quest as any).decoration_name && (
+                                                        {quest.decoration_name && (
                                                             <span className="inline-flex items-center gap-1 text-xs bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full">
                                                                 <Sparkles className="w-3 h-3" />
-                                                                {(quest as any).decoration_name}
+                                                                {quest.decoration_name}
                                                             </span>
                                                         )}
-                                                        {!quest.badge_name && !(quest as any).decoration_name && (
+                                                        {!quest.badge_name && !quest.decoration_name && (
                                                             <span className="text-xs text-[var(--muted-foreground)]">Reward: Badge</span>
                                                         )}
                                                     </div>
