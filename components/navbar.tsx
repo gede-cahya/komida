@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import { Search, Menu, X, BookOpen, User, Flame } from "lucide-react";
+import { Search, Menu, X, BookOpen, User, Flame, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { UserMenu } from "./user-menu";
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
     { label: "Home", href: "/", icon: BookOpen },
     { label: "Popular", href: "/popular", icon: Flame },
     { label: "Genres", href: "/genres", icon: null },
+    { label: "Quests", href: "/quests", icon: Trophy },
     { label: "Bookmarks", href: "/bookmarks", icon: null },
 ];
 

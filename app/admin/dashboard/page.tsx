@@ -4,7 +4,7 @@
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
-import { Shield, Users, BookOpen, LogOut, LayoutDashboard, TrendingUp, Eye, BarChart3, List, MessageSquare } from "lucide-react";
+import { Shield, Users, BookOpen, LogOut, LayoutDashboard, TrendingUp, Eye, BarChart3, List, MessageSquare, Trophy, Package } from "lucide-react";
 import { UserTable } from "@/components/admin/user-table";
 import { MangaTable } from "@/components/admin/manga-table";
 import { StatsCard } from "@/components/admin/stats-card";
@@ -16,9 +16,12 @@ import { Button } from "@/components/ui/button";
 import { SystemHealthWidget } from "@/components/admin/system-health";
 import { CommentsTable } from "@/components/admin/comments-table";
 import { AnnouncementsManager } from "@/components/admin/announcements-manager";
+import { QuestsManager } from "@/components/admin/quests-manager";
+import InventoryManager from "@/components/admin/inventory-manager";
 import { Megaphone } from "lucide-react";
+import { TopActiveUsers } from "@/components/admin/top-active-users";
 
-type Tab = 'dashboard' | 'users' | 'manga' | 'comments' | 'announcements';
+type Tab = 'dashboard' | 'users' | 'manga' | 'comments' | 'announcements' | 'quests' | 'inventory';
 
 export default function AdminDashboard() {
     const { user, logout, isLoading } = useAuth();
@@ -31,6 +34,7 @@ export default function AdminDashboard() {
     const [popularManga, setPopularManga] = useState<PopularManga[]>([]);
     const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
     const [timePeriod, setTimePeriod] = useState<TimePeriod>('day');
+    const [activeUsers, setActiveUsers] = useState<any[]>([]);
 
     const [users, setUsers] = useState([]);
     const [manga, setManga] = useState([]);
@@ -80,6 +84,17 @@ export default function AdminDashboard() {
             if (healthRes.ok) {
                 const health = await healthRes.json();
                 setSystemHealth(health);
+            }
+
+            // Fetch Top Active Users
+            try {
+                const activeRes = await fetch('/api/admin/active-users', { credentials: 'include' });
+                if (activeRes.ok) {
+                    const activeData = await activeRes.json();
+                    setActiveUsers(activeData.activeUsers || []);
+                }
+            } catch (e) {
+                console.error('Failed to fetch active users', e);
             }
         } catch (e) {
             console.error(e);
@@ -209,6 +224,22 @@ export default function AdminDashboard() {
                         <Megaphone className="w-5 h-5" />
                         Announcements
                     </button>
+                    <button
+                        onClick={() => handleTabChange('quests')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'quests' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                    >
+                        <Trophy className="w-5 h-5" />
+                        Quests
+                    </button>
+                    <button
+                        onClick={() => handleTabChange('inventory')}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'inventory' ? 'bg-primary text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                    >
+                        <Package className="w-5 h-5" />
+                        Inventory
+                    </button>
                 </nav>
 
                 <div className="pt-6 border-t border-white/10 space-y-2">
@@ -291,8 +322,9 @@ export default function AdminDashboard() {
                             <div className="lg:col-span-2">
                                 <VisitorsChart data={visitStats} title={`Site Visits (${timePeriod})`} />
                             </div>
-                            <div className="lg:col-span-1">
+                            <div className="lg:col-span-1 space-y-6">
                                 <PopularComicsTable data={popularManga} title={`Top 10 Comics (${timePeriod})`} />
+                                <TopActiveUsers users={activeUsers} loading={loadingData} />
                             </div>
                         </div>
                     </div>
@@ -339,6 +371,14 @@ export default function AdminDashboard() {
                         loading={loadingData}
                         onRefresh={fetchData}
                     />
+                )}
+
+                {activeTab === 'quests' && (
+                    <QuestsManager />
+                )}
+
+                {activeTab === 'inventory' && (
+                    <InventoryManager />
                 )}
             </main>
         </div>

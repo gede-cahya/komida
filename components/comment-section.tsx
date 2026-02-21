@@ -9,6 +9,7 @@ import { EmojiClickData, Theme } from 'emoji-picker-react';
 import { CommentsSkeleton } from '@/components/skeletons';
 import { GifPicker } from './gif-picker';
 import { AvatarWithDecoration } from './avatar-with-decoration';
+import { TierBadge } from './tier-badge';
 import dynamic from 'next/dynamic';
 import {
     AlertDialog,
@@ -38,6 +39,7 @@ interface Comment {
     is_spoiler?: boolean;
     media_url?: string;
     user_id?: number; // Needed for delete permission check
+    tier_info?: any;
 }
 
 interface CommentSectionProps {
@@ -488,6 +490,9 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                                     <div className="flex items-center justify-between mb-1">
                                         <div className="flex items-center gap-2 flex-wrap">
                                             <span className="font-semibold text-white break-words">{comment.display_name || comment.username}</span>
+                                            {comment.tier_info && (
+                                                <TierBadge tierInfo={comment.tier_info} size="sm" />
+                                            )}
                                             {comment.role === 'admin' && (
                                                 <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 text-[10px] font-bold rounded uppercase tracking-wider">
                                                     Admin

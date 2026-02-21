@@ -7,6 +7,7 @@ import { User, LogOut, LayoutDashboard, Settings, UserCircle } from 'lucide-reac
 import { LoginModal } from './login-modal';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AvatarWithDecoration } from './avatar-with-decoration';
 
 export function UserMenu() {
     const { user, logout } = useAuth();
@@ -54,17 +55,17 @@ export function UserMenu() {
         <div className="relative" ref={menuRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`relatve flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold text-white shadow-lg border border-white/20 transition-transform active:scale-95 overflow-hidden ${!user.avatar_url ? getRandomColor(user.username) : ''}`}
+                className="relative flex items-center justify-center transition-transform active:scale-95"
             >
-                {user.avatar_url ? (
-                    <img
-                        src={user.avatar_url}
-                        alt={user.username}
-                        className="w-full h-full object-cover"
+                <div className={`relative flex items-center justify-center w-9 h-9 rounded-full ${!user.avatar_url ? getRandomColor(user.username) + " text-white font-bold text-sm" : ""}`}>
+                    <AvatarWithDecoration
+                        src={user.avatar_url || ''}
+                        fallback={getInitials(user.username)}
+                        decorationUrl={user.decoration_url}
+                        size="sm"
+                        className="w-full h-full"
                     />
-                ) : (
-                    getInitials(user.username)
-                )}
+                </div>
             </button>
 
             <AnimatePresence>

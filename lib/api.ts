@@ -110,7 +110,7 @@ export async function fetchPopular(page = 1) {
 }
 
 export async function fetchGenre(genre: string, page = 1) {
-    const res = await fetchWithFallback(`/genres/${genre}?page=${page}`);
+    const res = await fetchWithFallback(`/genres/${genre}?page=${page}`, { next: { revalidate: 300 } });
     if (!res.ok) {
         throw new Error('Failed to fetch genre manga');
     }

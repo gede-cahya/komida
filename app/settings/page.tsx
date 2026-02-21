@@ -8,6 +8,8 @@ import { User, Mail, Lock, Camera, Save, Loader2, ArrowLeft, X } from 'lucide-re
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { AvatarWithDecoration } from '@/components/avatar-with-decoration';
+import { TierBadge, DEFAULT_TIER } from '@/components/tier-badge';
 
 export default function SettingsPage() {
     const { user, updateUser, checkAuth, isLoading: authLoading } = useAuth();
@@ -19,6 +21,8 @@ export default function SettingsPage() {
     const [displayName, setDisplayName] = useState('');
     const [email, setEmail] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [tierInfo, setTierInfo] = useState<any>(null);
+    const [tierLoading, setTierLoading] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Password State
@@ -34,8 +38,23 @@ export default function SettingsPage() {
             setDisplayName(user.display_name || '');
             setEmail(user.email || '');
             setAvatarUrl(user.avatar_url || '');
+            fetchTierInfo();
         }
     }, [user, authLoading, router]);
+
+    const fetchTierInfo = async () => {
+        try {
+            const res = await fetch('/api/user/tier', { credentials: 'include' });
+            if (res.ok) {
+                const data = await res.json();
+                setTierInfo(data);
+            }
+        } catch (e) {
+            console.error('Failed to fetch tier info:', e);
+        } finally {
+            setTierLoading(false);
+        }
+    };
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -172,20 +191,15 @@ export default function SettingsPage() {
                                 {/* Avatar Upload */}
                                 <div className="flex flex-col items-center sm:flex-row gap-6">
                                     <div className="relative group">
-                                        <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-purple-500/30 bg-[#2a2a2a] relative">
-                                            {avatarUrl ? (
-                                                <Image
+                                        <div className="w-24 h-24 relative">
+                                            <div className="absolute inset-x-0 -top-1 bottom-1 flex items-center justify-center">
+                                                <AvatarWithDecoration
                                                     src={avatarUrl}
-                                                    alt="Avatar"
-                                                    width={96}
-                                                    height={96}
-                                                    className="object-cover w-full h-full"
+                                                    fallback={user.username.slice(0, 2).toUpperCase()}
+                                                    decorationUrl={user?.decoration_url}
+                                                    size="xl"
                                                 />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-gray-500">
-                                                    {user.username.slice(0, 2).toUpperCase()}
-                                                </div>
-                                            )}
+                                            </div>
                                             <div
                                                 onClick={() => fileInputRef.current?.click()}
                                                 className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
@@ -201,13 +215,43 @@ export default function SettingsPage() {
                                             className="hidden"
                                         />
                                     </div>
-                                    <div className="flex-1 space-y-1 text-center sm:text-left">
-                                        <h3 className="font-medium text-lg">{user.username}</h3>
-                                        <p className="text-sm text-gray-400">Changed your look? Upload a new avatar (max 200KB).</p>
+                                    <div className="flex-1 space-y-3 text-center sm:text-left">
+                                        <div>
+                                            <h3 className="font-medium text-xl mb-1 flex items-center justify-center sm:justify-start gap-2">
+                                                {user.username}
+                                                {!tierLoading && <TierBadge tierInfo={tierInfo?.tier || DEFAULT_TIER} size="sm" />}
+                                            </h3>
+                                            <p className="text-sm text-gray-400">Changed your look? Upload a new avatar (max 200KB).</p>
+                                        </div>
+
+                                        {!tierLoading && tierInfo && (
+                                            <div className="bg-black/30 rounded-xl p-3 border border-white/5 space-y-2 max-w-sm mx-auto sm:mx-0">
+                                                <div className="flex flex-wrap justify-between items-center text-xs">
+                                                    <span className="text-gray-400">XP Progress</span>
+                                                    <span className="font-mono bg-white/5 px-2 py-0.5 rounded text-purple-400">
+                                                        {tierInfo.progress.current} / {tierInfo.progress.needed} XP
+                                                    </span>
+                                                </div>
+                                                <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${tierInfo.progress.percent}%` }}
+                                                        transition={{ duration: 1, ease: "easeOut" }}
+                                                        className={`h-full bg-gradient-to-r ${tierInfo.tier.gradient}`}
+                                                    />
+                                                </div>
+                                                {tierInfo.next_tier && (
+                                                    <p className="text-[10px] text-gray-500 italic">
+                                                        {tierInfo.progress.needed - tierInfo.progress.current} XP to {tierInfo.next_tier.name}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+
                                         <button
                                             type="button"
                                             onClick={() => fileInputRef.current?.click()}
-                                            className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                                            className="text-xs text-purple-400 hover:text-purple-300 transition-colors inline-block mt-2"
                                         >
                                             Upload New Photo
                                         </button>
@@ -323,8 +367,8 @@ export default function SettingsPage() {
                                         {user.badges && user.badges.length > 0 ? (
                                             user.badges.map((badge, idx) => (
                                                 <div key={idx} className="flex flex-col items-center gap-1 group relative">
-                                                    <div className="w-12 h-12 rounded-xl bg-[#2a2a2a] border border-white/5 p-2 flex items-center justify-center transition-transform group-hover:scale-110">
-                                                        <img src={badge.icon_url} alt={badge.name} className="w-full h-full object-contain" />
+                                                    <div className="w-12 h-12 rounded-full border border-white/5 p-1 flex items-center justify-center transition-transform group-hover:scale-110">
+                                                        <img src={badge.icon_url.startsWith('/uploads') ? `/api${badge.icon_url}` : badge.icon_url} alt={badge.name} className="w-full h-full object-contain rounded-full" />
                                                     </div>
                                                     <span className="text-[10px] text-gray-500 max-w-[60px] text-center truncate">{badge.name}</span>
 
@@ -452,8 +496,13 @@ function DecorationList({ currentDecoration, onEquip }: { currentDecoration?: st
                         currentDecoration === dec.image_url ? "border-purple-500 bg-purple-500/5" : "border-white/5 hover:border-white/10"
                     )}
                 >
-                    <div className="w-12 h-12 relative">
-                        <img src={dec.image_url} alt={dec.name} className="w-full h-full object-contain" />
+                    <div className="w-10 h-10 relative flex items-center justify-center scale-[0.8]">
+                        <AvatarWithDecoration
+                            decorationUrl={dec.image_url}
+                            size="sm"
+                            fallback="U"
+                            src="https://picsum.photos/seed/comic/150/150"
+                        />
                     </div>
                     <span className="text-[10px] font-medium text-gray-400 group-hover:text-white text-center truncate w-full">{dec.name}</span>
                 </div>
