@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/auth";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClientFooter } from "@/components/client-footer";
 import { Web3Provider } from "@/lib/web3-provider";
+import { ToastProvider } from "@/components/ui/toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,15 +92,17 @@ export default function RootLayout({
       >
         <Web3Provider>
           <ThemeProvider>
-            <div className="flex flex-col min-h-screen bg-background text-foreground">
-              <AuthProvider>
-                <Navbar />
-                <div className="flex-1 w-full">
-                  {children}
-                </div>
-              </AuthProvider>
-              <ClientFooter />
-            </div>
+            <ToastProvider>
+              <div className="flex flex-col min-h-screen bg-background text-foreground">
+                <AuthProvider>
+                  <Navbar />
+                  <div className="flex-1 w-full">
+                    {children}
+                  </div>
+                </AuthProvider>
+                <ClientFooter />
+              </div>
+            </ToastProvider>
           </ThemeProvider>
         </Web3Provider>
       </body>

@@ -2,8 +2,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Edit, Trash2, UserPlus, Search } from 'lucide-react';
+import { Edit, Trash2, UserPlus, Search, Loader2, CheckCircle, Ban } from 'lucide-react';
 import { UserDialog } from './user-dialog';
+import { DeleteConfirmModal } from './delete-confirm-modal';
+import { useToast } from '@/components/ui/toast';
 
 interface User {
     id: number;
@@ -27,6 +29,10 @@ export function UserTable({ users, loading, page, totalPages, onPageChange, onSe
     const [search, setSearch] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
+    const [deleting, setDeleting] = useState(false);
+    const [banningId, setBanningId] = useState<number | null>(null);
+    const { showToast } = useToast();
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,21 +44,46 @@ export function UserTable({ users, loading, page, totalPages, onPageChange, onSe
         setIsDialogOpen(true);
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm('Are you sure you want to delete this user?')) return;
+    const handleSuccess = () => {
+        onRefresh();
+        setIsDialogOpen(false);
+        showToast(selectedUser ? 'User updated successfully!' : 'User created successfully!', 'success');
+        setSelectedUser(null);
+    };
 
+    const handleDelete = async () => {
+        if (!deleteModal.id) return;
+        setDeleting(true);
         try {
-            const res = await fetch(`/api/admin/users/${id}`, {
+            const res = await fetch(`/api/admin/users/${deleteModal.id}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
             if (res.ok) {
                 onRefresh();
-            } else {
-                alert('Failed to delete user');
+                setDeleteModal({ open: false, id: null });
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    const handleBan = async (user: User) => {
+        setBanningId(user.id);
+        try {
+            const res = await fetch(`/api/admin/users/${user.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_banned: !user.is_banned }),
+                credentials: 'include'
+            });
+            if (res.ok) onRefresh();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setBanningId(null);
         }
     };
 
@@ -117,9 +148,35 @@ export function UserTable({ users, loading, page, totalPages, onPageChange, onSe
                                         <button onClick={() => handleEdit(user)} className="p-2 hover:bg-white/10 rounded-full text-blue-400 transition-colors">
                                             <Edit className="w-4 h-4" />
                                         </button>
-                                        <button onClick={() => handleDelete(user.id)} className="p-2 hover:bg-white/10 rounded-full text-red-400 transition-colors">
+                                        <button 
+                                            onClick={() => handleBan(user)}
+                                            disabled={banningId === user.id}
+                                            className={`p-2 rounded-full transition-colors disabled:opacity-50 ${
+                                                user.is_banned 
+                                                    ? 'text-green-400 hover:bg-green-500/10' 
+                                                    : 'text-orange-400 hover:bg-orange-500/10'
+                                            }`}
+                                            title={user.is_banned ? 'Unban User' : 'Ban User'}
+                                        >
+                                            {banningId === user.id ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : user.is_banned ? (
+                                                <CheckCircle className="w-4 h-4" />
+                                            ) : (
+                                                <Ban className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                        <button onClick={() => setDeleteModal({ open: true, id: user.id })} className="p-2 hover:bg-white/10 rounded-full text-red-400 transition-colors">
                                             <Trash2 className="w-4 h-4" />
                                         </button>
+                                        <DeleteConfirmModal
+                                            open={deleteModal.open && deleteModal.id === user.id}
+                                            onOpenChange={(open) => setDeleteModal({ open, id: open ? user.id : null })}
+                                            onConfirm={handleDelete}
+                                            title="Delete User?"
+                                            description={`Are you sure you want to delete user "${user.username}"? This action cannot be undone.`}
+                                            isLoading={deleting}
+                                        />
                                     </td>
                                 </tr>
                             ))
@@ -129,34 +186,28 @@ export function UserTable({ users, loading, page, totalPages, onPageChange, onSe
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-between items-center text-sm text-gray-500">
-                <span>Page {page} of {totalPages}</span>
-                <div className="flex gap-2">
-                    <button
-                        disabled={page === 1}
-                        onClick={() => onPageChange(page - 1)}
-                        className="px-3 py-1 bg-white/5 rounded hover:bg-white/10 disabled:opacity-50"
-                    >
-                        Prev
-                    </button>
-                    <button
-                        disabled={page === totalPages}
-                        onClick={() => onPageChange(page + 1)}
-                        className="px-3 py-1 bg-white/5 rounded hover:bg-white/10 disabled:opacity-50"
-                    >
-                        Next
-                    </button>
+            {totalPages > 1 && (
+                <div className="flex justify-center gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                        <button
+                            key={p}
+                            onClick={() => onPageChange(p)}
+                            className={`w-10 h-10 rounded-full font-medium transition-colors ${
+                                page === p ? 'bg-primary text-white' : 'bg-white/10 hover:bg-white/20 text-gray-400'
+                            }`}
+                        >
+                            {p}
+                        </button>
+                    ))}
                 </div>
-            </div>
-
-            {isDialogOpen && (
-                <UserDialog
-                    isOpen={isDialogOpen}
-                    onClose={() => setIsDialogOpen(false)}
-                    onSuccess={() => { setIsDialogOpen(false); onRefresh(); }}
-                    user={selectedUser}
-                />
             )}
+
+            <UserDialog
+                isOpen={isDialogOpen}
+                onClose={() => { setIsDialogOpen(false); setSelectedUser(null); }}
+                user={selectedUser}
+                onSuccess={handleSuccess}
+            />
         </div>
     );
 }

@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AvatarWithDecoration } from "@/components/avatar-with-decoration";
+import { DeleteConfirmModal } from "./delete-confirm-modal";
 
 interface Quest {
   id: number;
@@ -79,6 +80,8 @@ export function QuestsManager({ onRefresh }: QuestsManagerProps) {
   const [startsAt, setStartsAt] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [saving, setSaving] = useState(false);
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null; title?: string }>({ open: false, id: null, title: '' });
+  const [deleting, setDeleting] = useState(false);
 
   const fetchQuests = useCallback(async () => {
     setLoading(true);
@@ -212,16 +215,20 @@ export function QuestsManager({ onRefresh }: QuestsManagerProps) {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Yakin hapus quest ini?")) return;
+  const handleDelete = async () => {
+    if (!deleteModal.id) return;
+    setDeleting(true);
     try {
-      await fetch(`/api/admin/quests/${id}`, {
+      await fetch(`/api/admin/quests/${deleteModal.id}`, {
         method: "DELETE",
         credentials: "include",
       });
+      setDeleteModal({ open: false, id: null, title: '' });
       fetchQuests();
     } catch (e) {
       console.error(e);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -658,22 +665,30 @@ export function QuestsManager({ onRefresh }: QuestsManagerProps) {
                       )}
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => openEdit(quest)}
-                        className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(quest.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openEdit(quest)}
+                          className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteModal({ open: true, id: quest.id, title: quest.title })}
+                          className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                        <DeleteConfirmModal
+                          open={deleteModal.open && deleteModal.id === quest.id}
+                          onOpenChange={(open) => setDeleteModal({ open, id: open ? quest.id : null, title: open ? quest.title : '' })}
+                          onConfirm={handleDelete}
+                          title="Delete Quest?"
+                          description={`Are you sure you want to delete quest "${quest.title}"? This action cannot be undone.`}
+                          isLoading={deleting}
+                        />
+                      </div>
+                    </td>
                 </tr>
               ))}
               {quests.length === 0 && (

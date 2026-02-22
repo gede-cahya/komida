@@ -41,9 +41,7 @@ export function Footer() {
                     <div>
                         <h4 className="font-bold text-foreground mb-4">Support</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li><Link href="#" className="hover:text-primary transition-colors">Help Center</Link></li>
-                            <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-                            <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/bug-report" className="hover:text-primary transition-colors">Bug Report</Link></li>
                             <li><Link href="/dmca" className="hover:text-primary transition-colors">DMCA</Link></li>
                         </ul>
                     </div>

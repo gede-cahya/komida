@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Upload, Trash2, Edit, Plus, Image as ImageIcon, Award, Sparkles, X } from 'lucide-react';
 import { AvatarWithDecoration } from '@/components/avatar-with-decoration';
+import { DeleteConfirmModal } from './delete-confirm-modal';
 
 interface Badge {
     id: number;
@@ -60,6 +61,8 @@ function BadgesPanel() {
     const [showForm, setShowForm] = useState(false);
     const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
     const [loading, setLoading] = useState(true);
+    const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null; name?: string }>({ open: false, id: null, name: '' });
+    const [deleting, setDeleting] = useState(false);
 
     const fetchBadges = useCallback(async () => {
         try {
@@ -71,10 +74,14 @@ function BadgesPanel() {
 
     useEffect(() => { fetchBadges(); }, [fetchBadges]);
 
-    const handleDelete = async (id: number) => {
-        if (!confirm('Delete this badge? Users who earned it will lose it.')) return;
-        await fetch(`/api/admin/badges/${id}`, { method: 'DELETE', credentials: 'include' });
-        fetchBadges();
+    const handleDelete = async () => {
+        if (!deleteModal.id) return;
+        setDeleting(true);
+        try {
+            await fetch(`/api/admin/badges/${deleteModal.id}`, { method: 'DELETE', credentials: 'include' });
+            setDeleteModal({ open: false, id: null, name: '' });
+            fetchBadges();
+        } catch { } finally { setDeleting(false); }
     };
 
     if (loading) return <div className="text-gray-500 text-sm animate-pulse">Loading badges...</div>;
@@ -119,11 +126,19 @@ function BadgesPanel() {
                                 <Edit className="w-3 h-3" />
                             </button>
                             <button
-                                onClick={() => handleDelete(badge.id)}
+                                onClick={() => setDeleteModal({ open: true, id: badge.id, name: badge.name })}
                                 className="p-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30"
                             >
                                 <Trash2 className="w-3 h-3" />
                             </button>
+                            <DeleteConfirmModal
+                                open={deleteModal.open && deleteModal.id === badge.id}
+                                onOpenChange={(open) => setDeleteModal({ open, id: open ? badge.id : null, name: open ? badge.name : '' })}
+                                onConfirm={handleDelete}
+                                title="Delete Badge?"
+                                description={`Are you sure you want to delete "${badge.name}"? Users who earned this badge will lose it.`}
+                                isLoading={deleting}
+                            />
                         </div>
                     </div>
                 ))}
@@ -236,6 +251,8 @@ function DecorationsPanel() {
     const [showForm, setShowForm] = useState(false);
     const [editingDeco, setEditingDeco] = useState<Decoration | null>(null);
     const [loading, setLoading] = useState(true);
+    const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null; name?: string }>({ open: false, id: null, name: '' });
+    const [deleting, setDeleting] = useState(false);
 
     const fetchDecorations = useCallback(async () => {
         try {
@@ -247,10 +264,14 @@ function DecorationsPanel() {
 
     useEffect(() => { fetchDecorations(); }, [fetchDecorations]);
 
-    const handleDelete = async (id: number) => {
-        if (!confirm('Delete this decoration? Users who own it will lose it.')) return;
-        await fetch(`/api/admin/decorations/${id}`, { method: 'DELETE', credentials: 'include' });
-        fetchDecorations();
+    const handleDelete = async () => {
+        if (!deleteModal.id) return;
+        setDeleting(true);
+        try {
+            await fetch(`/api/admin/decorations/${deleteModal.id}`, { method: 'DELETE', credentials: 'include' });
+            setDeleteModal({ open: false, id: null, name: '' });
+            fetchDecorations();
+        } catch { } finally { setDeleting(false); }
     };
 
     if (loading) return <div className="text-gray-500 text-sm animate-pulse">Loading decorations...</div>;
@@ -299,11 +320,19 @@ function DecorationsPanel() {
                                 <Edit className="w-3 h-3" />
                             </button>
                             <button
-                                onClick={() => handleDelete(deco.id)}
+                                onClick={() => setDeleteModal({ open: true, id: deco.id, name: deco.name })}
                                 className="p-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30"
                             >
                                 <Trash2 className="w-3 h-3" />
                             </button>
+                            <DeleteConfirmModal
+                                open={deleteModal.open && deleteModal.id === deco.id}
+                                onOpenChange={(open) => setDeleteModal({ open, id: open ? deco.id : null, name: open ? deco.name : '' })}
+                                onConfirm={handleDelete}
+                                title="Delete Decoration?"
+                                description={`Are you sure you want to delete "${deco.name}"? Users who own this decoration will lose it.`}
+                                isLoading={deleting}
+                            />
                         </div>
                     </div>
                 ))}

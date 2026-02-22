@@ -1,16 +1,18 @@
+'use client';
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, CheckCircle, XCircle, Info, AlertTriangle, AlertOctagon } from 'lucide-react';
+import { Trash2, Edit, Info, AlertTriangle, CheckCircle, X, Plus } from 'lucide-react';
 import { format } from 'date-fns';
+import { DeleteConfirmModal } from './delete-confirm-modal';
 
-export interface Announcement {
+interface Announcement {
     id: number;
     content: string;
-    type: 'info' | 'warning' | 'success' | 'destructive';
+    type: "info" | "warning" | "success" | "destructive";
     is_active: boolean;
     created_at: string;
 }
@@ -22,32 +24,80 @@ interface AnnouncementsManagerProps {
 }
 
 export function AnnouncementsManager({ announcements, loading, onRefresh }: AnnouncementsManagerProps) {
-    const [newContent, setNewContent] = useState('');
-    const [newType, setNewType] = useState<'info' | 'warning' | 'success' | 'destructive'>('info');
-    const [newImageUrl, setNewImageUrl] = useState('');
-    const [isCreating, setIsCreating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [formData, setFormData] = useState<{ content: string; type: 'info' | 'warning' | 'success' | 'destructive' }>({ content: '', type: 'info' });
+    const [saving, setSaving] = useState(false);
+    const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
+    const [deleting, setDeleting] = useState(false);
 
-    const handleCreate = async (e: React.FormEvent) => {
+    const getTypeIcon = (type: string) => {
+        switch (type) {
+            case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+            case 'success': return <CheckCircle className="w-4 h-4 text-green-500" />;
+            case 'destructive': return <X className="w-4 h-4 text-red-500" />;
+            default: return <Info className="w-4 h-4 text-blue-500" />;
+        }
+    };
+
+    const getTypeStyles = (type: string) => {
+        switch (type) {
+            case 'warning': return 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500';
+            case 'success': return 'bg-green-500/10 border-green-500/30 text-green-500';
+            case 'destructive': return 'bg-red-500/10 border-red-500/30 text-red-500';
+            default: return 'bg-blue-500/10 border-blue-500/30 text-blue-500';
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!newContent.trim()) return;
+        setSaving(true);
 
-        setIsCreating(true);
         try {
-            const res = await fetch('/api/admin/announcements', {
-                method: 'POST',
+            const url = editingId ? `/api/admin/announcements/${editingId}` : '/api/admin/announcements';
+            const method = editingId ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: newContent, type: newType, image_url: newImageUrl }),
+                body: JSON.stringify(formData),
             });
 
             if (res.ok) {
-                setNewContent('');
-                setNewImageUrl('');
+                setIsEditing(false);
+                setEditingId(null);
+                setFormData({ content: '', type: 'info' });
                 onRefresh();
             }
         } catch (error) {
-            console.error("Failed to create announcement:", error);
+            console.error("Failed to save announcement:", error);
         } finally {
-            setIsCreating(false);
+            setSaving(false);
+        }
+    };
+
+    const handleEdit = (announcement: Announcement) => {
+        setEditingId(announcement.id);
+        setFormData({ content: announcement.content, type: announcement.type });
+        setIsEditing(true);
+    };
+
+    const handleDelete = async () => {
+        if (!deleteModal.id) return;
+        setDeleting(true);
+        try {
+            const res = await fetch(`/api/admin/announcements/${deleteModal.id}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                onRefresh();
+                setDeleteModal({ open: false, id: null });
+            }
+        } catch (error) {
+            console.error("Failed to delete announcement:", error);
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -59,86 +109,63 @@ export function AnnouncementsManager({ announcements, loading, onRefresh }: Anno
                 body: JSON.stringify({ is_active: !currentStatus }),
             });
 
-            if (res.ok) {
-                onRefresh();
-            }
+            if (res.ok) onRefresh();
         } catch (error) {
-            console.error("Failed to toggle status:", error);
-        }
-    };
-
-    const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
-
-    const handleDelete = async (id: number) => {
-        if (deleteConfirm === id) {
-            try {
-                const res = await fetch(`/api/admin/announcements/${id}`, {
-                    method: 'DELETE',
-                });
-
-                if (res.ok) {
-                    onRefresh();
-                    setDeleteConfirm(null);
-                }
-            } catch (error) {
-                console.error("Failed to delete announcement:", error);
-            }
-        } else {
-            setDeleteConfirm(id);
-            // Auto-reset after 3 seconds
-            setTimeout(() => setDeleteConfirm(null), 3000);
-        }
-    };
-
-    const getTypeIcon = (type: string) => {
-        switch (type) {
-            case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
-            case 'success': return <CheckCircle className="w-4 h-4 text-green-500" />;
-            case 'destructive': return <AlertOctagon className="w-4 h-4 text-red-500" />;
-            default: return <Info className="w-4 h-4 text-blue-500" />;
+            console.error("Failed to toggle announcement:", error);
         }
     };
 
     return (
         <div className="space-y-6">
-            {/* Create New */}
-            <div className="bg-card p-4 rounded-lg border shadow-sm space-y-4">
-                <h3 className="font-semibold text-lg">Create Announcement</h3>
-                <form onSubmit={handleCreate} className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-1">
-                        <Input
-                            placeholder="Announcement content..."
-                            value={newContent}
-                            onChange={(e) => setNewContent(e.target.value)}
-                            required
-                        />
-                        <Input
-                            placeholder="Image URL (optional)..."
-                            value={newImageUrl}
-                            onChange={(e) => setNewImageUrl(e.target.value)}
-                        />
-                        {newImageUrl && (
-                            <div className="relative w-full h-32 bg-muted rounded-md overflow-hidden">
-                                <img src={newImageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => e.currentTarget.style.display = 'none'} />
-                            </div>
+            {/* Create/Edit Form */}
+            <div className="bg-gray-900/50 p-6 rounded-xl border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4">
+                    {isEditing ? 'Edit Announcement' : 'Create Announcement'}
+                </h3>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="flex gap-2">
+                        {(['info', 'warning', 'success', 'destructive'] as const).map((type) => (
+                            <button
+                                key={type}
+                                type="button"
+                                onClick={() => setFormData({ ...formData, type })}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                                    formData.type === type
+                                        ? getTypeStyles(type)
+                                        : 'border-white/10 text-gray-400 hover:bg-white/5'
+                                }`}
+                            >
+                                {getTypeIcon(type)}
+                                <span className="capitalize">{type}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <Textarea
+                        value={formData.content}
+                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                        placeholder="Enter announcement content..."
+                        className="min-h-[100px] bg-black/50 border-white/10 text-white"
+                        required
+                    />
+                    <div className="flex gap-2">
+                        {isEditing && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => { setIsEditing(false); setEditingId(null); setFormData({ content: '', type: 'info' }); }}
+                                className="border-white/10 text-white hover:bg-white/10"
+                            >
+                                Cancel
+                            </Button>
                         )}
+                        <Button
+                            type="submit"
+                            disabled={saving}
+                            className="bg-primary hover:bg-primary/80"
+                        >
+                            {saving ? 'Saving...' : isEditing ? 'Update' : 'Create'}
+                        </Button>
                     </div>
-                    <div className="w-[150px]">
-                        <Select value={newType} onValueChange={(v: any) => setNewType(v)}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="info">Info</SelectItem>
-                                <SelectItem value="warning">Warning</SelectItem>
-                                <SelectItem value="success">Success</SelectItem>
-                                <SelectItem value="destructive">Urgent</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <Button type="submit" disabled={isCreating}>
-                        {isCreating ? 'Posting...' : 'Post'}
-                    </Button>
                 </form>
             </div>
 
@@ -147,11 +174,11 @@ export function AnnouncementsManager({ announcements, loading, onRefresh }: Anno
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[50px]">Type</TableHead>
+                            <TableHead>Type</TableHead>
                             <TableHead>Content</TableHead>
                             <TableHead className="w-[100px]">Status</TableHead>
                             <TableHead className="w-[150px]">Date</TableHead>
-                            <TableHead className="w-[100px] text-right">Actions</TableHead>
+                            <TableHead className="w-[150px] text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -169,38 +196,56 @@ export function AnnouncementsManager({ announcements, loading, onRefresh }: Anno
                             announcements.map((announcement) => (
                                 <TableRow key={announcement.id}>
                                     <TableCell>
-                                        <div className="flex items-center justify-center">
+                                        <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border ${getTypeStyles(announcement.type)}`}>
                                             {getTypeIcon(announcement.type)}
+                                            <span className="capitalize text-xs">{announcement.type}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-medium">{announcement.content}</TableCell>
+                                    <TableCell className="max-w-[400px]">
+                                        <div className="line-clamp-2 text-sm">{announcement.content}</div>
+                                    </TableCell>
                                     <TableCell>
                                         <button
                                             onClick={() => handleToggleActive(announcement.id, announcement.is_active)}
-                                            className={`px-2 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${announcement.is_active
-                                                ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
-                                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                                }`}
+                                            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                                                announcement.is_active
+                                                    ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20'
+                                                    : 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20'
+                                            }`}
                                         >
                                             {announcement.is_active ? 'Active' : 'Inactive'}
                                         </button>
                                     </TableCell>
                                     <TableCell className="text-muted-foreground text-sm">
-                                        {format(new Date(announcement.created_at), 'MMM d, yyyy')}
+                                        {format(new Date(announcement.created_at), 'MMM d, yyyy HH:mm')}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                            onClick={() => handleDelete(announcement.id)}
-                                        >
-                                            {deleteConfirm === announcement.id ? (
-                                                <span className="text-xs font-bold">Confirm</span>
-                                            ) : (
+                                        <div className="flex justify-end gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleEdit(announcement)}
+                                                className="hover:bg-white/10"
+                                            >
+                                                <Edit className="w-4 h-4 text-blue-400" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-red-400 hover:text-red-400 hover:bg-red-500/10"
+                                                onClick={() => setDeleteModal({ open: true, id: announcement.id })}
+                                            >
                                                 <Trash2 className="w-4 h-4" />
-                                            )}
-                                        </Button>
+                                            </Button>
+                                            <DeleteConfirmModal
+                                                open={deleteModal.open && deleteModal.id === announcement.id}
+                                                onOpenChange={(open) => setDeleteModal({ open, id: open ? announcement.id : null })}
+                                                onConfirm={handleDelete}
+                                                title="Delete Announcement?"
+                                                description={`Are you sure you want to delete this announcement? This action cannot be undone.`}
+                                                isLoading={deleting}
+                                            />
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))

@@ -10,6 +10,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import MangaAddDialog from "./manga-add-dialog";
+import { DeleteConfirmModal } from "./delete-confirm-modal";
 
 interface Manga {
   id: number;
@@ -70,6 +71,8 @@ export function MangaTable({
   const [updating, setUpdating] = useState(false);
   const [updatingSource, setUpdatingSource] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null; title?: string }>({ open: false, id: null, title: '' });
+  const [deleting, setDeleting] = useState(false);
 
   /* ── search ── */
   const handleSearch = (e: React.FormEvent) => {
@@ -78,20 +81,22 @@ export function MangaTable({
   };
 
   /* ── delete ── */
-  const handleDelete = async (id: number) => {
-    if (!confirm("Delete this manga? This cannot be undone.")) return;
-    setDeletingId(id);
+  const handleDelete = async () => {
+    if (!deleteModal.id) return;
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/admin/manga/${id}`, {
+      const res = await fetch(`/api/admin/manga/${deleteModal.id}`, {
         method: "DELETE",
         credentials: "include",
       });
-      if (res.ok) onRefresh();
-      else alert("Failed to delete manga");
+      if (res.ok) {
+        onRefresh();
+        setDeleteModal({ open: false, id: null, title: '' });
+      }
     } catch (err) {
       console.error(err);
     } finally {
-      setDeletingId(null);
+      setDeleting(false);
     }
   };
 
@@ -345,7 +350,7 @@ export function MangaTable({
                     {/* Delete */}
                     <td className="px-4 py-3 text-right">
                       <button
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => setDeleteModal({ open: true, id: item.id, title: item.title })}
                         disabled={deletingId === item.id}
                         className="p-2 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-40"
                         title="Delete from database"
@@ -356,6 +361,14 @@ export function MangaTable({
                           <Trash2 className="w-4 h-4" />
                         )}
                       </button>
+                      <DeleteConfirmModal
+                        open={deleteModal.open && deleteModal.id === item.id}
+                        onOpenChange={(open) => setDeleteModal({ open, id: open ? item.id : null, title: open ? item.title : '' })}
+                        onConfirm={handleDelete}
+                        title="Delete Manga?"
+                        description={`Are you sure you want to delete "${item.title}"? This action cannot be undone.`}
+                        isLoading={deleting}
+                      />
                     </td>
                   </tr>
                 ))

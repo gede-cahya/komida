@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function DmcaPage() {
     return (
-        <div className="container mx-auto px-4 py-12 max-w-4xl">
+        <div className="container mx-auto px-4 pt-28 pb-16 max-w-4xl">
             <h1 className="text-3xl font-bold mb-8 text-foreground">DMCA Copyright Policy</h1>
 
             <div className="space-y-6 text-muted-foreground leading-relaxed">

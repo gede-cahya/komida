@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Trophy,
   Package,
+  Bug,
 } from "lucide-react";
 import { UserTable } from "@/components/admin/user-table";
 import { MangaTable } from "@/components/admin/manga-table";
@@ -34,11 +35,13 @@ import { CommentsTable } from "@/components/admin/comments-table";
 import { AnnouncementsManager } from "@/components/admin/announcements-manager";
 import { QuestsManager } from "@/components/admin/quests-manager";
 import InventoryManager from "@/components/admin/inventory-manager";
+import { BugReportsManager } from "@/components/admin/bug-reports-manager";
 import { Megaphone } from "lucide-react";
 import {
   TopActiveUsers,
   type ActiveUser,
 } from "@/components/admin/top-active-users";
+import { type BugReport } from "@/components/admin/bug-reports-manager";
 
 type Tab =
   | "dashboard"
@@ -47,7 +50,8 @@ type Tab =
   | "comments"
   | "announcements"
   | "quests"
-  | "inventory";
+  | "inventory"
+  | "bug-reports";
 
 interface User {
   id: number;
@@ -104,6 +108,7 @@ export default function AdminDashboard() {
   const [manga, setManga] = useState<Manga[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [bugReports, setBugReports] = useState<BugReport[]>([]);
   const [loadingData, setLoadingData] = useState(false);
 
   // Pagination & Search
@@ -206,7 +211,9 @@ export default function AdminDashboard() {
             ? "/api/admin/manga"
             : activeTab === "comments"
               ? "/api/admin/comments"
-              : "/api/admin/announcements";
+              : activeTab === "bug-reports"
+                ? "/api/admin/bug-reports"
+                : "/api/admin/announcements";
       const sourceParam =
         activeTab === "manga" && sourceFilter
           ? `&source=${encodeURIComponent(sourceFilter)}`
@@ -227,8 +234,13 @@ export default function AdminDashboard() {
           setComments(data.comments);
         } else if (activeTab === "announcements") {
           setAnnouncements(data.announcements);
+        } else if (activeTab === "bug-reports") {
+          setBugReports(data.reports);
         }
         setTotalPages(data.totalPages);
+      } else {
+        const errorText = await res.text();
+        console.error(`API Error for ${endpoint}:`, res.status, errorText);
       }
     } catch (e) {
       console.error(e);
@@ -343,6 +355,17 @@ export default function AdminDashboard() {
           >
             <Package className="w-5 h-5" />
             Inventory
+          </button>
+          <button
+            onClick={() => handleTabChange("bug-reports")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+              activeTab === "bug-reports"
+                ? "bg-primary text-white"
+                : "text-gray-400 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <Bug className="w-5 h-5" />
+            Bug Reports
           </button>
         </nav>
 
@@ -502,6 +525,14 @@ export default function AdminDashboard() {
         {activeTab === "quests" && <QuestsManager />}
 
         {activeTab === "inventory" && <InventoryManager />}
+
+        {activeTab === "bug-reports" && (
+          <BugReportsManager
+            reports={bugReports}
+            loading={loadingData}
+            onRefresh={fetchData}
+          />
+        )}
       </main>
     </div>
   );
