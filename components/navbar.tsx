@@ -17,6 +17,9 @@ import {
   LayoutDashboard,
   Tag,
   Bookmark,
+  ShoppingBag,
+  Wallet,
+  Backpack,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -32,6 +35,12 @@ const NAV_ITEMS = [
   { label: "Genres", href: "/genres", icon: Tag },
   { label: "Quests", href: "/quests", icon: Trophy },
   { label: "Bookmarks", href: "/bookmarks", icon: Bookmark },
+];
+
+const SHOP_NAV_ITEMS = [
+  { label: "Shop", href: "/shop", icon: ShoppingBag },
+  { label: "Wallet", href: "/wallet", icon: Wallet },
+  { label: "Inventory", href: "/inventory", icon: Backpack },
 ];
 
 export function Navbar() {
@@ -106,6 +115,19 @@ export function Navbar() {
                 href={item.href}
                 className="text-sm font-medium text-muted-foreground hover:text-white transition-colors"
               >
+                {item.label}
+              </Link>
+            ))}
+            {/* Divider */}
+            <div className="w-px h-6 bg-white/20" />
+            {/* Shop Section */}
+            {SHOP_NAV_ITEMS.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="text-sm font-medium text-muted-foreground hover:text-white transition-colors flex items-center gap-1"
+              >
+                <item.icon className="w-4 h-4" />
                 {item.label}
               </Link>
             ))}
@@ -231,6 +253,22 @@ export function Navbar() {
                       <Settings className="w-5 h-5" />
                       Settings
                     </Link>
+
+                    {/* Shop Section */}
+                    <div className="border-t border-border pt-4 mt-2">
+                      <p className="text-xs text-muted-foreground font-medium mb-2 px-2">SHOP</p>
+                      {SHOP_NAV_ITEMS.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          className="flex items-center gap-3 text-lg font-medium text-muted-foreground hover:text-white p-2 hover:bg-secondary/50 rounded-lg transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {item.icon && <item.icon className="w-5 h-5" />}
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
 
                     <button
                       onClick={() => {

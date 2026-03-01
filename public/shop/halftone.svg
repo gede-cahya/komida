@@ -1,0 +1,42 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="halftone" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="4" r="2" fill="#000"/>
+    </pattern>
+    <pattern id="halftone-light" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="1.5" fill="#333"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="300" fill="#1a1a1a"/>
+  
+  <!-- Halftone Shadow Effect -->
+  <ellipse cx="220" cy="160" rx="100" ry="90" fill="url(#halftone)" opacity="0.4"/>
+  
+  <!-- Avatar Circle - Grayscale -->
+  <circle cx="200" cy="150" r="70" fill="#2d2d2d" stroke="#000" stroke-width="3"/>
+  <circle cx="200" cy="150" r="60" fill="#404040"/>
+  
+  <!-- Face Silhouette (Noir Style) -->
+  <ellipse cx="200" cy="145" rx="35" ry="40" fill="#1a1a1a"/>
+  <ellipse cx="185" cy="135" rx="8" ry="10" fill="#fff" opacity="0.8"/>
+  <ellipse cx="215" cy="135" rx="8" ry="10" fill="#fff" opacity="0.8"/>
+  
+  <!-- Fedora Hat Silhouette -->
+  <ellipse cx="200" cy="105" rx="50" ry="15" fill="#000"/>
+  <rect x="160" y="75" width="80" height="30" fill="#000"/>
+  <rect x="170" y="65" width="60" height="15" fill="#000"/>
+  
+  <!-- Slash Effect - White Line -->
+  <line x1="130" y1="180" x2="270" y2="120" stroke="#fff" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Halftone Dots Scattered -->
+  <circle cx="100" cy="100" r="3" fill="#fff" opacity="0.4"/>
+  <circle cx="300" cy="200" r="4" fill="#fff" opacity="0.3"/>
+  <circle cx="80" cy="200" r="2" fill="#fff" opacity="0.5"/>
+  <circle cx="320" cy="100" r="3" fill="#fff" opacity="0.4"/>
+  
+  <!-- Title -->
+  <text x="200" y="275" font-family="Georgia, serif" font-size="18" fill="#fff" text-anchor="middle" letter-spacing="4" font-style="italic">HALFTONE NOIR</text>
+</svg>

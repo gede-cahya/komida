@@ -172,7 +172,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const [error, setError] = useState<string | null>(null); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const [error, setError] = useState<string | null>(null);
 
   const fetchAnalytics = async (period: TimePeriod) => {
     try {
@@ -188,8 +188,6 @@ export default function AdminDashboard() {
 
       if (visitsRes.ok) {
         setVisitStats(await visitsRes.json());
-      } else {
-        throw new Error(`Failed to fetch visits: ${visitsRes.statusText}`);
       }
 
       if (popularRes.ok) {

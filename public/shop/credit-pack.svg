@@ -1,0 +1,6 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#1a1a2e"/>
+  <circle cx="200" cy="120" r="60" fill="#f39c12"/>
+  <text x="200" y="200" font-family="Arial" font-size="32" fill="#f39c12" text-anchor="middle" font-weight="bold">Credits</text>
+  <text x="200" y="240" font-family="Arial" font-size="48" fill="#fff" text-anchor="middle" font-weight="bold">$</text>
+</svg>

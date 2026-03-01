@@ -1,0 +1,36 @@
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="avatar-circle">
+      <circle cx="200" cy="150" r="90"/>
+    </clipPath>
+  </defs>
+  
+  <!-- Dark Background -->
+  <rect width="400" height="300" fill="#0d0d0d"/>
+  
+  <!-- Speed Lines - Rotating Effect -->
+  <g opacity="0.6">
+    <line x1="200" y1="30" x2="200" y2="60" stroke="#fff" stroke-width="3"/>
+    <line x1="200" y1="240" x2="200" y2="270" stroke="#fff" stroke-width="3"/>
+    <line x1="90" y1="150" x2="120" y2="150" stroke="#fff" stroke-width="3"/>
+    <line x1="280" y1="150" x2="310" y2="150" stroke="#fff" stroke-width="3"/>
+    <line x1="120" y1="80" x2="145" y2="105" stroke="#fff" stroke-width="2"/>
+    <line x1="280" y1="80" x2="255" y2="105" stroke="#fff" stroke-width="2"/>
+    <line x1="120" y1="220" x2="145" y2="195" stroke="#fff" stroke-width="2"/>
+    <line x1="280" y1="220" x2="255" y2="195" stroke="#fff" stroke-width="2"/>
+    <line x1="60" y1="120" x2="80" y2="140" stroke="#fff" stroke-width="2"/>
+    <line x1="340" y1="120" x2="320" y2="140" stroke="#fff" stroke-width="2"/>
+    <line x1="60" y1="180" x2="80" y2="160" stroke="#fff" stroke-width="2"/>
+    <line x1="340" y1="180" x2="320" y2="160" stroke="#fff" stroke-width="2"/>
+  </g>
+  
+  <!-- Avatar Circle -->
+  <circle cx="200" cy="150" r="85" fill="#1a1a2e" stroke="#fff" stroke-width="4"/>
+  <circle cx="200" cy="150" r="75" fill="#2d2d44"/>
+  
+  <!-- Speed Star Burst -->
+  <polygon points="200,80 210,110 240,110 215,130 225,160 200,140 175,160 185,130 160,110 190,110" fill="#ff4757" opacity="0.8"/>
+  
+  <!-- Title -->
+  <text x="200" y="270" font-family="Arial Black, sans-serif" font-size="20" fill="#fff" text-anchor="middle" letter-spacing="2">MANGA SPEED</text>
+</svg>
