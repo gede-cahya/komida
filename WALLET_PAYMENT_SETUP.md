@@ -191,7 +191,7 @@ bun run dev
 TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Request payment
-curl -X POST http://localhost:3002/api/payment/crypto \
+curl -X POST http://localhost:3481/api/payment/crypto \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -244,7 +244,7 @@ tail -f /home/cahya/2026/komida-backend/backend.log
 ### 4. Verify Credits Bertambah
 
 ```bash
-curl -X GET http://localhost:3002/api/user/credits \
+curl -X GET http://localhost:3481/api/user/credits \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -289,7 +289,7 @@ curl -X GET http://localhost:3002/api/user/credits \
 
 2. **Check pending transaction:**
    ```bash
-   curl -X GET "http://localhost:3002/api/payment/verify?transaction_id=123"
+   curl -X GET "http://localhost:3481/api/payment/verify?transaction_id=123"
    ```
 
 3. **Manual add credits (jika perlu):**
@@ -319,7 +319,7 @@ app.get('/api/admin/wallet-balance', async (c) => {
 
 **Test:**
 ```bash
-curl http://localhost:3002/api/admin/wallet-balance
+curl http://localhost:3481/api/admin/wallet-balance
 ```
 
 ---

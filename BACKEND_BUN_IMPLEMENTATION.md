@@ -101,7 +101,7 @@ shell = "bash"
 ### .env
 ```env
 # Server
-PORT=3002
+PORT=3481
 NODE_ENV=development
 
 # Database
@@ -377,7 +377,7 @@ console.log('✅ Database seeded with', shopItems.length, 'shop items');
 import { server } from './server';
 import { env } from 'bun';
 
-const port = env.PORT || 3002;
+const port = env.PORT || 3481;
 
 console.log(`🚀 Server starting on port ${port}...`);
 

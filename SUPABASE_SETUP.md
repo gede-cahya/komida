@@ -261,7 +261,7 @@ bun run dev
 ### 2. Test Login Admin
 
 ```bash
-curl -X POST http://localhost:3002/api/auth/login \
+curl -X POST http://localhost:3481/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@komida.site",
@@ -288,7 +288,7 @@ Response:
 Untuk user yang dibuat via local database (tanpa Supabase):
 
 ```bash
-curl -X POST http://localhost:3002/api/auth/login \
+curl -X POST http://localhost:3481/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@test.com",
@@ -342,7 +342,7 @@ Supabase Auth (Email/Password)
 
 ```bash
 # Check backend running
-curl http://localhost:3002/health
+curl http://localhost:3481/health
 
 # Restart if needed
 cd komida-backend

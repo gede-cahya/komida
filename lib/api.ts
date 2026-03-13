@@ -8,7 +8,7 @@ const SECONDARY_API_URL = 'https://api.komida.site/api';
 
 // Initial default
 let SERVER_API_URL = isServer
-    ? (process.env.NODE_ENV === 'production' ? PRIMARY_API_URL : cleanUrl(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api'))
+    ? (process.env.NODE_ENV === 'production' ? PRIMARY_API_URL : cleanUrl(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3481/api'))
     : '/api';
 
 // For client side, we use internal Next.js routes (/api/...) that act as proxy.

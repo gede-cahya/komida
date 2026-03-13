@@ -2,7 +2,7 @@
 
 Dokumentasi endpoint yang diperlukan untuk backend Komida agar bisa connect dengan frontend.
 
-**Base URL:** `http://localhost:3002/api`
+**Base URL:** `http://localhost:3481/api`
 
 ---
 
@@ -493,7 +493,7 @@ Untuk frontend bisa jalan, backend minimal perlu endpoint ini:
 
 ### Test Login
 ```bash
-curl -X POST http://localhost:3002/api/auth/login \
+curl -X POST http://localhost:3481/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@komida.site","password":"admin123"}'
 ```
@@ -502,13 +502,13 @@ curl -X POST http://localhost:3002/api/auth/login \
 ```bash
 TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
-curl -X GET http://localhost:3002/api/user/profile \
+curl -X GET http://localhost:3481/api/user/profile \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Test Get Shop Items
 ```bash
-curl -X GET http://localhost:3002/api/shop/items
+curl -X GET http://localhost:3481/api/shop/items
 ```
 
 ---
@@ -538,4 +538,4 @@ curl -X GET http://localhost:3002/api/shop/items
 
 **Last Updated:** 2026-02-24
 **Frontend Version:** Next.js 16.1.6
-**Backend Port:** 3002
+**Backend Port:** 3481

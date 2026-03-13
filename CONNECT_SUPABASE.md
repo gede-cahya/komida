@@ -86,7 +86,7 @@ bun run dev  # atau npm run dev
 ### 5. Test Login
 
 ```bash
-curl -X POST http://localhost:3002/api/auth/login \
+curl -X POST http://localhost:3481/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"adminc","password":"azsxdc147258"}'
 ```

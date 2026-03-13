@@ -365,7 +365,7 @@ PAYMENT_WALLET_ADDRESS=0x2645ceE3a2453D1B3d050796193504aD8e402d08
 
 ## 📝 Notes
 
-- Backend is running on port **3005** (not 3002 as in docs)
+- Backend is running on port **3005** (not 3481 as in docs)
 - Frontend should connect to `http://localhost:3005` for API calls
 - QRIS payment auto-completes after 5 seconds for testing
 - Crypto payment requires actual ETH transfer on Base chain

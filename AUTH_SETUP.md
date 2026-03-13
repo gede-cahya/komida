@@ -113,7 +113,7 @@ POST /api/auth/logout
 ### 1. Register User Test
 
 ```bash
-curl -X POST http://localhost:3002/api/auth/register \
+curl -X POST http://localhost:3481/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -126,7 +126,7 @@ curl -X POST http://localhost:3002/api/auth/register \
 ### 2. Login Test
 
 ```bash
-curl -X POST http://localhost:3002/api/auth/login \
+curl -X POST http://localhost:3481/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
@@ -137,7 +137,7 @@ curl -X POST http://localhost:3002/api/auth/login \
 ### 3. Get Profile Test
 
 ```bash
-curl -X GET http://localhost:3002/api/auth/me \
+curl -X GET http://localhost:3481/api/auth/me \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -147,7 +147,7 @@ curl -X GET http://localhost:3002/api/auth/me \
 
 ### Port
 ```
-PORT=3002
+PORT=3481
 ```
 
 ### JWT Secret
@@ -234,7 +234,7 @@ Frontend sudah configured untuk menggunakan endpoint ini secara otomatis via pro
 
 1. User input username & password di `/login`
 2. Frontend call `POST /api/auth/login`
-3. Proxy forward ke backend `http://localhost:3002/api/auth/login`
+3. Proxy forward ke backend `http://localhost:3481/api/auth/login`
 4. Backend return token + user data
 5. Frontend simpan token di localStorage/cookie
 6. User redirect ke home/dashboard
@@ -260,7 +260,7 @@ const checkAuth = async () => {
 ## ✅ Testing Checklist
 
 ```
-✅ Backend running di port 3002
+✅ Backend running di port 3481
 ✅ Health check endpoint works
 ✅ Register endpoint works
 ✅ Login endpoint works
@@ -283,7 +283,7 @@ bun run dev
 bun run start
 ```
 
-Server akan running di: **http://localhost:3002**
+Server akan running di: **http://localhost:3481**
 
 ---
 
@@ -293,7 +293,7 @@ Server akan running di: **http://localhost:3002**
 
 1. Check backend running:
 ```bash
-curl http://localhost:3002/health
+curl http://localhost:3481/health
 ```
 
 2. Jika tidak running:
@@ -304,7 +304,7 @@ bun run start
 
 3. Check port tidak digunakan:
 ```bash
-lsof -i :3002
+lsof -i :3481
 pkill -f "bun run"
 bun run start
 ```

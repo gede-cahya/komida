@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 // Constants to match lib/api.ts
 const PRIMARY_API_URL = "https://komida-backend-production.up.railway.app/api";
 const SECONDARY_API_URL = "https://api.komida.site/api";
-const LOCAL_API_URL = "http://localhost:3002/api";
+const LOCAL_API_URL = "http://localhost:3481/api";
 
 // Failover state
 let isFallbackActive = false;
