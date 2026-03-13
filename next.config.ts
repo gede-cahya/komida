@@ -50,6 +50,7 @@ const nextConfig: NextConfig = {
       },
     ],
 
+    unoptimized: true,
   },
   // Rewrites removed in favor of dynamic API route proxy in app/api/[...path]/route.ts
   // This allows for intelligent failover between Railway and Cloudflare Tunnel
