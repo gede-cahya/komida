@@ -1,6 +1,6 @@
 # 📚 Komida - Modern Manga Reader
 
-Komida is a high-performance, modern manga, manhwa, and manhua reader web application built with Next.js 15, Tailwind CSS, and Framer Motion.
+Komida is a high-performance, modern manga, manhwa, and manhua reader web application built with Next.js 16, Tailwind CSS, and Framer Motion.
 
 ![Komida Homepage Screenshot](public/screenshots/homepage.png)
 
@@ -56,7 +56,7 @@ Komida is a high-performance, modern manga, manhwa, and manhua reader web applic
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/)
+- **Framework**: [Next.js 16](https://nextjs.org/)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Icons**: [Lucide React](https://lucide.dev/)
@@ -67,11 +67,6 @@ Komida is a high-performance, modern manga, manhwa, and manhua reader web applic
 
 ## 📸 Screenshots
 
-````carousel
-![Homepage](public/screenshots/homepage.png)
-<!-- slide -->
-![Popular Page](public/screenshots/popular.png)
-<!-- slide -->
-![Genre List](public/screenshots/genres.png)
-````
-
+![Homepage](./public/screenshots/homepage.png)
+![Popular Page](./public/screenshots/popular.png)
+![Genre List](./public/screenshots/genres.png)
