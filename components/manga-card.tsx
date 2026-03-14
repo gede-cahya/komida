@@ -71,7 +71,7 @@ export function MangaCard({
         )}
 
         {/* Rating badge — top right */}
-        <div className="absolute top-2 right-2 z-10 flex items-center gap-0.5 bg-black/60 backdrop-blur-sm rounded-full px-1.5 py-0.5">
+        <div className="absolute top-2 right-2 z-10 flex items-center gap-0.5 bg-black/80 rounded-full px-1.5 py-0.5">
           <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
           <span className="text-[10px] text-white font-semibold leading-none">
             {rating}

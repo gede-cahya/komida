@@ -89,7 +89,7 @@ function BentoCard({ item, featured = false, index = 0 }: BentoCardProps) {
 
       {/* Rating badge — top right */}
       <div
-        className={`absolute top-2 right-2 z-20 flex items-center gap-0.5 bg-black/60 backdrop-blur-sm rounded-full ${
+        className={`absolute top-2 right-2 z-20 flex items-center gap-0.5 bg-black/80 rounded-full ${
           featured ? "px-2 py-1 gap-1" : "px-1.5 py-0.5"
         }`}
       >
