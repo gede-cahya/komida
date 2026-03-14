@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📚 Komida - Modern Manga Reader
 
-## Getting Started
+Komida is a high-performance, modern manga, manhwa, and manhua reader web application built with Next.js 15, Tailwind CSS, and Framer Motion.
 
-First, run the development server:
+![Komida Homepage Screenshot](public/screenshots/homepage.png)
 
-```bash
-bun run dev
-# or
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## ✨ Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Modern UI/UX**: Stunning dark-themed interface with smooth animations.
+- **Optimized Performance**: Zero-lag scrolling and instant navigation using Next.js Loading Skeletons.
+- **Comprehensive Library**: Browse through Popular, Genres, and Latest Updates.
+- **Shop & Economy**: Purchase decorations and manage your credits.
+- **Web3 Integration**: Wallet support for payments and microtransactions.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Getting Started
 
-## Learn More
+### Prerequisites
 
-To learn more about Next.js, take a look at the following resources:
+- [Bun](https://bun.sh/) (Recommended) or Node.js 18+
+- Backend server running (refer to the backend README)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/gede-cahya/komida.git
+   cd komida
+   ```
 
-## Deploy on Vercel
+2. **Install dependencies**:
+   ```bash
+   bun install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Configure Environment Variables**:
+   Create a `.env.local` file in the root directory:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:3481/api
+   NEXT_PUBLIC_TENOR_API_KEY=your_tenor_key
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. **Run the development server**:
+   ```bash
+   bun run dev
+   ```
+
+5. **Build for production**:
+   ```bash
+   bun run build
+   bun run start
+   ```
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 15](https://nextjs.org/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **State Management**: [TanStack Query](https://tanstack.com/query)
+- **Authentication**: Custom Supabase + SIWE integration
+
+---
+
+## 📸 Screenshots
+
+````carousel
+![Homepage](public/screenshots/homepage.png)
+<!-- slide -->
+![Popular Page](public/screenshots/popular.png)
+<!-- slide -->
+![Genre List](public/screenshots/genres.png)
+````
+
