@@ -93,6 +93,9 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
           setSelectedSource(bestSource);
         }
         setLoading(false);
+
+        // Track view only when user actually visits this page (not from prefetch)
+        fetch(`/api/manga/view/${slug}`, { method: 'POST', credentials: 'include' }).catch(() => {});
       })
       .catch((err) => {
         console.error(err);
