@@ -11,6 +11,7 @@ import { SiweMessage } from 'siwe';
 export default function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
     const [isVerifyingWallet, setIsVerifyingWallet] = useState(false);
     const { login } = useAuth();
@@ -78,7 +79,7 @@ export default function LoginPage() {
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ username, password, rememberMe }),
                 credentials: 'include'
             });
 
@@ -130,6 +131,19 @@ export default function LoginPage() {
                             placeholder="Enter password"
                             required
                         />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                            className="w-4 h-4 rounded border-white/10 bg-[#1a1a1a] text-primary focus:ring-primary focus:ring-offset-[#111]"
+                        />
+                        <label htmlFor="rememberMe" className="text-sm text-gray-400 cursor-pointer">
+                            Remember me
+                        </label>
                     </div>
 
                     <button

@@ -22,6 +22,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('user');
+    const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isVerifyingWallet, setIsVerifyingWallet] = useState(false);
@@ -101,6 +102,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
             const body: any = { username, password };
             if (mode === 'register') body.role = role;
+            if (mode === 'login') body.rememberMe = rememberMe;
 
             const res = await fetch(endpoint, {
                 method: 'POST',
@@ -323,6 +325,21 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
                                                 <option value="user">User</option>
                                                 <option value="admin">Admin</option>
                                             </select>
+                                        </div>
+                                    )}
+
+                                    {mode === 'login' && (
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <input
+                                                type="checkbox"
+                                                id="rememberMe"
+                                                checked={rememberMe}
+                                                onChange={(e) => setRememberMe(e.target.checked)}
+                                                className="w-4 h-4 rounded border-white/10 bg-[#0a0a0a] text-primary focus:ring-primary focus:ring-offset-[#111]"
+                                            />
+                                            <label htmlFor="rememberMe" className="text-sm text-gray-400 cursor-pointer">
+                                                Remember me
+                                            </label>
                                         </div>
                                     )}
 

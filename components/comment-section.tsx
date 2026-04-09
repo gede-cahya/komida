@@ -183,7 +183,7 @@ export function CommentSection({ slug, chapter }: CommentSectionProps) {
                     credentials: 'include',
                     body: JSON.stringify({
                         slug,
-                        chapter,
+                        chapter_slug: chapter,
                         content: newComment,
                         is_spoiler: isSpoiler,
                         media_url: mediaUrl
