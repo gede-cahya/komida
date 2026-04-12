@@ -68,8 +68,8 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
     }
 
     try {
-        // Use Node 18+ native AbortSignal.timeout which correctly severs the underlying socket
-        const signal = AbortSignal.timeout(5000); // 5s timeout
+        // Use options.signal if provided, otherwise default to a 5s timeout
+        const signal = options?.signal || AbortSignal.timeout(5000);
 
         const res = await fetch(`${activeServerUrl}${targetEndpoint}`, {
             ...options,
@@ -166,7 +166,9 @@ export async function fetchMangaBySlug(slug: string) {
 }
 
 export async function fetchChapter(id: string) {
-    const res = await fetchWithFallback(`/manga/chapter?id=${encodeURIComponent(id)}`);
+    const res = await fetchWithFallback(`/manga/chapter?id=${encodeURIComponent(id)}`, {
+        signal: AbortSignal.timeout(30000) // Increase timeout to 30s for scraping
+    });
     if (!res.ok) {
         throw new Error('Failed to fetch chapter');
     }

@@ -145,7 +145,7 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
         return <ChapterReaderSkeleton />;
     }
 
-    if (error || !data) {
+    if (error || !data || !Array.isArray(data.images) || data.images.length === 0) {
         return (
             <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white gap-4">
                 <p>{error || 'Chapter not found'}</p>
