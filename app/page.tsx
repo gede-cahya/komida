@@ -40,43 +40,41 @@ const GENRE_POOL = [
   { name: "Mystery", slug: "mystery", emoji: "🔍" },
 ];
 
-export default async function Home() {
-  // Fetch Popular data safely
+// Create isolated async components to enable React Suspense streaming
+async function PopularSection() {
   const popularData = await fetchPopular().catch(() => []);
-  // Ensure it's an array
-  const safePopularData = Array.isArray(popularData)
-    ? popularData
-    : popularData.data || [];
+  const safePopularData = Array.isArray(popularData) ? popularData : popularData?.data || [];
+  if (safePopularData.length === 0) return null;
+  return <GenreSection title="Komik Hot 🔥" genre="popular" initialData={safePopularData} />;
+}
 
-  // Helper for smart genre fetching with search fallback
-  const getSmartGenreData = async (slug: string, query: string) => {
-    try {
-      // 1. Try fetching by genre
-      const res = await fetchGenre(slug).catch(() => []);
-      const data = Array.isArray(res) ? res : (res?.data || []);
-      
-      if (data.length > 0) return data;
-
-      // 2. Fallback to search if genre is empty
-      console.log(`[HOME] Genre ${slug} is empty, falling back to search for "${query}"`);
+async function SmartGenreSection({ title, genre, query }: { title: string, genre: string, query: string }) {
+  try {
+    const res = await fetchGenre(genre).catch(() => []);
+    const data = Array.isArray(res) ? res : (res?.data || []);
+    
+    let finalData = data;
+    if (finalData.length === 0) {
+      console.log(`[HOME] Genre ${genre} is empty, falling back to search for "${query}"`);
       const searchRes = await fetchSearch(query).catch(() => ({ results: [] }));
-      return searchRes.results || [];
-    } catch (err) {
-      console.error(`[HOME] Error fetching data for ${slug}:`, err);
-      return [];
+      finalData = searchRes.results || [];
     }
-  };
 
+    if (finalData.length === 0) return null;
+
+    return <GenreSection title={title} genre={genre} initialData={finalData} />;
+  } catch (err) {
+    console.error(`[HOME] Error fetching data for ${genre}:`, err);
+    return null;
+  }
+}
+
+export default function Home() {
   // Implement 10-minute rotation
   const tenMinuteBlock = Math.floor(Date.now() / (1000 * 60 * 10));
   const genre1 = GENRE_POOL[tenMinuteBlock % GENRE_POOL.length];
   const genre2 = GENRE_POOL[(tenMinuteBlock + 1) % GENRE_POOL.length];
   const genre3 = GENRE_POOL[(tenMinuteBlock + 2) % GENRE_POOL.length];
-
-  // Pre-fetch dynamic sections with fallbacks
-  const data1 = await getSmartGenreData(genre1.slug, genre1.name);
-  const data2 = await getSmartGenreData(genre2.slug, genre2.name);
-  const data3 = await getSmartGenreData(genre3.slug, genre3.name);
 
   return (
     <main className="min-h-screen bg-background text-foreground pt-20 md:pt-24 space-y-12 pb-20">
@@ -88,7 +86,6 @@ export default async function Home() {
 
         {/* Komik Hot Section */}
         <section>
-          {/* Reuse GenreSection but pass initialData. Genre slug 'popular' used for link. */}
           <Suspense
             fallback={
               <MangaGridSkeleton
@@ -97,23 +94,9 @@ export default async function Home() {
               />
             }
           >
-            <GenreSection
-              title="Komik Hot 🔥"
-              genre="popular"
-              initialData={safePopularData}
-            />
+            <PopularSection />
           </Suspense>
         </section>
-
-        {/* Existing Trending Section (Keep or Remove? User didn't explicitly say remove, but "Hot" might duplicate it.
-           User said "buatkan fitu baru di home...".
-           If "Komik Hot" replaces Hero, maybe we keep Trending?
-           "Trending" usually means "Hot".
-           Let's keep Trending and Recent underneath for now, as they are part of the original structure.
-           Wait, "Komik Hot" IS the list of popular comics.
-           The user implementation request replaced Hero with these lists.
-           I will place these lists at the top.
-        */}
 
         <div className="space-y-12">
           <Suspense
@@ -124,10 +107,10 @@ export default async function Home() {
               />
             }
           >
-            <GenreSection 
+            <SmartGenreSection 
                 title={`List ${genre1.name} ${genre1.emoji}`} 
                 genre={genre1.slug} 
-                initialData={data1}
+                query={genre1.name}
             />
           </Suspense>
 
@@ -139,10 +122,10 @@ export default async function Home() {
               />
             }
           >
-            <GenreSection
+            <SmartGenreSection
               title={`List ${genre2.name} ${genre2.emoji}`}
               genre={genre2.slug}
-              initialData={data2}
+              query={genre2.name}
             />
           </Suspense>
 
@@ -154,13 +137,12 @@ export default async function Home() {
               />
             }
           >
-            <GenreSection 
+            <SmartGenreSection 
                 title={`List ${genre3.name} ${genre3.emoji}`} 
                 genre={genre3.slug} 
-                initialData={data3}
+                query={genre3.name}
             />
           </Suspense>
-
         </div>
 
         {/* Other Sections */}
