@@ -84,6 +84,47 @@ export function getReadStatusForManga(mangaTitle: string): ReadStatus {
         has: (id?: string, title?: string) => {
             if (id && ids.has(String(id))) return true;
             if (title && titles.has(title)) return true;
+
+            // Advanced ID matching to handle domain shifts, trailing slashes, or base64 encodings
+            if (id) {
+                const decodeSafe = (s: string) => {
+                    try { return decodeURIComponent(atob(s)); } 
+                    catch { try { return atob(s); } catch { return s; } }
+                };
+                
+                const checkMatch = (sourceId: string, historyId: string) => {
+                    const srcRaw = decodeSafe(sourceId).trim();
+                    const histRaw = decodeSafe(historyId).trim();
+                    
+                    // Match ignoring trailing slashes
+                    if (srcRaw.replace(/\/$/, '') === histRaw.replace(/\/$/, '')) return true;
+                    
+                    // Match domain-agnostic path (critical for Kiryuu/Softkomik domain changes)
+                    try {
+                        const urlSrc = new URL(srcRaw);
+                        const urlHist = new URL(histRaw);
+                        if (urlSrc.pathname.replace(/\/$/, '') === urlHist.pathname.replace(/\/$/, '')) return true;
+                    } catch {}
+                    
+                    return false;
+                };
+
+                for (const hId of ids) {
+                    if (checkMatch(String(id), String(hId))) return true;
+                }
+            }
+            
+            // Advanced Title cleaning
+            if (title) {
+                const normalizeTitle = (t: string) => String(t).toLowerCase().replace(/[^a-z0-9]/gi, '').trim();
+                const cleanSrc = normalizeTitle(title);
+                if (cleanSrc) {
+                    for (const hTitle of titles) {
+                        if (normalizeTitle(hTitle) === cleanSrc) return true;
+                    }
+                }
+            }
+
             return false;
         }
     };
