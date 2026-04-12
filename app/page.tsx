@@ -80,18 +80,7 @@ export default async function Home() {
               />
             }
           >
-            <GenreSection title="Rekomendasi Isekai 🌀" genre="isekai" />
-          </Suspense>
-
-          <Suspense
-            fallback={
-              <MangaGridSkeleton
-                count={6}
-                cols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
-              />
-            }
-          >
-            <GenreSection title="Rekomendasi Fantasi ⚔️" genre="fantasy" />
+            <GenreSection title="List Isekai 🌀" genre="isekai" />
           </Suspense>
 
           <Suspense
@@ -103,14 +92,25 @@ export default async function Home() {
             }
           >
             <GenreSection
-              title="Rekomendasi Slice of Life 🍃"
+              title="List Slice of Life 🍃"
               genre="slice-of-life"
             />
           </Suspense>
+
+          <Suspense
+            fallback={
+              <MangaGridSkeleton
+                count={6}
+                cols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+              />
+            }
+          >
+            <GenreSection title="List Reincarnator 🔄" genre="reincarnation" />
+          </Suspense>
         </div>
 
-        {/* Keeping original sections below as they were not explicitly asked to be removed, only Hero was. */}
-        <section className="pt-2 lg:pt-6">
+        {/* Other Sections */}
+        <section className="pt-2 lg:pt-6 border-t border-white/10">
           <Suspense fallback={<TrendingSkeleton />}>
             <TrendingSection />
           </Suspense>
