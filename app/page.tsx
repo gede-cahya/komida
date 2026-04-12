@@ -2,7 +2,7 @@ import { TrendingSection } from "@/components/trending";
 import { RecentUpdates } from "@/components/recent-updates";
 import { GenreSection } from "@/components/genre-section";
 import { AnnouncementBanner } from "@/components/announcement-banner";
-import { fetchPopular } from "@/lib/api";
+import { fetchPopular, fetchGenre, fetchSearch } from "@/lib/api";
 
 import { Metadata } from "next";
 
@@ -32,6 +32,30 @@ export default async function Home() {
   const safePopularData = Array.isArray(popularData)
     ? popularData
     : popularData.data || [];
+
+  // Helper for smart genre fetching with search fallback
+  const getSmartGenreData = async (slug: string, query: string) => {
+    try {
+      // 1. Try fetching by genre
+      const res = await fetchGenre(slug).catch(() => []);
+      const data = Array.isArray(res) ? res : (res?.data || []);
+      
+      if (data.length > 0) return data;
+
+      // 2. Fallback to search if genre is empty
+      console.log(`[HOME] Genre ${slug} is empty, falling back to search for "${query}"`);
+      const searchRes = await fetchSearch(query).catch(() => ({ results: [] }));
+      return searchRes.results || [];
+    } catch (err) {
+      console.error(`[HOME] Error fetching data for ${slug}:`, err);
+      return [];
+    }
+  };
+
+  // Pre-fetch missing sections with fallbacks
+  const isekaiData = await getSmartGenreData("isekai", "Isekai");
+  const sliceOfLifeData = await getSmartGenreData("slice-of-life", "Slice of Life");
+  const reincarnationData = await getSmartGenreData("reincarnation", "Reincarnator");
 
   return (
     <main className="min-h-screen bg-background text-foreground pt-20 md:pt-24 space-y-12 pb-20">
@@ -70,7 +94,6 @@ export default async function Home() {
            I will place these lists at the top.
         */}
 
-        {/* Genre Recommendations */}
         <div className="space-y-12">
           <Suspense
             fallback={
@@ -80,7 +103,11 @@ export default async function Home() {
               />
             }
           >
-            <GenreSection title="List Isekai 🌀" genre="isekai" />
+            <GenreSection 
+                title="List Isekai 🌀" 
+                genre="isekai" 
+                initialData={isekaiData}
+            />
           </Suspense>
 
           <Suspense
@@ -94,6 +121,7 @@ export default async function Home() {
             <GenreSection
               title="List Slice of Life 🍃"
               genre="slice-of-life"
+              initialData={sliceOfLifeData}
             />
           </Suspense>
 
@@ -105,7 +133,11 @@ export default async function Home() {
               />
             }
           >
-            <GenreSection title="List Reincarnator 🔄" genre="reincarnation" />
+            <GenreSection 
+                title="List Reincarnator 🔄" 
+                genre="reincarnation" 
+                initialData={reincarnationData}
+            />
           </Suspense>
         </div>
 

@@ -173,6 +173,14 @@ export async function fetchChapter(id: string) {
     return res.json();
 }
 
+export async function fetchSearch(query: string) {
+    const res = await fetchWithFallback(`/manga/search?q=${encodeURIComponent(query)}`);
+    if (!res.ok) {
+        throw new Error('Failed to fetch search results');
+    }
+    return res.json();
+}
+
 export interface Manga {
     id: number;
     title: string;
