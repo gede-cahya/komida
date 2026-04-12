@@ -8,6 +8,7 @@ import {
   RefreshCw,
   Filter,
   RotateCcw,
+  ImageOff,
 } from "lucide-react";
 import MangaAddDialog from "./manga-add-dialog";
 import { DeleteConfirmModal } from "./delete-confirm-modal";
@@ -73,6 +74,7 @@ export function MangaTable({
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null; title?: string }>({ open: false, id: null, title: '' });
   const [deleting, setDeleting] = useState(false);
+  const [fixingImages, setFixingImages] = useState(false);
 
   /* ── search ── */
   const handleSearch = (e: React.FormEvent) => {
@@ -121,6 +123,30 @@ export function MangaTable({
       alert("Error starting update");
     } finally {
       setUpdating(false);
+    }
+  };
+
+  /* ── fix-images ── */
+  const handleFixImages = async () => {
+    if (
+      !confirm(
+        "Detect and fix corrupted/white images? This triggers scrapers in the background.",
+      )
+    )
+      return;
+    setFixingImages(true);
+    try {
+      const res = await fetch("/api/admin/manga/fix-images", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) alert("Auto-fix started in background!");
+      else alert("Failed to start image fix");
+    } catch (err) {
+      console.error(err);
+      alert("Error starting image fix");
+    } finally {
+      setFixingImages(false);
     }
   };
 
@@ -213,13 +239,24 @@ export function MangaTable({
           )}
           <button
             onClick={handleUpdateAll}
-            disabled={updating}
+            disabled={updating || fixingImages}
             className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium"
           >
             <RefreshCw
               className={`w-4 h-4 ${updating ? "animate-spin" : ""}`}
             />
             {updating ? "Updating…" : "Update All"}
+          </button>
+          <button
+            onClick={handleFixImages}
+            disabled={updating || fixingImages}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium"
+            title="Scan and repair missing/corrupted covers"
+          >
+            <ImageOff
+              className={`w-4 h-4 ${fixingImages ? "animate-spin" : ""}`}
+            />
+            {fixingImages ? "Fixing…" : "Fix All Broken Images"}
           </button>
           <button
             onClick={() => setIsAdd(true)}
