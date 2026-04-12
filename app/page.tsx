@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
-export const revalidate = 60;
+export const revalidate = 600;
 
 import { Suspense } from "react";
 import {
@@ -24,6 +24,21 @@ import {
   RecentUpdatesSkeleton,
   MangaGridSkeleton,
 } from "@/components/skeletons";
+
+const GENRE_POOL = [
+  { name: "Action", slug: "action", emoji: "⚔️" },
+  { name: "Adventure", slug: "adventure", emoji: "🗺️" },
+  { name: "Comedy", slug: "comedy", emoji: "😂" },
+  { name: "Drama", slug: "drama", emoji: "🎭" },
+  { name: "Fantasy", slug: "fantasy", emoji: "✨" },
+  { name: "Isekai", slug: "isekai", emoji: "🌀" },
+  { name: "Romance", slug: "romance", emoji: "❤️" },
+  { name: "Slice of Life", slug: "slice-of-life", emoji: "🍃" },
+  { name: "Supernatural", slug: "supernatural", emoji: "👻" },
+  { name: "Sci-Fi", slug: "sci-fi", emoji: "🚀" },
+  { name: "Thriller", slug: "thriller", emoji: "🔪" },
+  { name: "Mystery", slug: "mystery", emoji: "🔍" },
+];
 
 export default async function Home() {
   // Fetch Popular data safely
@@ -52,10 +67,16 @@ export default async function Home() {
     }
   };
 
-  // Pre-fetch missing sections with fallbacks
-  const isekaiData = await getSmartGenreData("isekai", "Isekai");
-  const sliceOfLifeData = await getSmartGenreData("slice-of-life", "Slice of Life");
-  const reincarnationData = await getSmartGenreData("reincarnation", "Reincarnator");
+  // Implement 10-minute rotation
+  const tenMinuteBlock = Math.floor(Date.now() / (1000 * 60 * 10));
+  const genre1 = GENRE_POOL[tenMinuteBlock % GENRE_POOL.length];
+  const genre2 = GENRE_POOL[(tenMinuteBlock + 1) % GENRE_POOL.length];
+  const genre3 = GENRE_POOL[(tenMinuteBlock + 2) % GENRE_POOL.length];
+
+  // Pre-fetch dynamic sections with fallbacks
+  const data1 = await getSmartGenreData(genre1.slug, genre1.name);
+  const data2 = await getSmartGenreData(genre2.slug, genre2.name);
+  const data3 = await getSmartGenreData(genre3.slug, genre3.name);
 
   return (
     <main className="min-h-screen bg-background text-foreground pt-20 md:pt-24 space-y-12 pb-20">
@@ -104,9 +125,9 @@ export default async function Home() {
             }
           >
             <GenreSection 
-                title="List Isekai 🌀" 
-                genre="isekai" 
-                initialData={isekaiData}
+                title={`List ${genre1.name} ${genre1.emoji}`} 
+                genre={genre1.slug} 
+                initialData={data1}
             />
           </Suspense>
 
@@ -119,9 +140,9 @@ export default async function Home() {
             }
           >
             <GenreSection
-              title="List Slice of Life 🍃"
-              genre="slice-of-life"
-              initialData={sliceOfLifeData}
+              title={`List ${genre2.name} ${genre2.emoji}`}
+              genre={genre2.slug}
+              initialData={data2}
             />
           </Suspense>
 
@@ -134,11 +155,12 @@ export default async function Home() {
             }
           >
             <GenreSection 
-                title="List Reincarnator 🔄" 
-                genre="reincarnation" 
-                initialData={reincarnationData}
+                title={`List ${genre3.name} ${genre3.emoji}`} 
+                genre={genre3.slug} 
+                initialData={data3}
             />
           </Suspense>
+
         </div>
 
         {/* Other Sections */}
