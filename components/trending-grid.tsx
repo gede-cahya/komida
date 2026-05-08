@@ -1,10 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
 import { Star, Clock, ArrowRight, Flame } from "lucide-react";
 import { type TrendingManga } from "@/lib/api";
+import { imagePresets } from "@/lib/imagekit";
+import { SafeImage } from "@/components/safe-image";
 
 export interface TrendingGridProps {
   items: TrendingManga[];
@@ -42,8 +43,10 @@ function BentoCard({ item, featured = false, index = 0 }: BentoCardProps) {
     >
       {/* Cover image fills the full container */}
       {item.image ? (
-        <Image
-          src={`/api/image/proxy?url=${encodeURIComponent(item.image)}&source=${item.source || "kiryuu"}`}
+        <SafeImage
+          {...(featured
+            ? imagePresets.featured(item.image, item.source)
+            : imagePresets.thumbnail(item.image, item.source))}
           alt={item.title}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -52,6 +55,9 @@ function BentoCard({ item, featured = false, index = 0 }: BentoCardProps) {
               ? "(max-width: 768px) 100vw, 50vw"
               : "(max-width: 768px) 50vw, 25vw"
           }
+          priority={featured}
+          fetchPriority={featured ? "high" : "low"}
+          decoding="async"
         />
       ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-500">

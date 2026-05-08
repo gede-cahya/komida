@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, Menu, X, Home } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+import { SafeImage } from "@/components/safe-image";
 import { CommentSection } from "@/components/comment-section";
 import { formatDate } from "@/lib/utils";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { ChapterReaderSkeleton } from "@/components/skeletons";
 import { saveReadHistory } from "@/lib/history";
+import { imagePresets } from "@/lib/imagekit";
 
 interface ChapterData {
     images: string[];
@@ -188,8 +189,8 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
                 <div className="w-full max-w-4xl mx-auto">
                     {data.images.map((img, idx) => (
                         <div key={idx} className="relative w-full bg-gray-900/50 flex items-center justify-center">
-                            <Image
-                                src={`/api/image/proxy?url=${encodeURIComponent(img)}&source=${activeSource}`}
+                            <SafeImage
+                                {...imagePresets.chapter(img, activeSource)}
                                 alt={`Page ${idx + 1}`}
                                 width={800}
                                 height={1200}
@@ -197,6 +198,7 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
                                 unoptimized
                                 priority={idx < 4}
                                 loading={idx < 4 ? 'eager' : 'lazy'}
+                                decoding={idx < 4 ? 'sync' : 'async'}
                             />
                         </div>
                     ))}

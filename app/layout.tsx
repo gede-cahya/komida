@@ -87,6 +87,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://kacu.gmbr.pro" />
+        <link rel="preconnect" href="https://image.softkomik.com" />
+        <link rel="preconnect" href="https://cover.softdevices.my.id" />
+        <link rel="preconnect" href="https://ik.imagekit.io" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

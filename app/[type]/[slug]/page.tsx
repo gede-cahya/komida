@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import MangaDetailPage from './client-page';
-import { fetchMangaBySlug } from '@/lib/api';
+import { fetchMangaBySlug, fetchPopular } from '@/lib/api';
+import { slugify } from '@/lib/utils';
 
 type Props = {
     params: Promise<{
@@ -8,6 +9,9 @@ type Props = {
         slug: string;
     }>;
 };
+
+export const revalidate = 3600;
+export const dynamicParams = true;
 
 // Generate dynamic metadata
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -43,6 +47,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             title: `Read ${slug} Online | Komida`,
             description: `Read ${slug} manga online for free.`,
         };
+    }
+}
+
+export async function generateStaticParams() {
+    try {
+        const popular = await fetchPopular();
+        const data = Array.isArray(popular) ? popular : (popular?.data || []);
+        return data.slice(0, 100).map((manga: any) => {
+            const type = manga.type ? slugify(manga.type) : 'manhwa';
+            const slug = manga.slug || slugify(manga.title);
+            return { type, slug };
+        });
+    } catch {
+        return [];
     }
 }
 

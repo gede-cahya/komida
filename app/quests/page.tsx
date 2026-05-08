@@ -262,6 +262,7 @@ export default function QuestsPage() {
                                 fill
                                 sizes="80px"
                                 className={`object-cover ${quest.is_completed ? "" : "opacity-50 grayscale"}`}
+                                decoding="async"
                               />
                             </div>
                           ) : hasDecorationOnly(quest) ? (

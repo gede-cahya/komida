@@ -17,6 +17,7 @@ export function Footer() {
                                     alt="Komida Logo"
                                     fill
                                     className="object-contain"
+                                    decoding="async"
                                 />
                             </div>
                             <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground">

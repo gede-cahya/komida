@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Star, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { imagePresets } from "@/lib/imagekit";
+import { SafeImage } from "@/components/safe-image";
 
 interface MangaCardProps {
   title: string;
@@ -46,12 +47,14 @@ export function MangaCard({
       <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-gray-900">
         {/* Cover image */}
         {image ? (
-          <Image
-            src={`/api/image/proxy?url=${encodeURIComponent(image)}&source=${source || "kiryuu"}`}
+          <SafeImage
+            {...imagePresets.thumbnail(image, source)}
             alt={title}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
+            decoding="async"
+            fetchPriority="low"
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-gray-500">

@@ -142,7 +142,7 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
   let firstError: any = null;
   try {
     const response = await attemptFetch(targetBase);
-    return await convertFetchToNextResponse(response);
+    return await convertFetchToNextResponse(response, endpoint);
   } catch (err: any) {
     firstError = err;
 
@@ -182,7 +182,7 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
           );
         }
 
-        return await convertFetchToNextResponse(response);
+        return await convertFetchToNextResponse(response, endpoint);
       } catch (nextErr: any) {
         err = nextErr; // Track latest error for final message
       }
@@ -207,7 +207,7 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
   }
 }
 
-async function convertFetchToNextResponse(res: Response) {
+async function convertFetchToNextResponse(res: Response, endpoint?: string) {
   const data = await res.arrayBuffer();
 
   // Filter headers to avoid conflicts
@@ -226,6 +226,14 @@ async function convertFetchToNextResponse(res: Response) {
       responseHeaders.set(key, value);
     }
   });
+
+  // Add long-lived cache for image proxy responses (covers rarely change)
+  if (endpoint?.startsWith("/image/")) {
+    responseHeaders.set(
+      "Cache-Control",
+      "public, max-age=86400, stale-while-revalidate=604800"
+    );
+  }
 
   return new NextResponse(data, {
     status: res.status,

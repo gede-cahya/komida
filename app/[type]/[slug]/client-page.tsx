@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
+import { SafeImage } from "@/components/safe-image";
 import {
   Star,
   User,
@@ -21,6 +21,7 @@ import { CommentSection } from "@/components/comment-section";
 import { formatDate } from "@/lib/utils";
 import { MangaDetailSkeleton } from "@/components/skeletons";
 import { getReadStatusForManga } from "@/lib/history";
+import { imagePresets } from "@/lib/imagekit";
 
 interface SourceDetail {
   name: string;
@@ -173,17 +174,17 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
       <div className="relative w-full h-[300px] md:h-[400px]">
         {/* Blurred Background */}
         <div className="absolute inset-0 overflow-hidden">
-          <Image
-            src={
-              detail.image
-                ? `/api/image/proxy?url=${encodeURIComponent(detail.image)}&source=${selectedSource?.name || "kiryuu"}`
-                : "/placeholder.png"
-            }
-            alt="Background"
-            fill
-            className="object-cover blur-[50px] opacity-20 scale-110"
-            unoptimized
-          />
+          {detail.image ? (
+            <SafeImage
+              {...imagePresets.hero(detail.image, selectedSource?.name)}
+              alt="Background"
+              fill
+              className="object-cover blur-[50px] opacity-20 scale-110"
+              unoptimized
+              decoding="async"
+              fetchPriority="low"
+            />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-transparent" />
           <div className="absolute inset-0 bg-black/40" />{" "}
           {/* Added overlay for contrast */}
@@ -208,17 +209,18 @@ export default function MangaDetailPage({ initialData }: MangaDetailPageProps) {
             animate={{ opacity: 1, y: 0 }}
             className="w-[200px] md:w-[300px] aspect-[2/3] relative rounded-xl overflow-hidden shadow-2xl mx-auto md:mx-0 shrink-0 ring-1 ring-white/10"
           >
-            <Image
-              src={
-                detail.image
-                  ? `/api/image/proxy?url=${encodeURIComponent(detail.image)}&source=${selectedSource?.name || "kiryuu"}`
-                  : "/placeholder.png"
-              }
-              alt={detail.title}
-              fill
-              className="object-cover"
-              unoptimized
-            />
+            {detail.image ? (
+              <SafeImage
+                {...imagePresets.cover(detail.image, selectedSource?.name)}
+                alt={detail.title}
+                fill
+                className="object-cover"
+                unoptimized
+                priority
+                fetchPriority="high"
+                decoding="async"
+              />
+            ) : null}
           </motion.div>
 
           {/* Metadata */}

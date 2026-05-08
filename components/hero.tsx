@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Star, BookOpen } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import { imagePresets } from "@/lib/imagekit";
+import { SafeImage } from "@/components/safe-image";
 // Removed Skeleton import as parent handles loading state or we show nothing
 
 interface Manga {
@@ -65,15 +66,19 @@ export function Hero({ items: featuredManga = [] }: HeroProps) {
                 >
                     <div className={`absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent z-10`} />
                     <div className={`absolute inset-0 bg-gradient-to-r ${color} opacity-20 mix-blend-overlay z-10`} />
-                    <Image
-                        src={currentManga.image ? `/api/image/proxy?url=${encodeURIComponent(currentManga.image)}&source=${currentManga.source || 'kiryuu'}` : '/placeholder.png'}
-                        alt={currentManga.title}
-                        fill
-                        className="object-cover"
-                        priority
-                        unoptimized
-                        sizes="100vw"
-                    />
+                    {currentManga.image ? (
+                        <SafeImage
+                            {...imagePresets.hero(currentManga.image, currentManga.source)}
+                            alt={currentManga.title}
+                            fill
+                            className="object-cover"
+                            priority
+                            fetchPriority="high"
+                            decoding="async"
+                            unoptimized
+                            sizes="100vw"
+                        />
+                    ) : null}
                 </motion.div>
             </AnimatePresence>
 

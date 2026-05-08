@@ -100,6 +100,8 @@ export function Navbar() {
                 alt="Komida Logo"
                 fill
                 className="object-contain"
+                priority
+                decoding="async"
               />
             </div>
             <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
