@@ -105,6 +105,12 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
     }
   });
 
+  // Inject server-side API key so the backend accepts proxied requests
+  const apiKey = process.env.API_KEY;
+  if (apiKey) {
+    safeHeaders.set("x-api-key", apiKey);
+  }
+
   const attemptFetch = async (baseUrl: string): Promise<Response> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);

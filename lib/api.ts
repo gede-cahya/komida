@@ -6,6 +6,9 @@ const PRIMARY_API_URL = 'https://komida-backend-production.up.railway.app/api';
 // Cloudflare Tunnel URL as a reliable fallback
 const SECONDARY_API_URL = 'https://api.komida.site/api';
 
+// API key for server-to-server authentication (injected only server-side)
+const SERVER_API_KEY = isServer ? (process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || '') : '';
+
 // Initial default
 let SERVER_API_URL = isServer
     ? (process.env.NODE_ENV === 'production' ? PRIMARY_API_URL : cleanUrl(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3481/api'))
@@ -60,19 +63,28 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
     // In Server Components (isServer = true), relative endpoints MUST be appended to an absolute URL
     const targetEndpoint = isClientTarget ? endpoint : `/${endpoint}`;
 
+    // Inject API key for server-side direct backend calls
+    const serverOptions: RequestInit = { ...options };
+    if (isServer && SERVER_API_KEY) {
+        serverOptions.headers = {
+            ...(options?.headers || {}),
+            'x-api-key': SERVER_API_KEY,
+        };
+    }
+
     // Periodically check if primary has recovered
     await maybeResetToPrimary();
 
     if (isFallbackActive) {
-        return fetch(`${SECONDARY_API_URL}${targetEndpoint}`, options);
+        return fetch(`${SECONDARY_API_URL}${targetEndpoint}`, serverOptions);
     }
 
     try {
-        // Use options.signal if provided, otherwise default to a 5s timeout
-        const signal = options?.signal || AbortSignal.timeout(5000);
+        // Use serverOptions.signal if provided, otherwise default to a 5s timeout
+        const signal = serverOptions.signal || AbortSignal.timeout(5000);
 
         const res = await fetch(`${activeServerUrl}${targetEndpoint}`, {
-            ...options,
+            ...serverOptions,
             signal
         });
 
@@ -95,7 +107,7 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
 
             // Retry directly to secondary without timeout strictness for the first load
             try {
-                return await fetch(`${activeServerUrl}${targetEndpoint}`, options);
+                return await fetch(`${activeServerUrl}${targetEndpoint}`, serverOptions);
             } catch (secondErr: any) {
                 const secondMsg = secondErr.message || secondErr.name || 'Unknown';
                 console.error(`[SSR PINGER] Secondary API (${activeServerUrl}) also failed (${secondMsg}). Returning empty mock to prevent build crash.`);
