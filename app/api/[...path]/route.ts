@@ -207,6 +207,11 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
   }
 }
 
+const TRANSPARENT_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+  "base64"
+);
+
 async function convertFetchToNextResponse(res: Response, endpoint?: string) {
   const data = await res.arrayBuffer();
 
@@ -229,6 +234,26 @@ async function convertFetchToNextResponse(res: Response, endpoint?: string) {
 
   // Add long-lived cache for image proxy responses (covers rarely change)
   if (endpoint?.startsWith("/image/")) {
+    // Validate upstream actually returned an image, not an error page
+    const contentType = res.headers.get("content-type") || "";
+    const isImage = contentType.startsWith("image/");
+    const isValidSize = data.byteLength > 100; // Reject empty or tiny error responses
+
+    if (!isImage || !isValidSize) {
+      console.warn(
+        `[PROXY IMAGE] Upstream returned non-image (ctype=${contentType}, size=${data.byteLength}). Serving placeholder.`
+      );
+      responseHeaders.set("content-type", "image/png");
+      responseHeaders.set(
+        "Cache-Control",
+        "public, max-age=60, stale-while-revalidate=300"
+      );
+      return new NextResponse(TRANSPARENT_PNG, {
+        status: 200,
+        headers: responseHeaders,
+      });
+    }
+
     responseHeaders.set(
       "Cache-Control",
       "public, max-age=86400, stale-while-revalidate=604800"

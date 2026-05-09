@@ -68,13 +68,16 @@ async function SmartGenreSection({ title, genre, query }: { title: string, genre
   }
 }
 
-export default function Home() {
-  // Implement 10-minute rotation
-  const tenMinuteBlock = Math.floor(Date.now() / (1000 * 60 * 10));
-  const genre1 = GENRE_POOL[tenMinuteBlock % GENRE_POOL.length];
-  const genre2 = GENRE_POOL[(tenMinuteBlock + 1) % GENRE_POOL.length];
-  const genre3 = GENRE_POOL[(tenMinuteBlock + 2) % GENRE_POOL.length];
+// Use deterministic rotation based on day-of-year so ISR can cache effectively.
+// Changes every day at midnight UTC instead of every 10 minutes.
+const dayOfYear = Math.floor(
+  (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)
+);
+const genre1 = GENRE_POOL[dayOfYear % GENRE_POOL.length];
+const genre2 = GENRE_POOL[(dayOfYear + 1) % GENRE_POOL.length];
+const genre3 = GENRE_POOL[(dayOfYear + 2) % GENRE_POOL.length];
 
+export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground pt-20 md:pt-24 space-y-12 pb-20">
       <div className="container mx-auto px-4 space-y-16">
