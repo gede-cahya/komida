@@ -1,8 +1,7 @@
 import { TrendingSection } from "@/components/trending";
 import { RecentUpdates } from "@/components/recent-updates";
 import { AnnouncementBanner } from "@/components/announcement-banner";
-import { PopularSection } from "@/components/popular-section";
-import { SmartGenreSection } from "@/components/smart-genre-section";
+import { HomeSections } from "@/components/home-sections";
 
 import { Metadata } from "next";
 
@@ -14,6 +13,8 @@ export const metadata: Metadata = {
     canonical: "https://komida.site",
   },
 };
+
+export const dynamic = "force-dynamic";
 
 const GENRE_POOL = [
   { name: "Action", slug: "action", emoji: "⚔️" },
@@ -46,36 +47,15 @@ export default function Home() {
           <AnnouncementBanner />
         </section>
 
-        {/* Komik Hot Section */}
-        <section>
-          <PopularSection />
-        </section>
+        {/* Popular + Genre Sections (client-side fetched) */}
+        <HomeSections genre1={genre1} genre2={genre2} genre3={genre3} />
 
-        <div className="space-y-12">
-          <SmartGenreSection
-            title={`List ${genre1.name} ${genre1.emoji}`}
-            genre={genre1.slug}
-            query={genre1.name}
-          />
-
-          <SmartGenreSection
-            title={`List ${genre2.name} ${genre2.emoji}`}
-            genre={genre2.slug}
-            query={genre2.name}
-          />
-
-          <SmartGenreSection
-            title={`List ${genre3.name} ${genre3.emoji}`}
-            genre={genre3.slug}
-            query={genre3.name}
-          />
-        </div>
-
-        {/* Other Sections */}
+        {/* Trending */}
         <section className="pt-2 lg:pt-6 border-t border-white/10">
           <TrendingSection />
         </section>
 
+        {/* Recent Updates */}
         <section className="mt-6 lg:mt-10 pt-6 lg:pt-10 border-t border-white/10">
           <RecentUpdates />
         </section>
