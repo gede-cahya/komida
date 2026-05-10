@@ -23,6 +23,8 @@ interface TransformOptions {
 const BLOCKED_ORIGINS = new Set([
   "kacu.gmbr.pro",
   "v3.kiryuu.to",
+  "v4.kiryuu.to",
+  "v5.kiryuu.to",
   "kiryuu.to",
   "yuucdn.com",
   "manhwaindo.my",
@@ -105,26 +107,26 @@ export function getProxyUrl(
 export const imagePresets = {
   /** Grid thumbnails: ~300w, highly compressed */
   thumbnail: (url: string, source?: string) => ({
-    src: getImageKitUrl(url, { width: 300, quality: 80, progressive: true }),
-    fallbackSrc: getProxyUrl(url, source),
+    src: getProxyUrl(url, source),
+    fallbackSrc: getImageKitUrl(url, { width: 300, quality: 80, progressive: true }),
   }),
 
   /** Trending featured card: ~600w */
   featured: (url: string, source?: string) => ({
-    src: getImageKitUrl(url, { width: 600, quality: 85, progressive: true }),
-    fallbackSrc: getProxyUrl(url, source),
+    src: getProxyUrl(url, source),
+    fallbackSrc: getImageKitUrl(url, { width: 600, quality: 85, progressive: true }),
   }),
 
   /** Detail page cover: ~400w */
   cover: (url: string, source?: string) => ({
-    src: getImageKitUrl(url, { width: 400, quality: 85, progressive: true }),
-    fallbackSrc: getProxyUrl(url, source),
+    src: getProxyUrl(url, source),
+    fallbackSrc: getImageKitUrl(url, { width: 400, quality: 85, progressive: true }),
   }),
 
   /** Hero background: ~1200w, higher quality */
   hero: (url: string, source?: string) => ({
-    src: getImageKitUrl(url, { width: 1200, quality: 85, progressive: true }),
-    fallbackSrc: getProxyUrl(url, source),
+    src: getProxyUrl(url, source),
+    fallbackSrc: getImageKitUrl(url, { width: 1200, quality: 85, progressive: true }),
   }),
 
   /** Chapter page images: ~800w */
