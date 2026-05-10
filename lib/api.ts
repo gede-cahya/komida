@@ -2,54 +2,19 @@ const isServer = typeof window === 'undefined';
 // Ensure no trailing slash
 const cleanUrl = (url: string) => url.endsWith('/') ? url.slice(0, -1) : url;
 
-const PRIMARY_API_URL = 'https://komida-backend-production.up.railway.app/api';
-// Cloudflare Tunnel URL as a reliable fallback
-const SECONDARY_API_URL = 'https://api.komida.site/api';
+// VPS via Cloudflare Tunnel — sole backend (Railway removed)
+const API_BASE_URL = 'https://api.komida.site/api';
 
 // API key for server-to-server authentication (injected only server-side)
 const SERVER_API_KEY = isServer ? (process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || '') : '';
 
-// Initial default
+// Dev fallback to localhost
 let SERVER_API_URL = isServer
-    ? (process.env.NODE_ENV === 'production' ? PRIMARY_API_URL : cleanUrl(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3481/api'))
+    ? (process.env.NODE_ENV === 'production' ? API_BASE_URL : cleanUrl(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3481/api'))
     : '/api';
 
-// For client side, we use internal Next.js routes (/api/...) that act as proxy.
-// But for server components, we fetch directly to Backend. We need to handle fallback.
-let activeServerUrl = SERVER_API_URL;
-let isFallbackActive = false;
-let lastHealthCheck = 0;
-const HEALTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
-
-// Statuses that should trigger failover
-const FAILOVER_STATUSES = new Set([404, 500, 502, 503, 504, 530]);
-
 /**
- * Periodically check if the primary API has recovered (server-side only).
- */
-async function maybeResetToPrimary() {
-    if (!isFallbackActive || !isServer) return;
-    const now = Date.now();
-    if (now - lastHealthCheck < HEALTH_CHECK_INTERVAL) return;
-    lastHealthCheck = now;
-
-    try {
-        const res = await fetch(`${PRIMARY_API_URL}/popular`, {
-            signal: AbortSignal.timeout(4000),
-            cache: 'no-store',
-        });
-        if (res.ok) {
-            console.log('[SSR HEALTH] Primary API recovered! Switching back.');
-            activeServerUrl = PRIMARY_API_URL;
-            isFallbackActive = false;
-        }
-    } catch {
-        // Primary still down
-    }
-}
-
-/**
- * Intelligent fetch wrapper that routes to the secondary API if the primary one is down.
+ * Direct fetch to VPS backend. No failover — single source of truth.
  */
 async function fetchWithFallback(endpoint: string, options?: RequestInit) {
     const isClientTarget = endpoint.startsWith('/');
@@ -72,53 +37,13 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
         };
     }
 
-    // Periodically check if primary has recovered
-    await maybeResetToPrimary();
+    // 15s timeout for VPS cold starts
+    const signal = serverOptions.signal || AbortSignal.timeout(15000);
 
-    if (isFallbackActive) {
-        return fetch(`${SECONDARY_API_URL}${targetEndpoint}`, serverOptions);
-    }
-
-    try {
-        // Use serverOptions.signal if provided, otherwise default to a 15s timeout
-        // (Railway free tier needs ~10s cold start)
-        const signal = serverOptions.signal || AbortSignal.timeout(15000);
-
-        const res = await fetch(`${activeServerUrl}${targetEndpoint}`, {
-            ...serverOptions,
-            signal
-        });
-
-        if (!res.ok && activeServerUrl === PRIMARY_API_URL) {
-            // Failover for known-bad status codes (suspended app, server errors, dead tunnel)
-            if (FAILOVER_STATUSES.has(res.status)) {
-                throw new Error(`Primary API Failure (Status ${res.status})`);
-            }
-        }
-        return res;
-
-    } catch (err: any) {
-        const errorMsg = err.name === 'TimeoutError' || err.name === 'AbortError' ? 'TIMEOUT (5s)' : (err.message || 'Unknown Error');
-
-        if (activeServerUrl === PRIMARY_API_URL && !isFallbackActive) {
-            console.warn(`[SSR PINGER] Primary API (${PRIMARY_API_URL}) failed (${errorMsg}). Switching to Backup Tunnel (${SECONDARY_API_URL}) for ${targetEndpoint}`);
-            activeServerUrl = SECONDARY_API_URL;
-            isFallbackActive = true;
-            lastHealthCheck = Date.now();
-
-            // Retry directly to secondary without timeout strictness for the first load
-            try {
-                return await fetch(`${activeServerUrl}${targetEndpoint}`, serverOptions);
-            } catch (secondErr: any) {
-                const secondMsg = secondErr.message || secondErr.name || 'Unknown';
-                console.error(`[SSR PINGER] Secondary API (${activeServerUrl}) also failed (${secondMsg}). Returning empty mock to prevent build crash.`);
-                return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
-            }
-        }
-
-        console.error(`[SSR PINGER] API completely unreachable (Target: ${activeServerUrl}${targetEndpoint}, Error: ${errorMsg}). Returning empty mock.`);
-        return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    }
+    return fetch(`${SERVER_API_URL}${targetEndpoint}`, {
+        ...serverOptions,
+        signal
+    });
 }
 
 const API_URL = isServer ? SERVER_API_URL : '/api';
