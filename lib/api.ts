@@ -2,8 +2,8 @@ const isServer = typeof window === 'undefined';
 // Ensure no trailing slash
 const cleanUrl = (url: string) => url.endsWith('/') ? url.slice(0, -1) : url;
 
-// Cloudflare Tunnel — accessible from Vercel serverless (direct HTTP IP may be blocked)
-const API_BASE_URL = 'https://api.komida.site/api';
+// Direct VPS IP (nginx cached) — Cloudflare Tunnel is unreliable (502 errors)
+const API_BASE_URL = 'http://129.226.222.242/api';
 
 // API key for server-to-server authentication (injected only server-side)
 const SERVER_API_KEY = isServer ? (process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || '') : '';
