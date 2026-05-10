@@ -18,11 +18,7 @@ export const metadata: Metadata = {
 export const revalidate = 600;
 
 import { Suspense } from "react";
-import {
-  TrendingSkeleton,
-  RecentUpdatesSkeleton,
-  MangaGridSkeleton,
-} from "@/components/skeletons";
+import { MangaGridSkeleton } from "@/components/skeletons";
 
 const GENRE_POOL = [
   { name: "Action", slug: "action", emoji: "⚔️" },
@@ -149,15 +145,11 @@ export default function Home() {
 
         {/* Other Sections */}
         <section className="pt-2 lg:pt-6 border-t border-white/10">
-          <Suspense fallback={<TrendingSkeleton />}>
-            <TrendingSection />
-          </Suspense>
+          <TrendingSection />
         </section>
 
         <section className="mt-6 lg:mt-10 pt-6 lg:pt-10 border-t border-white/10">
-          <Suspense fallback={<RecentUpdatesSkeleton />}>
-            <RecentUpdates />
-          </Suspense>
+          <RecentUpdates />
         </section>
       </div>
     </main>

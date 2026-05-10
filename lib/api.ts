@@ -80,8 +80,9 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
     }
 
     try {
-        // Use serverOptions.signal if provided, otherwise default to a 5s timeout
-        const signal = serverOptions.signal || AbortSignal.timeout(5000);
+        // Use serverOptions.signal if provided, otherwise default to a 15s timeout
+        // (Railway free tier needs ~10s cold start)
+        const signal = serverOptions.signal || AbortSignal.timeout(15000);
 
         const res = await fetch(`${activeServerUrl}${targetEndpoint}`, {
             ...serverOptions,
@@ -123,7 +124,7 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
 const API_URL = isServer ? SERVER_API_URL : '/api';
 
 export async function fetchTrending() {
-    const res = await fetchWithFallback(`/trending`, { next: { revalidate: 60 } });
+    const res = await fetchWithFallback(`/trending`, { cache: 'no-store' });
     if (!res.ok) {
         const text = await res.text();
         console.error('Fetch Trending Error:', res.status, text);
@@ -133,7 +134,7 @@ export async function fetchTrending() {
 }
 
 export async function fetchRecentUpdates() {
-    const res = await fetchWithFallback(`/recent`, { next: { revalidate: 60 } });
+    const res = await fetchWithFallback(`/recent`, { cache: 'no-store' });
     if (!res.ok) {
         const text = await res.text();
         console.error('Fetch Recent Error:', res.status, text);
@@ -143,7 +144,7 @@ export async function fetchRecentUpdates() {
 }
 
 export async function fetchPopular(page = 1) {
-    const res = await fetchWithFallback(`/popular?page=${page}`, { next: { revalidate: 60 } });
+    const res = await fetchWithFallback(`/popular?page=${page}`, { cache: 'no-store' });
     if (!res.ok) {
         // Fallback for demo if backend isn't ready
         console.warn("Retrying with fallback or returning error");
@@ -153,7 +154,7 @@ export async function fetchPopular(page = 1) {
 }
 
 export async function fetchGenre(genre: string, page = 1) {
-    const res = await fetchWithFallback(`/genres/${genre}?page=${page}`, { next: { revalidate: 300 } });
+    const res = await fetchWithFallback(`/genres/${genre}?page=${page}`, { cache: 'no-store' });
     if (!res.ok) {
         throw new Error('Failed to fetch genre manga');
     }
