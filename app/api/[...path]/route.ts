@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// VPS via Cloudflare Tunnel — sole backend (Railway removed)
-const API_URL = "https://api.komida.site/api";
-const LOCAL_API_URL = "http://localhost:3481/api";
+// Go sidecar on VPS via nginx reverse proxy on port 80
+const API_URL = "http://129.226.222.242/api";
+const LOCAL_API_URL = "http://localhost:3482/api";
 
 export async function GET(
   request: NextRequest,
