@@ -6,6 +6,7 @@ import { useEffect, useState, use } from "react";
 import { ArrowLeft, Save, Trash2, ExternalLink, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getImageKitUrl } from "@/lib/imagekit";
 
 interface Chapter {
     title: string;
@@ -166,7 +167,7 @@ export default function MangaEditor({ params }: { params: Promise<{ id: string }
                     <div className="md:col-span-1">
                         <div className="aspect-[2/3] relative rounded-xl overflow-hidden bg-gray-900 border border-white/10">
                             <img
-                                src={formData.image ? `/api/image/proxy?url=${encodeURIComponent(formData.image)}&source=${manga.source}` : '/placeholder.png'}
+                                src={formData.image ? getImageKitUrl(formData.image, { width: 400, quality: 80 }) : '/placeholder.png'}
                                 alt="Cover"
                                 className="w-full h-full object-cover"
                             />

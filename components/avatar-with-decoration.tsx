@@ -3,6 +3,7 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { cn } from "@/lib/utils";
+import { getImageKitUrl } from "@/lib/imagekit";
 import {
   PopArtAvatar,
   MangaSpeedAvatar,
@@ -21,6 +22,10 @@ function resolveBadgeUrl(url: string): string {
   if (url.startsWith("/uploads/")) {
     return `/api${url}`;
   }
+  // Optimize external URLs with ImageKit
+  if (url.startsWith("http")) {
+    return getImageKitUrl(url, { width: 64, quality: 75 });
+  }
   return url;
 }
 
@@ -28,6 +33,10 @@ function resolveBadgeUrl(url: string): string {
 function resolveDecorationUrl(url: string): string {
   if (url?.startsWith("/uploads/")) {
     return `/api${url}`;
+  }
+  // Optimize external URLs with ImageKit
+  if (url?.startsWith("http")) {
+    return getImageKitUrl(url, { width: 128, quality: 80 });
   }
   return url;
 }
@@ -58,10 +67,15 @@ export const AvatarWithDecoration: React.FC<AvatarWithDecorationProps> = ({
 }) => {
   const config = sizeConfig[size];
 
+  // Optimize external avatar URLs with ImageKit (skip data URIs and local paths)
+  const avatarSrc = src && (src.startsWith("http") || src.startsWith("https"))
+    ? getImageKitUrl(src, { width: 128, quality: 80 })
+    : src;
+
   // Inner avatar element to be potentially wrapped
   const avatarElement = (
     <Avatar className={cn(config.avatar, "relative z-0 overflow-visible")}>
-      <AvatarImage src={src} className="rounded-full" />
+      <AvatarImage src={avatarSrc} className="rounded-full" />
       <AvatarFallback className="rounded-full">
         {fallback || "?"}
       </AvatarFallback>

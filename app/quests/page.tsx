@@ -13,6 +13,7 @@ import {
   Zap,
 } from "lucide-react";
 import Image from "next/image";
+import { getImageKitUrl } from "@/lib/imagekit";
 import { AvatarWithDecoration } from "@/components/avatar-with-decoration";
 
 interface Quest {
@@ -144,6 +145,10 @@ export default function QuestsPage() {
       // Resolve backend-relative paths through API proxy
       if (quest.badge_icon_url.startsWith("/uploads")) {
         return `/api${quest.badge_icon_url}`;
+      }
+      // Optimize external URLs with ImageKit
+      if (quest.badge_icon_url.startsWith("http")) {
+        return getImageKitUrl(quest.badge_icon_url, { width: 80, quality: 75 });
       }
       return quest.badge_icon_url;
     }

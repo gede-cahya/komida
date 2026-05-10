@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { AvatarWithDecoration } from "@/components/avatar-with-decoration";
 import { Zap, Award, Backpack, Check, Star, ExternalLink, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getImageKitUrl } from "@/lib/imagekit";
 import type { UserInventoryItem } from "@/types/payments";
 
 type FilterType = "all" | "decoration" | "badge";
@@ -135,7 +136,13 @@ export default function InventoryPage() {
                 {user.badges?.slice(0, 5).map((badge, idx) => (
                   <img
                     key={idx}
-                    src={badge.icon_url.startsWith("/uploads/") ? `/api${badge.icon_url}` : badge.icon_url}
+                    src={
+                      badge.icon_url.startsWith("/uploads/")
+                        ? `/api${badge.icon_url}`
+                        : badge.icon_url.startsWith("http")
+                        ? getImageKitUrl(badge.icon_url, { width: 32, quality: 75 })
+                        : badge.icon_url
+                    }
                     alt={badge.name}
                     className="w-8 h-8 rounded-full bg-white/10 p-1"
                     title={badge.name}
@@ -351,6 +358,8 @@ export default function InventoryPage() {
                       src={
                         item.image_url.startsWith("/uploads/")
                           ? `/api${item.image_url}`
+                          : item.image_url.startsWith("http")
+                          ? getImageKitUrl(item.image_url, { width: 80, quality: 75 })
                           : item.image_url
                       }
                       alt={item.name}

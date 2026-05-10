@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { X, Info, AlertTriangle, CheckCircle, AlertOctagon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getImageKitUrl } from '@/lib/imagekit';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Announcement {
@@ -92,7 +93,7 @@ export function AnnouncementBanner() {
                     {announcement.image_url && (
                         <div className="mt-3 relative rounded-lg overflow-hidden border border-white/10 shadow-md max-w-md">
                             <img
-                                src={announcement.image_url}
+                                src={getImageKitUrl(announcement.image_url, { width: 600, quality: 80 })}
                                 alt="Announcement attachment"
                                 className="w-full h-auto object-cover max-h-[300px]"
                             />

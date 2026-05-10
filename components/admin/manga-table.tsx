@@ -10,6 +10,7 @@ import {
   RotateCcw,
   ImageOff,
 } from "lucide-react";
+import { getImageKitUrl } from "@/lib/imagekit";
 import MangaAddDialog from "./manga-add-dialog";
 import { DeleteConfirmModal } from "./delete-confirm-modal";
 
@@ -177,11 +178,9 @@ export function MangaTable({
     }
   };
 
-  /* ── image proxy ── */
-  const proxyImage = (url: string, source: string) =>
-    url
-      ? `/api/image/proxy?url=${encodeURIComponent(url)}&source=${source.toLowerCase()}`
-      : "";
+  /* ── imagekit optimized url ── */
+  const optimizedImage = (url: string) =>
+    url ? getImageKitUrl(url, { width: 80, quality: 75 }) : "";
 
   /* ─────────────────────────────────────────── */
   return (
@@ -332,7 +331,7 @@ export function MangaTable({
                       <div className="relative w-9 h-13 rounded-md overflow-hidden bg-gray-800 shrink-0">
                         {item.image && (
                           <img
-                            src={proxyImage(item.image, item.source)}
+                            src={optimizedImage(item.image)}
                             alt={item.title}
                             className="w-full h-full object-cover"
                             style={{ aspectRatio: "2/3" }}

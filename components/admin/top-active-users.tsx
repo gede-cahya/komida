@@ -1,4 +1,5 @@
 import { Activity, User } from "lucide-react";
+import { getImageKitUrl } from "@/lib/imagekit";
 import { TierBadge } from "@/components/tier-badge";
 
 export interface ActiveUser {
@@ -63,7 +64,7 @@ export function TopActiveUsers({ users, loading }: TopActiveUsersProps) {
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-[var(--muted)] border border-white/5 flex items-center justify-center flex-shrink-0">
                     {user.avatar_url ? (
                       <img
-                        src={user.avatar_url}
+                        src={user.avatar_url.startsWith("http") ? getImageKitUrl(user.avatar_url, { width: 40, quality: 75 }) : user.avatar_url}
                         alt={user.username}
                         className="w-full h-full object-cover"
                       />

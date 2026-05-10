@@ -3,6 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PopularManga } from '@/types/analytics';
+import { getImageKitUrl } from '@/lib/imagekit';
 import Image from 'next/image';
 
 interface ComponentProps {
@@ -31,7 +32,7 @@ export function PopularComicsTable({ data, title }: ComponentProps) {
                                 </div>
                                 <div className="relative h-10 w-8 overflow-hidden rounded">
                                     <Image
-                                        src={manga.image ? `/api/image/proxy?url=${encodeURIComponent(manga.image)}&source=${manga.source || 'kiryuu'}` : '/placeholder.png'}
+                                        src={manga.image ? getImageKitUrl(manga.image, { width: 64, quality: 75 }) : '/placeholder.png'}
                                         alt={manga.title}
                                         fill
                                         className="object-cover"
