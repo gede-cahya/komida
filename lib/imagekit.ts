@@ -92,15 +92,13 @@ export function getImageKitUrl(
 
 /**
  * Build a fallback proxy URL for sources with hotlink protection.
- * Uses absolute HTTPS backend URL to avoid frontend catch-all route
- * content-type corruption issues.
  */
 export function getProxyUrl(
   originalUrl: string,
   source?: string
 ): string {
   if (!originalUrl) return "";
-  return `https://api.komida.site/api/image/proxy?url=${encodeURIComponent(originalUrl)}&source=${source || "kiryuu"}`;
+  return `/api/image/proxy?url=${encodeURIComponent(originalUrl)}&source=${source || "kiryuu"}`;
 }
 
 /**
