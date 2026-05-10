@@ -1,8 +1,8 @@
 import { TrendingSection } from "@/components/trending";
 import { RecentUpdates } from "@/components/recent-updates";
-import { GenreSection } from "@/components/genre-section";
 import { AnnouncementBanner } from "@/components/announcement-banner";
-import { fetchPopular, fetchGenre, fetchSearch } from "@/lib/api";
+import { PopularSection } from "@/components/popular-section";
+import { SmartGenreSection } from "@/components/smart-genre-section";
 
 import { Metadata } from "next";
 
@@ -14,12 +14,6 @@ export const metadata: Metadata = {
     canonical: "https://komida.site",
   },
 };
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-import { Suspense } from "react";
-import { MangaGridSkeleton } from "@/components/skeletons";
 
 const GENRE_POOL = [
   { name: "Action", slug: "action", emoji: "⚔️" },
@@ -36,37 +30,6 @@ const GENRE_POOL = [
   { name: "Mystery", slug: "mystery", emoji: "🔍" },
 ];
 
-// Create isolated async components to enable React Suspense streaming
-async function PopularSection() {
-  const popularData = await fetchPopular().catch(() => []);
-  const safePopularData = Array.isArray(popularData) ? popularData : popularData?.data || [];
-  if (safePopularData.length === 0) return null;
-  return <GenreSection title="Komik Hot 🔥" genre="popular" initialData={safePopularData} />;
-}
-
-async function SmartGenreSection({ title, genre, query }: { title: string, genre: string, query: string }) {
-  try {
-    const res = await fetchGenre(genre).catch(() => []);
-    const data = Array.isArray(res) ? res : (res?.data || []);
-    
-    let finalData = data;
-    if (finalData.length === 0) {
-      console.log(`[HOME] Genre ${genre} is empty, falling back to search for "${query}"`);
-      const searchRes = await fetchSearch(query).catch(() => ({ results: [] }));
-      finalData = searchRes.results || [];
-    }
-
-    if (finalData.length === 0) return null;
-
-    return <GenreSection title={title} genre={genre} initialData={finalData} />;
-  } catch (err) {
-    console.error(`[HOME] Error fetching data for ${genre}:`, err);
-    return null;
-  }
-}
-
-// Use deterministic rotation based on day-of-year so ISR can cache effectively.
-// Changes every day at midnight UTC instead of every 10 minutes.
 const dayOfYear = Math.floor(
   (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)
 );
@@ -85,63 +48,27 @@ export default function Home() {
 
         {/* Komik Hot Section */}
         <section>
-          <Suspense
-            fallback={
-              <MangaGridSkeleton
-                count={6}
-                cols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
-              />
-            }
-          >
-            <PopularSection />
-          </Suspense>
+          <PopularSection />
         </section>
 
         <div className="space-y-12">
-          <Suspense
-            fallback={
-              <MangaGridSkeleton
-                count={6}
-                cols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
-              />
-            }
-          >
-            <SmartGenreSection 
-                title={`List ${genre1.name} ${genre1.emoji}`} 
-                genre={genre1.slug} 
-                query={genre1.name}
-            />
-          </Suspense>
+          <SmartGenreSection
+            title={`List ${genre1.name} ${genre1.emoji}`}
+            genre={genre1.slug}
+            query={genre1.name}
+          />
 
-          <Suspense
-            fallback={
-              <MangaGridSkeleton
-                count={6}
-                cols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
-              />
-            }
-          >
-            <SmartGenreSection
-              title={`List ${genre2.name} ${genre2.emoji}`}
-              genre={genre2.slug}
-              query={genre2.name}
-            />
-          </Suspense>
+          <SmartGenreSection
+            title={`List ${genre2.name} ${genre2.emoji}`}
+            genre={genre2.slug}
+            query={genre2.name}
+          />
 
-          <Suspense
-            fallback={
-              <MangaGridSkeleton
-                count={6}
-                cols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
-              />
-            }
-          >
-            <SmartGenreSection 
-                title={`List ${genre3.name} ${genre3.emoji}`} 
-                genre={genre3.slug} 
-                query={genre3.name}
-            />
-          </Suspense>
+          <SmartGenreSection
+            title={`List ${genre3.name} ${genre3.emoji}`}
+            genre={genre3.slug}
+            query={genre3.name}
+          />
         </div>
 
         {/* Other Sections */}
