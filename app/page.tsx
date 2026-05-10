@@ -15,7 +15,8 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 600;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 import { Suspense } from "react";
 import { MangaGridSkeleton } from "@/components/skeletons";

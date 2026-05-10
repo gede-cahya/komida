@@ -49,7 +49,7 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
 const API_URL = isServer ? SERVER_API_URL : '/api';
 
 export async function fetchTrending() {
-    const res = await fetchWithFallback(`/trending`, { cache: 'no-store' });
+    const res = await fetchWithFallback(`/trending?t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) {
         const text = await res.text();
         console.error('Fetch Trending Error:', res.status, text);
@@ -59,7 +59,7 @@ export async function fetchTrending() {
 }
 
 export async function fetchRecentUpdates() {
-    const res = await fetchWithFallback(`/recent`, { cache: 'no-store' });
+    const res = await fetchWithFallback(`/recent?t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) {
         const text = await res.text();
         console.error('Fetch Recent Error:', res.status, text);
@@ -79,7 +79,7 @@ export async function fetchPopular(page = 1) {
 }
 
 export async function fetchGenre(genre: string, page = 1) {
-    const res = await fetchWithFallback(`/genres/${genre}?page=${page}`, { cache: 'no-store' });
+    const res = await fetchWithFallback(`/genres/${genre}?page=${page}&t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) {
         throw new Error('Failed to fetch genre manga');
     }
