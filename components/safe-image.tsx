@@ -31,6 +31,7 @@ export function SafeImage({ src, fallbackSrc, onError, ...props }: SafeImageProp
   return (
     <Image
       {...props}
+      loading={props.priority ? undefined : "lazy"}
       src={imgSrc}
       onLoad={(e) => {
         const target = e.currentTarget;
