@@ -19,6 +19,27 @@ interface TransformOptions {
   progressive?: boolean;
 }
 
+// Known manga scraper domains that block external crawlers (ImageKit can't fetch these)
+const BLOCKED_ORIGINS = new Set([
+  "kacu.gmbr.pro",
+  "v3.kiryuu.to",
+  "kiryuu.to",
+  "manhwaindo.my",
+  "softkomik.com",
+  "keikomik.com",
+  "komikindo.co",
+  "komikcast.io",
+]);
+
+function isBlockedOrigin(url: string): boolean {
+  try {
+    const hostname = new URL(url.startsWith("http") ? url : `https://${url}`).hostname;
+    return BLOCKED_ORIGINS.has(hostname) || BLOCKED_ORIGINS.has(hostname.replace(/^www\./, ""));
+  } catch {
+    return false;
+  }
+}
+
 export function getImageKitUrl(
   originalUrl: string,
   options: TransformOptions = {}
@@ -29,6 +50,12 @@ export function getImageKitUrl(
 
   // If originalUrl is already an ImageKit URL or data URI, return as-is
   if (originalUrl.startsWith("data:") || originalUrl.includes("ik.imagekit.io")) {
+    return originalUrl;
+  }
+
+  // Skip ImageKit for manga scraper domains that block crawlers
+  // SafeImage will fall back to proxy URL instead
+  if (isBlockedOrigin(originalUrl)) {
     return originalUrl;
   }
 
