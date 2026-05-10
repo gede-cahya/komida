@@ -24,6 +24,7 @@ const BLOCKED_ORIGINS = new Set([
   "kacu.gmbr.pro",
   "v3.kiryuu.to",
   "kiryuu.to",
+  "yuucdn.com",
   "manhwaindo.my",
   "softkomik.com",
   "keikomik.com",
@@ -128,7 +129,7 @@ export const imagePresets = {
 
   /** Chapter page images: ~800w */
   chapter: (url: string, source?: string) => ({
-    src: getImageKitUrl(url, { width: 800, quality: 80, progressive: true }),
-    fallbackSrc: getProxyUrl(url, source),
+    src: getProxyUrl(url, source),
+    fallbackSrc: url,
   }),
 };

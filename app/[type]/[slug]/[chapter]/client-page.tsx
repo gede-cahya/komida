@@ -3,9 +3,8 @@
 import { Navbar } from "@/components/navbar";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter, useParams } from "next/navigation";
-import { ArrowLeft, ArrowRight, Menu, X, Home } from "lucide-react";
+import { ArrowLeft, ArrowRight, Menu, X, Home, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
-import { SafeImage } from "@/components/safe-image";
 import { CommentSection } from "@/components/comment-section";
 import { formatDate } from "@/lib/utils";
 import { ScrollToTop } from "@/components/scroll-to-top";
@@ -21,6 +20,88 @@ interface ChapterData {
 }
 
 const API_URL = '/api';
+
+function withRetryParam(url: string, attempt: number) {
+    if (!attempt) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}retry=${attempt}`;
+}
+
+function ChapterImage({ image, source, page }: { image: string; source?: string | null; page: number }) {
+    const preset = imagePresets.chapter(image, source || undefined);
+    const [attempt, setAttempt] = useState(0);
+    const [useFallback, setUseFallback] = useState(false);
+    const [status, setStatus] = useState<'loading' | 'loaded' | 'failed'>('loading');
+
+    const currentSrc = withRetryParam(useFallback && preset.fallbackSrc ? preset.fallbackSrc : preset.src, attempt);
+
+    const retry = () => {
+        setStatus('loading');
+        setUseFallback(false);
+        setAttempt((value) => value + 1);
+    };
+
+    const handleFailure = () => {
+        if (!useFallback && preset.fallbackSrc && attempt >= 2) {
+            setUseFallback(true);
+            setAttempt((value) => value + 1);
+            return;
+        }
+
+        if (attempt < 5) {
+            setStatus('loading');
+            window.setTimeout(() => setAttempt((value) => value + 1), 1000 + attempt * 700);
+            return;
+        }
+
+        setStatus('failed');
+    };
+
+    return (
+        <div className="relative w-full min-h-[60vh] bg-gray-900/50 flex items-center justify-center">
+            {status === 'loading' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-gray-400">
+                    <Loader2 className="w-7 h-7 animate-spin text-primary" />
+                    <span className="text-xs">Loading page {page}...</span>
+                </div>
+            )}
+
+            {status === 'failed' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-gray-300 p-6 text-center">
+                    <p className="text-sm">Page {page} failed to load.</p>
+                    <button
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            retry();
+                        }}
+                        className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/80"
+                    >
+                        <RefreshCw className="w-4 h-4" />
+                        Refresh image
+                    </button>
+                </div>
+            )}
+
+            <img
+                key={currentSrc}
+                src={currentSrc}
+                alt={`Page ${page}`}
+                className={`w-full h-auto object-cover transition-opacity duration-300 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+                loading={page <= 4 ? 'eager' : 'lazy'}
+                decoding={page <= 4 ? 'sync' : 'async'}
+                onLoad={(event) => {
+                    const target = event.currentTarget;
+                    if (target.naturalWidth <= 2 && target.naturalHeight <= 2) {
+                        handleFailure();
+                        return;
+                    }
+                    setStatus('loaded');
+                }}
+                onError={handleFailure}
+            />
+        </div>
+    );
+}
 
 interface ChapterReaderPageProps {
     initialData?: ChapterData | null;
@@ -188,19 +269,12 @@ export default function ChapterReaderPage({ initialData }: ChapterReaderPageProp
             >
                 <div className="w-full max-w-4xl mx-auto">
                     {data.images.map((img, idx) => (
-                        <div key={idx} className="relative w-full bg-gray-900/50 flex items-center justify-center">
-                            <SafeImage
-                                {...imagePresets.chapter(img, activeSource)}
-                                alt={`Page ${idx + 1}`}
-                                width={800}
-                                height={1200}
-                                className="w-full h-auto object-cover"
-                                unoptimized
-                                priority={idx < 4}
-                                loading={idx < 4 ? 'eager' : 'lazy'}
-                                decoding={idx < 4 ? 'sync' : 'async'}
-                            />
-                        </div>
+                        <ChapterImage
+                            key={`${img}-${idx}`}
+                            image={img}
+                            source={activeSource}
+                            page={idx + 1}
+                        />
                     ))}
                 </div>
 
