@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Go sidecar on VPS via nginx reverse proxy on port 80
-const API_URL = "http://129.226.222.242/api";
+// Go sidecar via Cloudflare Tunnel (cached, global CDN)
+const API_URL = "https://api.komida.site/api";
 const LOCAL_API_URL = "http://localhost:3482/api";
 
 export async function GET(
