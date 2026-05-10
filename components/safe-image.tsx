@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image, { ImageProps } from "next/image";
+import { cn } from "@/lib/utils";
 
 interface SafeImageProps extends Omit<ImageProps, "src"> {
   src: string;
@@ -16,16 +17,41 @@ interface SafeImageProps extends Omit<ImageProps, "src"> {
 export function SafeImage({ src, fallbackSrc, onError, ...props }: SafeImageProps) {
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
+  const [isInvalid, setIsInvalid] = useState(false);
+
+  if (isInvalid) {
+    return (
+      <div className={cn("absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gray-900 text-gray-500", props.className)}>
+        <span className="text-4xl">📚</span>
+        <span className="text-xs font-medium">No Image</span>
+      </div>
+    );
+  }
 
   return (
     <Image
       {...props}
       src={imgSrc}
+      onLoad={(e) => {
+        const target = e.currentTarget;
+        if (target.naturalWidth <= 2 && target.naturalHeight <= 2) {
+          if (!hasError && fallbackSrc) {
+            setHasError(true);
+            setImgSrc(fallbackSrc);
+            return;
+          }
+          setIsInvalid(true);
+          return;
+        }
+        props.onLoad?.(e);
+      }}
       onError={(e) => {
         if (!hasError && fallbackSrc) {
           setHasError(true);
           setImgSrc(fallbackSrc);
+          return;
         }
+        setIsInvalid(true);
         onError?.(e);
       }}
     />
