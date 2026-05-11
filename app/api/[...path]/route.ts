@@ -78,6 +78,22 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
     const url = `${targetBase}${endpoint}${queryString}`;
     console.log(`[PROXY] Fetching: ${url}`);
 
+    if (endpoint === "/auth/login" && request.method === "POST") {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": apiKey,
+        },
+        body,
+        signal: controller.signal,
+        cache: "no-store",
+      });
+
+      console.log(`[PROXY] Status from ${targetBase}: ${res.status}`);
+      return await convertFetchToNextResponse(res, endpoint);
+    }
+
     const res = await fetch(url, {
       method: request.method,
       headers: safeHeaders,
