@@ -64,7 +64,7 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
   });
 
   // Inject server-side API key so the backend accepts proxied requests
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY;
   if (apiKey) {
     safeHeaders.set("x-api-key", apiKey);
   }
