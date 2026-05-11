@@ -108,30 +108,30 @@ export const imagePresets = {
   /** Grid thumbnails: ~300w, highly compressed */
   thumbnail: (url: string, source?: string) => ({
     src: getProxyUrl(url, source),
-    fallbackSrc: getImageKitUrl(url, { width: 300, quality: 80, progressive: true }),
+    fallbackSrc: isBlockedOrigin(url) ? undefined : getImageKitUrl(url, { width: 300, quality: 80, progressive: true }),
   }),
 
   /** Trending featured card: ~600w */
   featured: (url: string, source?: string) => ({
     src: getProxyUrl(url, source),
-    fallbackSrc: getImageKitUrl(url, { width: 600, quality: 85, progressive: true }),
+    fallbackSrc: isBlockedOrigin(url) ? undefined : getImageKitUrl(url, { width: 600, quality: 85, progressive: true }),
   }),
 
   /** Detail page cover: ~400w */
   cover: (url: string, source?: string) => ({
     src: getProxyUrl(url, source),
-    fallbackSrc: getImageKitUrl(url, { width: 400, quality: 85, progressive: true }),
+    fallbackSrc: isBlockedOrigin(url) ? undefined : getImageKitUrl(url, { width: 400, quality: 85, progressive: true }),
   }),
 
   /** Hero background: ~1200w, higher quality */
   hero: (url: string, source?: string) => ({
     src: getProxyUrl(url, source),
-    fallbackSrc: getImageKitUrl(url, { width: 1200, quality: 85, progressive: true }),
+    fallbackSrc: isBlockedOrigin(url) ? undefined : getImageKitUrl(url, { width: 1200, quality: 85, progressive: true }),
   }),
 
   /** Chapter page images: ~800w */
   chapter: (url: string, source?: string) => ({
     src: getProxyUrl(url, source),
-    fallbackSrc: url,
+    fallbackSrc: isBlockedOrigin(url) ? undefined : url,
   }),
 };

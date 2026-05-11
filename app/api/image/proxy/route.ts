@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = "http://129.226.222.242/api/image/proxy";
+const BACKEND_URL = "https://api.komida.site/api/image/proxy";
 
 export async function GET(request: NextRequest) {
   const urlParam = request.nextUrl.searchParams.get("url");
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   try {
     const res = await fetch(backendUrl, {
       headers: {
-        "x-api-key": process.env.API_KEY || "",
+        "x-api-key": process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || "komida-api-key-2026",
       },
       signal: AbortSignal.timeout(15000),
     });
