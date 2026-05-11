@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Go sidecar via direct VPS IP (nginx cached, fastest from Vercel)
-const API_URL = "http://129.226.222.242/api";
-const LOCAL_API_URL = "http://localhost:3482/api";
+// Go sidecar via Cloudflare Tunnel
+const API_URL = "https://api.komida.site/api";
+const LOCAL_API_URL = "http://localhost:3481/api";
 
 export async function GET(
   request: NextRequest,
