@@ -39,6 +39,7 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
 
   const isDev = process.env.NODE_ENV === "development";
   const targetBase = isDev ? LOCAL_API_URL : API_URL;
+  const apiKey = process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || "komida-api-key-2026";
 
   // Handle body for non-GET requests
   let body: any = null;
@@ -64,9 +65,10 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
   });
 
   // Inject server-side API key so the backend accepts proxied requests
-  const apiKey = process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY;
-  if (apiKey) {
-    safeHeaders.set("x-api-key", apiKey);
+  safeHeaders.set("x-api-key", apiKey);
+
+  if (endpoint === "/auth/login" && request.method === "POST") {
+    safeHeaders.set("content-type", "application/json");
   }
 
   const controller = new AbortController();
