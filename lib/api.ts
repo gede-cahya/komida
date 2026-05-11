@@ -37,8 +37,8 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
         };
     }
 
-    // 15s timeout for VPS cold starts
-    const signal = serverOptions.signal || AbortSignal.timeout(15000);
+    // 5s timeout for server fetches
+    const signal = serverOptions.signal || AbortSignal.timeout(5000);
 
     return fetch(`${SERVER_API_URL}${targetEndpoint}`, {
         ...serverOptions,
