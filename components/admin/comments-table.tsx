@@ -132,7 +132,7 @@ export function CommentsTable({ comments, loading, page, totalPages, onPageChang
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden ring-1 ring-white/10 shadow-sm shrink-0">
                                                     {comment.avatar_url ? (
-                                                        <img src={comment.avatar_url.startsWith("http") ? getImageKitUrl(comment.avatar_url, { width: 40, quality: 75 }) : comment.avatar_url} alt={comment.username} className="w-full h-full object-cover" />
+                                                        <img src={comment.avatar_url.startsWith("http") ? getImageKitUrl(comment.avatar_url, { width: 40, quality: 75 }) : comment.avatar_url} alt={comment.username} className="w-full h-full object-cover" crossOrigin="anonymous" loading="lazy" decoding="async" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white bg-gradient-to-br from-gray-700 to-gray-800">
                                                             {comment.username.substring(0, 2).toUpperCase()}
@@ -157,6 +157,9 @@ export function CommentsTable({ comments, loading, page, totalPages, onPageChang
                                                                 src={comment.media_url.startsWith("http") ? getImageKitUrl(comment.media_url, { width: 200, quality: 75 }) : comment.media_url}
                                                                 alt="Attachment"
                                                                 className="h-16 w-auto rounded border border-white/10 hover:opacity-80 transition-opacity"
+                                                                crossOrigin="anonymous"
+                                                                loading="lazy"
+                                                                decoding="async"
                                                             />
                                                         </a>
                                                     </div>
@@ -246,7 +249,7 @@ export function CommentsTable({ comments, loading, page, totalPages, onPageChang
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden ring-1 ring-white/10">
                                         {comment.avatar_url ? (
-                                            <img src={comment.avatar_url} alt={comment.username} className="w-full h-full object-cover" />
+                                            <img src={comment.avatar_url} alt={comment.username} className="w-full h-full object-cover" crossOrigin="anonymous" loading="lazy" decoding="async" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white bg-gradient-to-br from-gray-700 to-gray-800">
                                                 {comment.username.substring(0, 2).toUpperCase()}

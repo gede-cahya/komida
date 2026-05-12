@@ -335,6 +335,9 @@ export function MangaTable({
                             alt={item.title}
                             className="w-full h-full object-cover"
                             style={{ aspectRatio: "2/3" }}
+                            crossOrigin="anonymous"
+                            loading="lazy"
+                            decoding="async"
                             onError={(e) => {
                               (e.target as HTMLImageElement).style.display =
                                 "none";

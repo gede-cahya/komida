@@ -386,6 +386,9 @@ export function QuestsManager({ onRefresh }: QuestsManagerProps) {
                           src={resolveUrl(selectedBadge.icon_url)}
                           alt={selectedBadge.name}
                           className="w-full h-full object-contain"
+                          crossOrigin="anonymous"
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
                     )}
@@ -421,6 +424,9 @@ export function QuestsManager({ onRefresh }: QuestsManagerProps) {
                             src={resolveUrl(b.icon_url)}
                             alt={b.name}
                             className="w-full h-full object-contain"
+                            crossOrigin="anonymous"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </button>
                       ))}
@@ -615,6 +621,9 @@ export function QuestsManager({ onRefresh }: QuestsManagerProps) {
                             src={resolveUrl(quest.badge_icon_url)}
                             alt=""
                             className="w-full h-full object-contain"
+                            crossOrigin="anonymous"
+                            loading="lazy"
+                            decoding="async"
                           />
                         </div>
                       )}

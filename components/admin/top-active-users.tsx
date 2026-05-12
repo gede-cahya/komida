@@ -67,6 +67,9 @@ export function TopActiveUsers({ users, loading }: TopActiveUsersProps) {
                         src={user.avatar_url.startsWith("http") ? getImageKitUrl(user.avatar_url, { width: 40, quality: 75 }) : user.avatar_url}
                         alt={user.username}
                         className="w-full h-full object-cover"
+                        crossOrigin="anonymous"
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <User className="w-5 h-5 text-gray-500" />

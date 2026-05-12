@@ -226,6 +226,9 @@ export default function MangaAddDialog({
                           src={`/api/image/proxy?url=${encodeURIComponent(manga.image)}&source=${manga.source.toLowerCase()}`}
                           alt={manga.title}
                           className="w-full h-full object-cover"
+                          crossOrigin="anonymous"
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => {
                             (e.target as HTMLImageElement).src =
                               "/placeholder.png";
