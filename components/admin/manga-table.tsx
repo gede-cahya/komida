@@ -10,7 +10,7 @@ import {
   RotateCcw,
   ImageOff,
 } from "lucide-react";
-import { getImageKitUrl } from "@/lib/imagekit";
+import { getImageKitUrl, getProxyUrl } from "@/lib/imagekit";
 import MangaAddDialog from "./manga-add-dialog";
 import { DeleteConfirmModal } from "./delete-confirm-modal";
 
@@ -178,9 +178,9 @@ export function MangaTable({
     }
   };
 
-  /* ── imagekit optimized url ── */
-  const optimizedImage = (url: string) =>
-    url ? getImageKitUrl(url, { width: 80, quality: 75 }) : "";
+  /* ── proxy through backend to avoid CORS issues ── */
+  const optimizedImage = (url: string, source?: string) =>
+    url ? getProxyUrl(url, source || "kiryuu") : "";
 
   /* ─────────────────────────────────────────── */
   return (
@@ -331,7 +331,7 @@ export function MangaTable({
                       <div className="relative w-9 h-13 rounded-md overflow-hidden bg-gray-800 shrink-0">
                         {item.image && (
                           <img
-                            src={optimizedImage(item.image)}
+                            src={optimizedImage(item.image, item.source)}
                             alt={item.title}
                             className="w-full h-full object-cover"
                             style={{ aspectRatio: "2/3" }}
