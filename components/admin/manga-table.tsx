@@ -329,20 +329,21 @@ export function MangaTable({
                     {/* Cover */}
                     <td className="px-4 py-3">
                       <div className="relative w-9 h-13 rounded-md overflow-hidden bg-gray-800 shrink-0">
-                        {item.image && (
+                        {item.image ? (
                           <img
                             src={optimizedImage(item.image, item.source)}
                             alt={item.title}
                             className="w-full h-full object-cover"
                             style={{ aspectRatio: "2/3" }}
-                            crossOrigin="anonymous"
                             loading="lazy"
-                            decoding="async"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).style.display =
-                                "none";
+                              (e.target as HTMLImageElement).style.display = "none";
                             }}
                           />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">
+                            No Image
+                          </div>
                         )}
                       </div>
                     </td>
