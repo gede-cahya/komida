@@ -49,7 +49,7 @@ interface Decoration {
 }
 
 function resolveUrl(url: string): string {
-  if (url?.startsWith("/uploads/")) return `/api${url}`;
+  if (url?.startsWith("/uploads/")) return `/api${url}?v=2`;
   return url;
 }
 

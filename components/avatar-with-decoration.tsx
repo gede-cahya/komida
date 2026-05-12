@@ -20,7 +20,7 @@ interface Badge {
 // Resolve badge icon_url to a proper frontend-accessible URL
 function resolveBadgeUrl(url: string): string {
   if (url.startsWith("/uploads/")) {
-    return `/api${url}`;
+    return `/api${url}?v=2`;
   }
   // Optimize external URLs with ImageKit
   if (url.startsWith("http")) {
@@ -32,7 +32,7 @@ function resolveBadgeUrl(url: string): string {
 // Resolve decoration image_url to a proper frontend-accessible URL
 function resolveDecorationUrl(url: string): string {
   if (url?.startsWith("/uploads/")) {
-    return `/api${url}`;
+    return `/api${url}?v=2`;
   }
   // Optimize external URLs with ImageKit
   if (url?.startsWith("http")) {
