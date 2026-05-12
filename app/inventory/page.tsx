@@ -138,7 +138,7 @@ export default function InventoryPage() {
                     key={idx}
                     src={
                       badge.icon_url.startsWith("/uploads/")
-                        ? `/api${badge.icon_url}`
+                        ? `/api${badge.icon_url}?v=2`
                         : badge.icon_url.startsWith("http")
                         ? getImageKitUrl(badge.icon_url, { width: 32, quality: 75 })
                         : badge.icon_url
@@ -290,7 +290,7 @@ export default function InventoryPage() {
                         item.image_url.startsWith("css:")
                           ? item.image_url
                           : item.image_url.startsWith("/uploads/")
-                          ? `/api${item.image_url}`
+                          ? `/api${item.image_url}?v=2`
                           : item.image_url
                       }
                       size="xl"
@@ -357,7 +357,7 @@ export default function InventoryPage() {
                     <img
                       src={
                         item.image_url.startsWith("/uploads/")
-                          ? `/api${item.image_url}`
+                          ? `/api${item.image_url}?v=2`
                           : item.image_url.startsWith("http")
                           ? getImageKitUrl(item.image_url, { width: 80, quality: 75 })
                           : item.image_url

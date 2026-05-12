@@ -428,7 +428,7 @@ export default function SettingsPage() {
                             <img
                               src={
                                 badge.icon_url.startsWith("/uploads")
-                                  ? `/api${badge.icon_url}`
+                                  ? `/api${badge.icon_url}?v=2`
                                   : badge.icon_url
                               }
                               alt={badge.name}

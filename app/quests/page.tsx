@@ -144,7 +144,7 @@ export default function QuestsPage() {
     if (quest.badge_icon_url) {
       // Resolve backend-relative paths through API proxy
       if (quest.badge_icon_url.startsWith("/uploads")) {
-        return `/api${quest.badge_icon_url}`;
+        return `/api${quest.badge_icon_url}?v=2`;
       }
       // Optimize external URLs with ImageKit
       if (quest.badge_icon_url.startsWith("http")) {
