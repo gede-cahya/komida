@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import BookmarksPage from './client-page';
 
 export const metadata: Metadata = {
-    title: 'My Bookmarks | Komida',
+    title: 'My Bookmarks',
     description: 'View your saved manga, manhwa, and manhua on Komida.',
     alternates: {
         canonical: 'https://komida.site/bookmarks',

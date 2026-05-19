@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         const manga = await fetchMangaBySlug(slug);
 
         return {
-            title: `${manga.title} - Read ${type} Online | Komida`,
+            title: `${manga.title} - Read ${type} Online`,
             description: manga.synopsis ? manga.synopsis.slice(0, 160) + '...' : `Read ${manga.title} online at Komida.`,
             openGraph: {
                 title: `${manga.title} | Komida`,
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     } catch (error) {
         console.error("Failed to generate metadata for manga:", error);
         return {
-            title: `Read ${slug} Online | Komida`,
+            title: `Read ${slug} Online`,
             description: `Read ${slug} manga online for free.`,
         };
     }

@@ -7,7 +7,7 @@ import { fetchPopular, fetchGenre, fetchSearch } from "@/lib/api";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Komida - Home | Read Manga, Manhwa, Manhua",
+  title: "Read Manga, Manhwa, Manhua Online",
   description:
     "Discover the best Manga, Manhwa, and Manhua online. Free reading, high-quality images, and daily updates.",
   alternates: {
@@ -77,6 +77,8 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background text-foreground pt-20 md:pt-24 space-y-12 pb-20">
       <div className="container mx-auto px-4 space-y-16">
+        <h1 className="sr-only">Read Manga, Manhwa, and Manhua Online at Komida</h1>
+
         {/* Announcement Banner */}
         <section>
           <AnnouncementBanner />

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const formattedChapter = decodeURIComponent(chapter).replace(/-/g, ' ');
 
     return {
-        title: `${formattedTitle} ${formattedChapter} - Read Online | Komida`,
+        title: `${formattedTitle} ${formattedChapter} - Read Online`,
         description: `Read ${formattedTitle} ${formattedChapter} online in high quality.`,
         robots: {
             index: false, // Often better to not index individual chapter pages to avoid dilution, or set to true if content is unique

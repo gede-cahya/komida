@@ -7,7 +7,7 @@ import { MaintenanceActions } from '@/components/maintenance-actions';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Under Maintenance | Komida',
+    title: 'Under Maintenance',
     description: 'Komida is currently undergoing scheduled maintenance. We will be back shortly.',
     robots: {
         index: false,

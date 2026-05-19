@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import PopularPage from './client-page';
 
 export const metadata: Metadata = {
-    title: 'Popular Manga | Komida',
+    title: 'Popular Manga',
     description: 'Browse the most popular manga, manhwa, and manhua on Komida. Updated daily.',
     alternates: {
         canonical: 'https://komida.site/popular',

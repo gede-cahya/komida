@@ -3,7 +3,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'DMCA Policy | Komida',
+    title: 'DMCA Policy',
     description: 'DMCA Copyright Policy and Takedown Procedure for Komida.',
     alternates: {
         canonical: 'https://komida.site/dmca',
