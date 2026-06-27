@@ -21,10 +21,13 @@ interface TransformOptions {
 
 // Known manga scraper domains that block external crawlers (ImageKit can't fetch these)
 const BLOCKED_ORIGINS = new Set([
-  "kacu.gmbr.pro",
-  "v3.kiryuu.to",
+  "v2.kiryuu.to",
   "v4.kiryuu.to",
   "v5.kiryuu.to",
+  "kiryuuid.net",
+  "images.envira-cdn.com",
+  "kacu.gmbr.pro",
+  "v3.kiryuu.to",
   "kiryuu.to",
   "yuucdn.com",
   "manhwaindo.my",
@@ -37,7 +40,7 @@ const BLOCKED_ORIGINS = new Set([
 function isBlockedOrigin(url: string): boolean {
   try {
     const hostname = new URL(url.startsWith("http") ? url : `https://${url}`).hostname;
-    return BLOCKED_ORIGINS.has(hostname) || BLOCKED_ORIGINS.has(hostname.replace(/^www\./, ""));
+    return BLOCKED_ORIGINS.has(hostname) || BLOCKED_ORIGINS.has(hostname.replace(/^www\./, "")) || hostname.endsWith(".wp.com");
   } catch {
     return false;
   }
