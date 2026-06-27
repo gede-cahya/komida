@@ -101,7 +101,7 @@ export function getProxyUrl(
   source?: string
 ): string {
   if (!originalUrl) return "";
-  return `/api/image/proxy?url=${encodeURIComponent(originalUrl)}&source=${source || "kiryuu"}&v=2`;
+  return `/api/image/proxy?url=${encodeURIComponent(originalUrl)}&source=${source || "kiryuu"}&v=3`;
 }
 
 /**
