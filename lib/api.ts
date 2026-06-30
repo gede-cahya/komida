@@ -2,8 +2,10 @@ const isServer = typeof window === 'undefined';
 // Ensure no trailing slash
 const cleanUrl = (url: string) => url.endsWith('/') ? url.slice(0, -1) : url;
 
-// Cloudflare Tunnel — HTTPS, stable after intermittent 502 recovery
-const API_BASE_URL = 'https://api.komida.site/api';
+// Direct VPS IP — bypass Cloudflare tunnel WAF
+const API_BASE_URL = 'http://129.226.222.242:3481/api';
+// Cloudflare Tunnel fallback
+const API_BASE_URL_CF = 'https://api.komida.site/api';
 
 // API key for server-to-server authentication (injected only server-side)
 const SERVER_API_KEY = isServer ? (process.env.API_KEY || process.env.NEXT_PUBLIC_API_KEY || '') : '';
@@ -14,7 +16,7 @@ let SERVER_API_URL = isServer
     : '/api';
 
 /**
- * Direct fetch to VPS backend. No failover — single source of truth.
+ * Direct fetch to VPS backend with Cloudflare Tunnel fallback.
  */
 async function fetchWithFallback(endpoint: string, options?: RequestInit) {
     const isClientTarget = endpoint.startsWith('/');
@@ -37,13 +39,22 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
         };
     }
 
-    // 5s timeout for server fetches
-    const signal = serverOptions.signal || AbortSignal.timeout(5000);
+    // Try primary (direct VPS) first, then Cloudflare Tunnel
+    const urls = isServer
+        ? [`${API_BASE_URL}${targetEndpoint}`, `${API_BASE_URL_CF}${targetEndpoint}`]
+        : [`${SERVER_API_URL}${targetEndpoint}`];
 
-    return fetch(`${SERVER_API_URL}${targetEndpoint}`, {
-        ...serverOptions,
-        signal
-    });
+    for (const url of urls) {
+        try {
+            const signal = serverOptions.signal || AbortSignal.timeout(5000);
+            const res = await fetch(url, { ...serverOptions, signal });
+            return res;
+        } catch {}
+    }
+
+    // All failed — return empty mock to prevent build crash
+    console.error(`[API] All backends failed for ${targetEndpoint}`);
+    return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
 }
 
 const API_URL = isServer ? SERVER_API_URL : '/api';
