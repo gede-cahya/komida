@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Go sidecar via Cloudflare Tunnel
-const API_URL = "https://api.komida.site/api";
+// Direct VPS IP (primary, bypasses Cloudflare challenge) with Cloudflare Tunnel as fallback
+const API_URL = "http://129.226.222.242:3481/api";
+const API_URL_CF = "https://api.komida.site/api"; // Cloudflare Tunnel fallback
 const LOCAL_API_URL = "http://localhost:3481/api";
 
 export async function GET(
@@ -82,30 +83,41 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
     const url = `${targetBase}${endpoint}${queryString}`;
     console.log(`[PROXY] Fetching: ${url}`);
 
-    if (endpoint === "/auth/login" && request.method === "POST") {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-api-key": apiKey,
-          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        },
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: request.method === "GET" ? "GET" : request.method,
+        headers: safeHeaders,
         body,
         signal: controller.signal,
         cache: "no-store",
       });
-
-      console.log(`[PROXY] Status from ${targetBase}: ${res.status}`);
-      return await convertFetchToNextResponse(res, endpoint);
+    } catch (fetchErr) {
+      // Direct VPS unreachable, try Cloudflare Tunnel
+      console.warn(`[PROXY] Direct VPS failed, trying Cloudflare Tunnel: ${fetchErr}`);
+      const cfUrl = `${API_URL_CF}${endpoint}${queryString}`;
+      res = await fetch(cfUrl, {
+        method: request.method === "GET" ? "GET" : request.method,
+        headers: safeHeaders,
+        body,
+        signal: controller.signal,
+        cache: "no-store",
+      });
     }
 
-    const res = await fetch(url, {
-      method: request.method,
-      headers: safeHeaders,
-      body,
-      signal: controller.signal,
-      cache: "no-store",
-    });
+    // If direct VPS returned error, try Cloudflare Tunnel
+    if (!res.ok && res.status !== 404) {
+      const cfUrl = `${API_URL_CF}${endpoint}${queryString}`;
+      console.warn(`[PROXY] Direct VPS returned ${res.status}, trying CF tunnel`);
+      const cfRes = await fetch(cfUrl, {
+        method: request.method === "GET" ? "GET" : request.method,
+        headers: safeHeaders,
+        body,
+        signal: controller.signal,
+        cache: "no-store",
+      }).catch(() => null);
+      if (cfRes && cfRes.ok) res = cfRes;
+    }
 
     console.log(`[PROXY] Status from ${targetBase}: ${res.status}`);
     return await convertFetchToNextResponse(res, endpoint);
