@@ -66,6 +66,10 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
 
   // Inject server-side API key so the backend accepts proxied requests
   safeHeaders.set("x-api-key", apiKey);
+  // Browser-like User-Agent to bypass Cloudflare bot challenge
+  if (!safeHeaders.has("user-agent")) {
+    safeHeaders.set("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
+  }
 
   if (endpoint === "/auth/login" && request.method === "POST") {
     safeHeaders.set("content-type", "application/json");
@@ -84,6 +88,7 @@ async function handleProxy(request: NextRequest, { path }: { path: string[] }) {
         headers: {
           "content-type": "application/json",
           "x-api-key": apiKey,
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
         },
         body,
         signal: controller.signal,
